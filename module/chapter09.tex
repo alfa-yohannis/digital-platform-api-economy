@@ -1,0 +1,91 @@
+\chapter{Desain Kontrak API dengan OpenAPI}
+
+\section*{Tujuan Pembelajaran}
+\begin{itemize}
+  \item Menjelaskan pendekatan \textit{contract-first} dan manfaatnya bagi kerja sama dengan vendor dan mitra.
+  \item Membaca dan meninjau kontrak OpenAPI dari sisi bisnis maupun teknis.
+  \item Menyusun kontrak OpenAPI sederhana untuk satu API prioritas.
+\end{itemize}
+
+\section{Pendahuluan}
+
+% TODO
+% Cakupan: vendor Medikara+ dan tim SIMRS sering salah paham tentang format data; kesalahan baru
+% ketahuan setelah aplikasi rilis sehingga perbaikannya mahal.
+
+\section{Kontrak API dan Pendekatan Contract-First}
+
+% TODO
+% Cakupan: kontrak sebagai kesepakatan antara penyedia dan pengguna API; contract-first dan
+% code-first; manfaat bagi pengadaan vendor dan kerja paralel; kontrak sebagai lampiran perjanjian
+% kerja sama.
+% Kasus Medikara: kontrak API jadwal dokter sebagai dasar tender vendor.
+
+\section{Pemodelan Sumber Daya dan Penamaan}
+
+% TODO
+% Cakupan: menentukan sumber daya dari bahasa bisnis; penamaan yang konsisten; relasi antar sumber
+% daya; pola desain API dari Zimmermann dkk.
+% Kasus Medikara: sumber daya dokter, jadwal, slot, dan janji temu.
+
+\section{Model Galat, Pagination, dan Penyaringan}
+
+% TODO
+% Cakupan: format galat dengan Problem Details (RFC 9457); pesan galat yang jelas bagi pengembang
+% dan petugas layanan; pagination untuk data besar; penyaringan dan pengurutan; idempotency untuk
+% permintaan yang diulang.
+
+\section{Kompatibilitas dan Perubahan yang Merusak}
+
+% TODO
+% Cakupan: kompatibilitas mundur; contoh perubahan yang aman dan yang merusak (breaking change);
+% dampak perubahan bagi mitra; kebijakan versi dibahas di Bab 10.
+% Kasus Medikara: perubahan format nomor rekam medis yang memutus integrasi mitra.
+
+\section{Struktur OpenAPI 3.2}
+
+% TODO
+% Cakupan: bagian info, servers, paths, components, dan security; cara membaca kontrak bagi
+% anggota non-teknis; hal baru di OpenAPI 3.2.0 (September 2025) seperti hierarki tag; alat gratis
+% untuk menyunting dan menampilkan kontrak.
+% Pendalaman teknis: menulis berkas OpenAPI dari templat dan memvalidasinya.
+
+\section{AsyncAPI untuk API Berbasis Event}
+
+% TODO
+% Cakupan: AsyncAPI 3.1.0 untuk mendeskripsikan channel, operasi, dan pesan; kapan kontrak event
+% dibutuhkan; hubungan dengan webhook pada Bab 5.
+% Kasus Medikara: kontrak event hasil laboratorium selesai.
+
+\section{Tinjauan Desain dan Mock Server}
+
+% TODO
+% Cakupan: daftar periksa desain; tinjauan bersama calon pengguna API; mock server untuk mencoba
+% kontrak sebelum API dibangun; pemeriksaan otomatis dengan linter.
+% Pendalaman teknis: menjalankan mock server dari kontrak, lalu memeriksa kontrak dengan Spectral.
+
+\section{Aktivitas: Kontrak OpenAPI untuk API Prioritas}
+
+% TODO
+% Tujuan aktivitas: menghasilkan kontrak API yang disepakati bisnis dan teknis untuk satu API
+% prioritas dari Bab 8.
+% Peran dalam tim: anggota berlatar non-teknis menulis aturan bisnis, contoh data, dan kasus galat
+% dalam bahasa biasa; anggota berlatar teknis menuangkannya ke berkas OpenAPI berdasarkan templat.
+% Langkah: pilih satu API prioritas, misalnya jadwal dokter dan janji temu; tulis aturan bisnis dan
+% contoh; susun kontrak dari templat; tinjau bersama dengan daftar periksa; catat keputusan desain.
+% Luaran dan tonggak capstone: kontrak API prioritas, masuk ke C3.
+% Berkas sources yang direncanakan: sources/chapter09/templat-openapi-3.2.yaml,
+% sources/chapter09/daftar-periksa-desain-api.md, sources/chapter09/contoh-janji-temu-openapi.yaml,
+% sources/chapter09/contoh-hasil-lab-asyncapi.yaml
+
+\section{Ringkasan}
+
+% TODO
+
+\section{Latihan}
+
+\begin{enumerate}
+  \item Jelaskan kepada manajer proyek mengapa kontrak API perlu disepakati sebelum vendor mulai membangun.
+  \item Dari sebuah potongan kontrak OpenAPI, tentukan perubahan yang merusak bagi mitra dan perubahan yang aman.
+  \item Rancang tiga pesan galat untuk API janji temu yang jelas bagi pengembang mitra maupun petugas layanan pelanggan.
+\end{enumerate}

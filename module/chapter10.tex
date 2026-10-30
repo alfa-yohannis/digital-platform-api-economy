@@ -1,0 +1,86 @@
+\chapter{Manajemen Siklus Hidup API dan API Gateway}
+
+\section*{Tujuan Pembelajaran}
+\begin{itemize}
+  \item Menjelaskan tahap siklus hidup API dan keputusan penting di tiap tahap.
+  \item Menjelaskan fungsi \textit{API gateway} dan komponen platform manajemen API.
+  \item Membandingkan alternatif platform manajemen API dengan kriteria yang dapat dipertanggungjawabkan.
+\end{itemize}
+
+\section{Pendahuluan}
+
+% TODO
+% Cakupan: perubahan API di satu rumah sakit dapat memutus integrasi mitra tanpa pemberitahuan,
+% sementara tidak ada catatan mitra mana yang memakai versi mana.
+
+\section{Siklus Hidup API}
+
+% TODO
+% Cakupan: tahap siklus hidup dari perancangan, pembangunan, publikasi, pemakaian, pemeliharaan,
+% sampai pensiun; tingkat kematangan API menurut Medjaoui dkk.; keputusan dan pemilik keputusan di
+% tiap tahap.
+% Kasus Medikara: API jadwal dokter dari rancangan sampai dipakai klinik mitra.
+
+\section{Versi dan Deprecation}
+
+% TODO
+% Cakupan: kebijakan versi (kapan versi baru diperlukan, cara penamaan versi); deprecation dan
+% pensiun API; tenggat dan cara pemberitahuan kepada mitra; kaitan dengan kompatibilitas pada Bab 9.
+% Kasus Medikara: mitra yang masih memakai API versi lama.
+
+\section{API Gateway}
+
+% TODO
+% Cakupan: posisi API gateway di antara pengguna dan layanan; fungsi routing, autentikasi, rate
+% limiting, kuota, transformasi, dan pencatatan; penerapan kebijakan keamanan dari Bab 6 di
+% gateway; risiko gateway sebagai titik kegagalan tunggal.
+% Kasus Medikara: satu gateway bersama untuk lima rumah sakit.
+% Pendalaman teknis: menjalankan gateway open source di Docker dan menerapkan rate limiting serta
+% validasi token pada satu API contoh.
+
+\section{Platform Manajemen API}
+
+% TODO
+% Cakupan: komponen gateway, portal pengembang, analitik, dan pengelola kebijakan; katalog API;
+% hubungan dengan portal pengembang pada Bab 11 dan metrik pada Bab 12.
+
+\section{Memilih Platform Manajemen API}
+
+% TODO
+% Cakupan: pilihan open source, layanan cloud, dan hibrida; kriteria (fungsi, biaya, kendali,
+% keterampilan tim, lokasi data, ketergantungan pada penyedia); matriks keputusan; ekonomi cloud
+% dan FinOps dibahas rinci di IT40713.
+% Kasus Medikara: pertimbangan lokasi data pasien dan kemampuan tim TI internal.
+
+\section{API Gateway dan Service Mesh}
+
+% TODO
+% Cakupan: perbedaan lalu lintas dari luar ke dalam dan lalu lintas antarlayanan; peran gateway dan
+% service mesh secara singkat; service mesh dan komunikasi antarlayanan dibahas rinci di IT40713.
+
+\section{Aktivitas: Rancangan Manajemen API}
+
+% TODO
+% Tujuan aktivitas: merancang cara API target dikelola sepanjang hidupnya.
+% Peran dalam tim: anggota berlatar bisnis dan hukum menyusun kebijakan versi dan tata cara
+% pemberitahuan deprecation kepada mitra; anggota berlatar teknis menggambar posisi gateway dan
+% aliran permintaan.
+% Langkah: gambar arsitektur manajemen API target; tentukan kebijakan di gateway; susun kebijakan
+% siklus hidup dan versi; bandingkan tiga alternatif platform manajemen API dalam matriks
+% keputusan; tulis catatan keputusan.
+% Luaran dan tonggak capstone: rancangan manajemen API dan kebijakan siklus hidup, masuk ke C3.
+% Berkas sources yang direncanakan: sources/chapter10/kebijakan-siklus-hidup-api.md,
+% sources/chapter10/matriks-pemilihan-platform-api.csv,
+% sources/chapter10/docker-compose-gateway.yml (opsional)
+
+\section{Ringkasan}
+
+% TODO
+
+\section{Latihan}
+
+\begin{enumerate}
+  \item Misalkan seorang mitra masih memakai API versi lama yang akan dipensiunkan. Susun langkah komunikasi dan tenggat yang adil bagi kedua pihak.
+  \item Jelaskan fungsi \textit{API gateway} dengan analogi pos pemeriksaan, lalu sebutkan batas analogi tersebut.
+  \item Bandingkan layanan manajemen API dari penyedia \textit{cloud} dengan produk \textit{open source} yang dipasang sendiri, dari sisi biaya, kendali, dan keterampilan tim.
+\end{enumerate}

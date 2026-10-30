@@ -1,0 +1,84 @@
+\chapter{Monetisasi API dan Metrik Platform}
+
+\section*{Tujuan Pembelajaran}
+\begin{itemize}
+  \item Membedakan nilai API langsung dan tidak langsung beserta contoh penerapannya.
+  \item Memilih model harga API yang sesuai dengan strategi platform dan sisi pasar.
+  \item Menyusun pohon metrik yang menghubungkan aktivitas API dengan tujuan bisnis.
+\end{itemize}
+
+\section{Pendahuluan}
+
+% TODO
+% Cakupan: direksi Medikara menanyakan hasil nyata dari membuka API ke mitra; tanpa model nilai dan
+% metrik, investasi platform sulit dipertahankan.
+
+\section{Nilai API Langsung dan Tidak Langsung}
+
+% TODO
+% Cakupan: pendapatan langsung dari API; nilai tidak langsung berupa efisiensi, jangkauan, kepuasan
+% pasien, dan data; API sebagai pusat biaya atau pusat laba; temuan Postman 2025 tentang pendapatan
+% dari API.
+% Kasus Medikara: penghematan biaya integrasi dan antrean yang lebih pendek sebagai nilai tidak
+% langsung.
+
+\section{Model Harga API}
+
+% TODO
+% Cakupan: gratis, freemium, berjenjang, bayar per pemakaian, dan bagi hasil; kelebihan dan risiko
+% tiap model; kaitan dengan kuota di gateway.
+% Kasus Medikara: model harga untuk API pengecekan kepesertaan asuransi.
+
+\section{Harga dalam Pasar Multi-Sisi}
+
+% TODO
+% Cakupan: menerapkan logika subsidi lintas sisi dari Bab 2 pada API; sisi yang membayar dan sisi
+% yang digratiskan; batasan etika dan regulasi pada layanan kesehatan.
+% Kasus Medikara: siapa yang membayar, klinik mitra, asuransi, atau perusahaan klien.
+
+\section{Biaya dan Titik Impas API}
+
+% TODO
+% Cakupan: komponen biaya API (pengembangan, operasi, dukungan, keamanan, kepatuhan); biaya per
+% panggilan dan per mitra; titik impas sederhana; ekonomi cloud dan FinOps dibahas rinci di IT40713,
+% sedangkan business case menyeluruh dibahas rinci di IT40513.
+
+\section{Metrik Platform dan Metrik API}
+
+% TODO
+% Cakupan: metrik platform (likuiditas, tingkat kecocokan, aktivasi mitra, retensi); metrik API
+% (adopsi, volume panggilan, tingkat galat, latensi, waktu sampai panggilan pertama); sumber data
+% di gateway dan portal.
+% Pendalaman teknis: merancang dashboard metrik API dari contoh data log gateway.
+
+\section{North Star Metric dan Pohon Metrik}
+
+% TODO
+% Cakupan: north star metric sebagai ukuran nilai bagi pengguna; pohon metrik dari north star sampai
+% metrik operasional; metrik semu (vanity metric) dan cara menghindarinya; pelaporan KPI ke direksi
+% dibahas rinci di IT40813.
+% Kasus Medikara: north star metric untuk ekosistem mitra Medikara.
+
+\section{Aktivitas: Model Monetisasi dan Pohon Metrik}
+
+% TODO
+% Tujuan aktivitas: menetapkan cara platform menghasilkan nilai dan cara nilai itu diukur.
+% Peran dalam tim: anggota berlatar bisnis dan akuntansi menghitung perkiraan biaya, pendapatan, dan
+% titik impas; anggota berlatar teknis menentukan sumber data tiap metrik di gateway atau portal.
+% Langkah: pilih model nilai dan harga untuk API mitra; hitung biaya dan titik impas sederhana;
+% tetapkan north star metric; susun pohon metrik sampai metrik operasional API; tentukan sumber data.
+% Luaran dan tonggak capstone: model monetisasi dan pohon metrik platform, masuk ke C4.
+% Berkas sources yang direncanakan: sources/chapter12/kalkulator-biaya-api.xlsx,
+% sources/chapter12/templat-pohon-metrik.md, sources/chapter12/contoh-log-gateway.csv (opsional)
+
+\section{Ringkasan}
+
+% TODO
+
+\section{Latihan}
+
+\begin{enumerate}
+  \item Jelaskan mengapa API internal yang tidak menghasilkan uang tetap bisa bernilai tinggi, dengan satu contoh dari Medikara.
+  \item Bandingkan model bayar per pemakaian dan langganan berjenjang untuk API pengecekan kepesertaan asuransi.
+  \item Tentukan satu \textit{north star metric} untuk ekosistem mitra Medikara, lalu jelaskan mengapa jumlah panggilan API bukan pilihan yang tepat.
+\end{enumerate}

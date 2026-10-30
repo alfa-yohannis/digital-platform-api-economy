@@ -1,0 +1,85 @@
+\chapter{API untuk Agen AI dan Peta Jalan Platform}
+
+\section*{Tujuan Pembelajaran}
+\begin{itemize}
+  \item Menjelaskan cara agen AI (\textit{Artificial Intelligence}) memakai API dan peran MCP (\textit{Model Context Protocol}).
+  \item Menilai kesiapan API organisasi untuk dipakai agen AI beserta risikonya.
+  \item Menyusun peta jalan platform dan API yang merangkum tonggak C1 sampai C3.
+\end{itemize}
+
+\section{Pendahuluan}
+
+% TODO
+% Cakupan: perusahaan klien layanan kesehatan karyawan mulai memakai agen AI yang ingin memesan
+% jadwal dan membaca hasil pemeriksaan; Medikara harus memutuskan seberapa jauh API dibuka bagi agen.
+
+\section{Agen AI sebagai Pengguna API}
+
+% TODO
+% Cakupan: perbedaan agen AI dan pengembang manusia sebagai pengguna API; temuan Postman 2025 bahwa
+% baru sebagian kecil pengembang merancang API untuk agen; peluang dan risiko bagi platform.
+% Kasus Medikara: agen penjadwalan milik perusahaan klien.
+
+\section{Model Context Protocol}
+
+% TODO
+% Cakupan: arsitektur host, client, dan server; fitur server berupa tools, resources, dan prompts;
+% spesifikasi revisi 2026-07-28 dengan permintaan yang mandiri dan kerangka extensions; pengelolaan
+% MCP di bawah Agentic AI Foundation milik Linux Foundation.
+% Pendalaman teknis: membungkus satu API contoh menjadi server MCP sederhana dengan SDK resmi, lalu
+% mengujinya dengan MCP Inspector.
+
+\section{Protokol Agen Lainnya}
+
+% TODO
+% Cakupan: protokol A2A (Agent2Agent) versi 1.0 untuk komunikasi antaragen; perbedaan fokus A2A dan
+% MCP; pertimbangan memilih protokol yang masih berkembang.
+
+\section{Merancang API yang Siap Dipakai Agen}
+
+% TODO
+% Cakupan: deskripsi operasi yang jelas dan tidak ambigu; alur kerja multi-langkah dengan Arazzo
+% 1.1.0; batasan aksi dan idempotency; scope sempit untuk agen; persetujuan manusia untuk aksi
+% berisiko.
+% Kasus Medikara: kesiapan API janji temu untuk dipakai agen.
+
+\section{Risiko dan Kendali}
+
+% TODO
+% Cakupan: panggilan berlebihan, prompt injection, penyalahgunaan tool, dan kebocoran data lewat
+% agen; kaitan dengan butir OWASP API Security Top 10 pada Bab 6; pencatatan aksi agen; tata kelola
+% AI (ISO/IEC 42001, EU AI Act) dibahas rinci di IT40813.
+
+\section{Menyusun Peta Jalan Platform dan API}
+
+% TODO
+% Cakupan: merangkum luaran C1 sampai C3; gelombang rilis berdasarkan nilai, kesiapan mitra, dan
+% ketergantungan teknis; inisiatif yang sengaja ditunda; kaitan dengan peta jalan transformasi di
+% IT40513; persiapan presentasi C4.
+% Kasus Medikara: tiga gelombang dari API internal, API mitra, sampai API untuk agen.
+
+\section{Aktivitas: Kesiapan Agen AI dan Peta Jalan Platform}
+
+% TODO
+% Tujuan aktivitas: menilai kesiapan satu API bagi agen AI dan menyusun peta jalan platform dan API.
+% Peran dalam tim: anggota berlatar bisnis memimpin penentuan urutan nilai dan kesiapan mitra;
+% anggota berlatar teknis memeriksa ketergantungan teknis antar-API.
+% Langkah: bagian pertama, nilai kesiapan satu API prioritas untuk agen AI dan tetapkan aksi yang
+% wajib mendapat persetujuan manusia; bagian kedua, susun peta jalan tiga gelombang dari luaran C1
+% sampai C3, beri alasan urutan, dan siapkan bahan presentasi.
+% Luaran dan tonggak capstone: penilaian kesiapan agen AI serta peta jalan platform dan API, masuk
+% ke C4 yang dipresentasikan menjelang UAS.
+% Berkas sources yang direncanakan: sources/chapter14/penilaian-kesiapan-agen-ai.md,
+% sources/chapter14/templat-peta-jalan-platform.md, sources/chapter14/contoh-server-mcp/ (opsional)
+
+\section{Ringkasan}
+
+% TODO
+
+\section{Latihan}
+
+\begin{enumerate}
+  \item Jelaskan perbedaan API yang dirancang untuk pengembang manusia dengan API yang dipakai agen AI.
+  \item Misalkan agen AI milik perusahaan klien ingin memesan jadwal dokter untuk karyawannya. Tentukan tiga batasan yang perlu diterapkan Medikara.
+  \item Jelaskan alasan urutan gelombang dalam peta jalan tim, termasuk satu inisiatif yang sengaja ditunda.
+\end{enumerate}

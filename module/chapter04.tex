@@ -1,0 +1,87 @@
+\chapter{API sebagai Produk dan Ekonomi API}
+
+\section*{Tujuan Pembelajaran}
+\begin{itemize}
+  \item Menjelaskan konsep API sebagai produk dan perbedaannya dengan API sebagai proyek integrasi.
+  \item Mengklasifikasikan API menurut audiensnya: privat, mitra, dan publik.
+  \item Menyusun inventaris integrasi dan API yang berjalan di organisasi.
+\end{itemize}
+
+\section{Pendahuluan}
+
+% TODO
+% Cakupan: biaya integrasi Medikara tinggi karena tiap integrasi dibangun sebagai proyek sekali
+% jadi oleh vendor berbeda, dan tidak ada yang tahu pasti berapa banyak integrasi yang berjalan.
+
+\section{Ekonomi API}
+
+% TODO
+% Cakupan: arti ekonomi API; temuan Benzell, Hersh, dan Van Alstyne bahwa API membalik batas
+% perusahaan dan berkaitan dengan pertumbuhan; temuan Postman 2025 State of the API (adopsi
+% API-first, pendapatan dari API); posisi Indonesia melalui SNAP dan SATUSEHAT secara singkat.
+
+\section{API sebagai Produk}
+
+% TODO
+% Cakupan: pengguna API, nilai yang ditawarkan, pemilik produk, dan peta jalan; perbedaan dengan
+% API sebagai proyek; pendekatan API-first; API sebagai produk internal maupun eksternal.
+% Kasus Medikara: API jadwal dokter yang dibuat ulang oleh tiap vendor.
+
+\section{Audiens API: Privat, Mitra, dan Publik}
+
+% TODO
+% Cakupan: klasifikasi API privat, mitra, dan publik; konsekuensi pada keamanan, dokumentasi,
+% kontrak, dan dukungan; perpindahan API dari privat ke mitra.
+% Kasus Medikara: API pendaftaran pasien, API hasil laboratorium, dan API katalog layanan.
+
+\section{Integrasi Point-to-Point dan Utang Integrasi}
+
+% TODO
+% Cakupan: pertumbuhan jumlah sambungan point-to-point seiring bertambahnya sistem; biaya
+% tersembunyi berupa pemeliharaan, ketergantungan vendor, dan kegagalan berantai; konsep utang
+% integrasi.
+% Kasus Medikara: integrasi tiap rumah sakit ke BPJS Kesehatan dan SATUSEHAT yang dibangun terpisah.
+
+\section{Model Bisnis Berbasis API}
+
+% TODO
+% Cakupan: contoh perusahaan yang produk utamanya API di sektor pembayaran dan komunikasi; contoh
+% layanan pembayaran berbasis SNAP di Indonesia; contoh di sektor kesehatan seperti layanan
+% laboratorium; monetisasi dibahas rinci di Bab 12.
+
+\section{Menyusun Inventaris Integrasi dan API}
+
+% TODO
+% Cakupan: kolom inventaris (sistem asal, sistem tujuan, data, pemilik, cara pertukaran, audiens,
+% frekuensi, masalah); sumber informasi berupa wawancara, dokumentasi, konfigurasi, dan kontrak
+% vendor; cara memeriksa kelengkapan inventaris.
+% Kasus Medikara: contoh baris inventaris untuk SIMRS, ERP, Medikara+, BPJS Kesehatan, dan
+% SATUSEHAT.
+% Pendalaman teknis: menelusuri katalog API pada SNAP Developer Site milik ASPI dan membandingkan
+% cara katalog mendeskripsikan produk API.
+
+\section{Aktivitas: Inventaris Integrasi dan API Saat Ini}
+
+% TODO
+% Tujuan aktivitas: memiliki daftar lengkap integrasi dan API yang berjalan sebagai dasar C2.
+% Peran dalam tim: anggota berlatar non-teknis mewawancarai pemilik proses tentang kegunaan dan
+% masalah tiap integrasi; anggota berlatar teknis menelusuri dokumentasi, konfigurasi, atau kontrak
+% vendor.
+% Langkah: mulai dari daftar pertukaran data Bab 1; isi templat inventaris; klasifikasikan audiens;
+% tandai integrasi paling mahal atau paling rawan; validasi bersama pemilik proses.
+% Luaran dan tonggak capstone: inventaris integrasi dan API, masuk ke C2.
+% Berkas sources yang direncanakan: sources/chapter04/inventaris-integrasi.csv,
+% sources/chapter04/panduan-wawancara-pemilik-proses.md,
+% sources/chapter04/contoh-inventaris-medikara.csv
+
+\section{Ringkasan}
+
+% TODO
+
+\section{Latihan}
+
+\begin{enumerate}
+  \item Jelaskan dengan contoh mengapa integrasi \textit{point-to-point} yang jumlahnya terus bertambah menaikkan biaya organisasi.
+  \item Tentukan apakah API pendaftaran pasien Medikara sebaiknya privat, mitra, atau publik, lalu tuliskan alasannya.
+  \item Sebutkan tiga ciri yang membedakan API yang dikelola sebagai produk dari API yang dibangun sebagai proyek sekali jadi.
+\end{enumerate}

@@ -1,0 +1,85 @@
+\chapter{Gaya API dan Pola Integrasi}
+
+\section*{Tujuan Pembelajaran}
+\begin{itemize}
+  \item Membedakan REST (\textit{Representational State Transfer}), GraphQL, \textit{event}, dan \textit{webhook} berdasarkan cara kerja dan kegunaannya.
+  \item Menilai kecocokan gaya API untuk suatu kebutuhan bisnis beserta \textit{trade-off}-nya.
+  \item Memetakan integrasi yang berjalan beserta gaya dan titik masalahnya.
+\end{itemize}
+
+\section{Pendahuluan}
+
+% TODO
+% Cakupan: data kunjungan dari SIMRS dikirim tengah malam dalam bentuk berkas, sementara aplikasi
+% pasien membutuhkan jadwal dokter saat itu juga; satu gaya integrasi tidak cocok untuk semua
+% kebutuhan.
+
+\section{Empat Cara Sistem Bertukar Data}
+
+% TODO
+% Cakupan: pertukaran berkas, basis data bersama, panggilan langsung, dan pesan; kelebihan dan
+% kekurangan masing-masing; posisi API di antara keempatnya.
+% Kasus Medikara: laporan berbasis berkas dan akses langsung vendor ke basis data SIMRS.
+
+\section{Komunikasi Sinkron dan Asinkron}
+
+% TODO
+% Cakupan: analogi telepon dan pesan singkat; dampak pada waktu tunggu, antrean, dan ketersediaan;
+% kapan pengguna harus menunggu jawaban dan kapan cukup diberi tahu belakangan.
+% Kasus Medikara: pemesanan janji temu (sinkron) dan pengiriman hasil laboratorium (asinkron).
+
+\section{REST: Sumber Daya, Metode, dan Kode Status}
+
+% TODO
+% Cakupan: sumber daya dan alamatnya; metode HTTP GET, POST, PUT, PATCH, DELETE; kode status yang
+% paling sering muncul; tingkat kematangan REST secara singkat.
+% Kasus Medikara: sumber daya pasien, dokter, jadwal, dan janji temu.
+
+\section{GraphQL}
+
+% TODO
+% Cakupan: satu titik akses dengan query yang menentukan bentuk data; spesifikasi GraphQL edisi
+% September 2025; kelebihan bagi aplikasi dengan kebutuhan data beragam; risiko query yang mahal
+% dan otorisasi per kolom.
+% Pendalaman teknis: membandingkan ringkasan kunjungan pasien sebagai permintaan REST dan sebagai
+% query GraphQL, dari sisi jumlah panggilan dan ukuran data.
+
+\section{Event dan Webhook}
+
+% TODO
+% Cakupan: event sebagai catatan bahwa sesuatu telah terjadi; webhook sebagai pemberitahuan ke
+% sistem mitra; pengiriman ulang dan penanganan duplikat; keamanan webhook dengan tanda tangan;
+% AsyncAPI disinggung dan dibahas di Bab 9; arsitektur berbasis event dibahas rinci di IT40713.
+% Kasus Medikara: pemberitahuan hasil laboratorium ke klinik mitra.
+
+\section{Memilih Gaya API}
+
+% TODO
+% Cakupan: kriteria pemilihan (pengguna, frekuensi, kebutuhan waktu nyata, keterikatan, kemampuan
+% teknis mitra); gRPC sebagai pembanding singkat untuk komunikasi internal; matriks pemilihan gaya.
+% Kasus Medikara: gaya yang cocok untuk integrasi Medikara+, BPJS Kesehatan, dan ERP.
+
+\section{Aktivitas: Peta Integrasi Saat Ini}
+
+% TODO
+% Tujuan aktivitas: melihat pola integrasi yang berjalan dan menemukan titik masalah utama.
+% Peran dalam tim: anggota berlatar non-teknis menandai integrasi yang menyebabkan antrean, kerja
+% ulang, atau laporan terlambat; anggota berlatar teknis menilai keterikatan (coupling) dan titik
+% kegagalan tunggal.
+% Langkah: ambil inventaris Bab 4; gambar sistem dan garis integrasi; beri label gaya, frekuensi,
+% arah, sinkron atau asinkron; tandai tiga titik masalah utama beserta dampaknya.
+% Luaran dan tonggak capstone: peta integrasi saat ini dengan tiga titik masalah utama, masuk ke C2.
+% Berkas sources yang direncanakan: sources/chapter05/templat-peta-integrasi.md,
+% sources/chapter05/contoh-peta-integrasi-medikara.md, sources/chapter05/contoh-rest-graphql.md
+
+\section{Ringkasan}
+
+% TODO
+
+\section{Latihan}
+
+\begin{enumerate}
+  \item Klinik mitra perlu segera tahu ketika hasil laboratorium selesai. Bandingkan \textit{polling} lewat REST dan \textit{webhook}, lalu pilih salah satu beserta alasannya.
+  \item Jelaskan dalam bahasa non-teknis perbedaan komunikasi sinkron dan asinkron, dengan contoh dari layanan rumah sakit.
+  \item Tentukan kapan GraphQL lebih tepat daripada REST, dan kapan GraphQL justru menambah risiko.
+\end{enumerate}

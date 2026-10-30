@@ -1,0 +1,88 @@
+\chapter{Standar API Sektoral: SATUSEHAT, HL7 FHIR, dan SNAP}
+
+\section*{Tujuan Pembelajaran}
+\begin{itemize}
+  \item Menjelaskan alasan regulator menetapkan standar API sektoral dan dampaknya bagi organisasi.
+  \item Menjelaskan konsep dasar HL7 FHIR (\textit{Health Level Seven Fast Healthcare Interoperability Resources}): \textit{resource}, profil, dan terminologi.
+  \item Menilai kesenjangan integrasi organisasi terhadap standar sektor yang berlaku.
+\end{itemize}
+
+\section{Pendahuluan}
+
+% TODO
+% Cakupan: Medikara wajib mengirim data rekam medis ke SATUSEHAT dan bertukar data klaim dengan BPJS
+% Kesehatan, tetapi tiap rumah sakit melakukannya dengan cara yang berbeda.
+
+\section{Mengapa Regulator Menetapkan Standar API}
+
+% TODO
+% Cakupan: interoperabilitas sebagai infrastruktur bersama; penurunan biaya integrasi di tingkat
+% nasional; persaingan yang lebih sehat karena pendatang baru dapat terhubung; standar wajib dan
+% standar sukarela.
+
+\section{HL7 FHIR: Resource, Profil, dan Terminologi}
+
+% TODO
+% Cakupan: resource sebagai unit data (Patient, Encounter, Observation); profil sebagai penyesuaian
+% nasional; terminologi seperti ICD, LOINC, dan SNOMED CT; FHIR R4 (4.0.1) yang dipakai SATUSEHAT,
+% R5 sebagai rilis terbit terbaru, dan R6 yang masih dalam proses ballot.
+% Pendalaman teknis: membaca contoh resource Patient dan Encounter pada spesifikasi FHIR R4, lalu
+% memetakan kolom data SIMRS ke elemen resource tersebut.
+
+\section{SATUSEHAT dan Rekam Medis Elektronik}
+
+% TODO
+% Cakupan: kewajiban rekam medis elektronik dan interoperabilitas dalam Permenkes 24/2022; fungsi
+% SATUSEHAT Platform; alur integrasi dari registrasi, sandbox, sampai produksi; UU 17/2023 tentang
+% Kesehatan disinggung singkat.
+% Kasus Medikara: lima SIMRS dengan versi berbeda yang harus mengirim data dengan standar yang sama.
+
+\section{Integrasi dengan BPJS Kesehatan}
+
+% TODO
+% Cakupan: layanan bridging BPJS Kesehatan untuk klaim dan antrean; kredensial dan lingkungan uji;
+% tantangan ketika SIMRS berbeda versi; hubungan antrean daring dengan pengalaman pasien.
+% Kasus Medikara: antrean layanan yang panjang dan integrasi point-to-point tiap rumah sakit.
+
+\section{Open Banking, Open Finance, dan SNAP}
+
+% TODO
+% Cakupan: konsep open banking dan open finance; SNAP dari Bank Indonesia beserta standar teknis
+% dan keamanan, standar data, dan pedoman tata kelola; pengelolaan oleh ASPI sejak 1 September
+% 2023 dan revisi standar ke versi 1.0.2 pada September 2024; layanan digital bank bersama mitra
+% menurut POJK 21/2023; PSD2 dan rencana PSD3 di Uni Eropa sebagai pembanding.
+% Kasus Medikara: pembayaran layanan dan klaim asuransi yang melibatkan bank atau dompet digital.
+
+\section{Pelajaran Lintas Sektor}
+
+% TODO
+% Cakupan: perbandingan sektor kesehatan dan keuangan (wajib atau sukarela, pengelola standar,
+% sertifikasi, sanksi); dampak standar sektoral terhadap strategi platform; standar sebagai
+% boundary resource bersama.
+
+\section{Aktivitas: Penilaian Kesiapan Interoperabilitas}
+
+% TODO
+% Tujuan aktivitas: mengetahui jarak antara integrasi saat ini dan standar sektor yang berlaku.
+% Peran dalam tim: anggota berlatar kesehatan, hukum, atau keuangan membaca kewajiban regulasi
+% beserta tenggatnya; anggota berlatar teknis membandingkan data yang dikirim saat ini dengan
+% resource atau spesifikasi standar.
+% Langkah: tentukan standar yang relevan (SATUSEHAT dan BPJS Kesehatan untuk Medikara, SNAP untuk
+% organisasi keuangan); daftar kewajiban; nilai status tiap integrasi; tandai kesenjangan proses,
+% data, dan teknologi; rangkum bersama luaran Bab 4 sampai 6.
+% Luaran dan tonggak capstone: penilaian kesiapan interoperabilitas, melengkapi C2 yang ditinjau
+% menjelang UTS.
+% Berkas sources yang direncanakan: sources/chapter07/penilaian-kesiapan-interoperabilitas.md,
+% sources/chapter07/contoh-patient-encounter-r4.json, sources/chapter07/pemetaan-simrs-fhir.csv
+
+\section{Ringkasan}
+
+% TODO
+
+\section{Latihan}
+
+\begin{enumerate}
+  \item Jelaskan mengapa SATUSEHAT memakai standar terbuka seperti HL7 FHIR, bukan format buatan sendiri.
+  \item Bandingkan cara Indonesia melalui SNAP (Standar Nasional Open API Pembayaran) dan Uni Eropa melalui PSD2 (\textit{Payment Services Directive 2}) mendorong \textit{open banking}. Sebutkan satu persamaan dan satu perbedaan.
+  \item Misalkan data kunjungan pasien dari dua rumah sakit Medikara belum terkirim ke SATUSEHAT. Uraikan tiga kemungkinan penyebab dari sisi proses, data, dan teknologi.
+\end{enumerate}

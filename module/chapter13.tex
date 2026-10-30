@@ -1,0 +1,93 @@
+\chapter{Tata Kelola API dan Regulasi Platform}
+
+\section*{Tujuan Pembelajaran}
+\begin{itemize}
+  \item Merancang model tata kelola API yang menjaga konsistensi tanpa memperlambat tim.
+  \item Menjelaskan risiko persaingan usaha pada platform beserta regulasinya di Indonesia dan Uni Eropa.
+  \item Menilai batasan regulasi terhadap rancangan platform organisasi.
+\end{itemize}
+
+\section{Pendahuluan}
+
+% TODO
+% Cakupan: lima rumah sakit hasil akuisisi membangun API dengan gaya berbeda; rencana membuka
+% ekosistem memunculkan pertanyaan tentang persaingan usaha dan pemakaian data pasien.
+
+\section{Tata Kelola API sebagai Pemungkin}
+
+% TODO
+% Cakupan: tujuan tata kelola API (konsistensi, keamanan, kemudahan dipakai ulang); jebakan tata
+% kelola yang berubah menjadi birokrasi; tata kelola yang dapat diotomatiskan.
+
+\section{Model Tata Kelola: Terpusat, Terdistribusi, dan Federasi}
+
+% TODO
+% Cakupan: tiga model beserta trade-off; peran tim platform API dan tim domain; forum keputusan;
+% kaitan dengan tata kelola arsitektur di IT40513 dan sistem tata kelola TI di IT40813.
+% Kasus Medikara: model federasi untuk lima rumah sakit dengan standar bersama.
+
+\section{Panduan Gaya, Tinjauan Desain, dan Pemeriksaan Otomatis}
+
+% TODO
+% Cakupan: isi minimum panduan gaya API; tinjauan desain sebagai titik pemeriksaan; pemeriksaan
+% otomatis kontrak; katalog API dan kepemilikan; pengecualian dan cara mengajukannya.
+% Pendalaman teknis: menulis aturan Spectral untuk dua butir panduan gaya, lalu menjalankannya pada
+% kontrak OpenAPI Bab 9.
+
+\section{Tata Kelola Ekosistem Mitra}
+
+% TODO
+% Cakupan: aturan masuk dan keluar bagi mitra; kurasi dan penilaian mutu mitra; sanksi dan
+% pencabutan akses; pembagian data dan nilai; transparansi aturan.
+% Kasus Medikara: aturan bagi apotek daring dan klinik mitra di Medikara+.
+
+\section{Persaingan Usaha pada Platform}
+
+% TODO
+% Cakupan: posisi dominan dan penyalahgunaannya; self-preferencing dan platform envelopment; UU
+% 5/1999 dan peran KPPU; putusan KPPU tentang Google Play Billing beserta penguatannya oleh Mahkamah
+% Agung; usulan undang-undang pasar digital.
+% Kasus Medikara: risiko menempatkan apotek milik Medikara di atas apotek mitra.
+
+\section{Regulasi Platform di Uni Eropa}
+
+% TODO
+% Cakupan: DMA (Digital Markets Act) dan kriteria gatekeeper; contoh kewajiban seperti larangan
+% self-preferencing dan kewajiban interoperabilitas; daftar gatekeeper saat ini; tinjauan pertama
+% DMA pada 2026; relevansi prinsipnya bagi Indonesia.
+
+\section{Batas Pemakaian Data}
+
+% TODO
+% Cakupan: data kesehatan sebagai data pribadi yang bersifat spesifik menurut UU 27/2022; dasar
+% pemrosesan dan persetujuan saat data dibagikan ke mitra; PP 33/2026 yang menurut pemberitaan
+% berlaku mulai 16 Januari 2027; rincian kepatuhan PDP dibahas di IT40813.
+% Kasus Medikara: berbagi hasil laboratorium dengan asuransi dan perusahaan klien.
+
+\section{Aktivitas: Model Tata Kelola API dan Batasan Regulasi}
+
+% TODO
+% Tujuan aktivitas: menetapkan aturan main API dan ekosistem serta batasan regulasi yang harus
+% dipatuhi rancangan platform.
+% Peran dalam tim: anggota berlatar hukum dan bisnis memeriksa batasan regulasi persaingan usaha,
+% pelindungan data, dan sektor; anggota berlatar teknis menyusun aturan pemeriksaan otomatis untuk
+% panduan gaya API.
+% Langkah: pilih model tata kelola; tetapkan struktur keputusan dan peran; susun standar minimum dan
+% titik pemeriksaan; daftar batasan regulasi beserta dampaknya pada rancangan C3.
+% Luaran dan tonggak capstone: model tata kelola API dan daftar batasan regulasi, masuk ke C4 dan
+% menjadi masukan bagi IT40813.
+% Berkas sources yang direncanakan: sources/chapter13/model-tata-kelola-api.md,
+% sources/chapter13/panduan-gaya-api.md, sources/chapter13/aturan-spectral.yaml,
+% sources/chapter13/daftar-batasan-regulasi.md
+
+\section{Ringkasan}
+
+% TODO
+
+\section{Latihan}
+
+\begin{enumerate}
+  \item Jelaskan perbedaan tata kelola API terpusat dan federasi, lalu tentukan model yang cocok bagi Medikara dengan lima rumah sakit hasil akuisisi.
+  \item Misalkan Medikara berencana menampilkan apotek miliknya di urutan teratas aplikasi Medikara+, di atas apotek mitra. Analisis risikonya dari sudut persaingan usaha.
+  \item Ambil satu kewajiban \textit{gatekeeper} dalam DMA (\textit{Digital Markets Act}), lalu jelaskan apakah prinsipnya relevan bagi platform kesehatan di Indonesia.
+\end{enumerate}

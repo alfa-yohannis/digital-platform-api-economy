@@ -1,0 +1,87 @@
+\chapter{Keamanan API: OAuth 2.0 dan OWASP API Security Top 10}
+
+\section*{Tujuan Pembelajaran}
+\begin{itemize}
+  \item Membedakan autentikasi dan otorisasi pada API, serta peran \textit{API key}, token, dan \textit{scope}.
+  \item Menjelaskan alur OAuth (\textit{Open Authorization}) 2.0 yang umum dipakai aplikasi dan mitra pada tingkat konsep.
+  \item Menilai risiko keamanan integrasi yang berjalan dengan OWASP (\textit{Open Worldwide Application Security Project}) API Security Top 10 edisi 2023.
+\end{itemize}
+
+\section{Pendahuluan}
+
+% TODO
+% Cakupan: kebocoran data pasien skala kecil lewat vendor pada 2025 dan temuan audit tentang kontrol
+% akses yang lemah; membuka API ke mitra memperluas permukaan serangan.
+
+\section{Pola Insiden Keamanan API}
+
+% TODO
+% Cakupan: pola umum insiden API (akses ke data milik orang lain, kredensial bocor, API lama yang
+% terlupakan); kekhawatiran baru tentang panggilan berlebihan dari agen AI menurut Postman 2025;
+% biaya insiden bagi organisasi kesehatan.
+% Kasus Medikara: kronologi fiktif kebocoran lewat vendor sebagai bahan analisis.
+
+\section{Autentikasi, Otorisasi, dan Token}
+
+% TODO
+% Cakupan: perbedaan siapa yang mengakses dan apa yang boleh diakses; API key dan kelemahannya;
+% token akses dan masa berlakunya; scope dan prinsip hak akses minimum.
+% Kasus Medikara: hak akses vendor Medikara+ terhadap data SIMRS.
+
+\section{OAuth 2.0 dan OpenID Connect pada Tingkat Konsep}
+
+% TODO
+% Cakupan: empat peran dalam OAuth 2.0 (RFC 6749); alur client credentials untuk sistem mitra; alur
+% authorization code dengan PKCE (Proof Key for Code Exchange) untuk aplikasi pengguna; OpenID
+% Connect untuk identitas; praktik terbaru dalam RFC 9700; OAuth 2.1 masih berupa draft IETF.
+% Pendalaman teknis: menelusuri alur authorization code dengan PKCE pada OAuth playground publik.
+
+\section{Profil Keamanan untuk Data Berisiko Tinggi}
+
+% TODO
+% Cakupan: FAPI (Financial-grade API) 2.0 Security Profile yang berstatus Final sejak Februari 2025;
+% token yang terikat pada pengirim; persetujuan (consent) pemilik data; relevansi bagi data
+% kesehatan dan keuangan.
+% Kasus Medikara: persetujuan pasien sebelum data dibagikan ke asuransi.
+
+\section{OWASP API Security Top 10 Edisi 2023}
+
+% TODO
+% Cakupan: sepuluh butir edisi 2023, dari Broken Object Level Authorization sampai Unsafe
+% Consumption of APIs; contoh tiap butir di sektor kesehatan; status edisi 2023 sebagai edisi
+% terbaru per Oktober 2026.
+% Kasus Medikara: pemetaan insiden 2025 ke butir yang relevan.
+
+\section{Pembatasan Konsumsi dan Pemantauan}
+
+% TODO
+% Cakupan: rate limiting dan kuota; pencatatan akses dan jejak audit; deteksi pola akses tidak
+% wajar; inventaris API untuk mencegah API yang terlupakan; kerangka keamanan informasi organisasi
+% (ISO/IEC 27001, NIST CSF) dibahas rinci di IT40813.
+
+\section{Aktivitas: Penilaian Risiko Keamanan API}
+
+% TODO
+% Tujuan aktivitas: menilai integrasi yang berjalan terhadap OWASP API Security Top 10 dan
+% menghasilkan daftar risiko berprioritas.
+% Peran dalam tim: anggota berlatar hukum, kesehatan, atau bisnis menilai dampak temuan terhadap
+% pasien, kepatuhan, dan reputasi; anggota berlatar teknis memeriksa bukti teknis seperti cara
+% autentikasi, pembatasan akses per objek, dan pencatatan akses.
+% Langkah: pilih integrasi berisiko dari peta integrasi Bab 5; isi daftar periksa per butir; beri
+% tingkat dampak dan kemungkinan; susun tiga rekomendasi perbaikan awal.
+% Luaran dan tonggak capstone: penilaian risiko keamanan API, masuk ke C2 dan menjadi masukan risk
+% register di IT40813.
+% Berkas sources yang direncanakan: sources/chapter06/daftar-periksa-owasp-api-2023.md,
+% sources/chapter06/register-risiko-api.csv, sources/chapter06/kronologi-insiden-medikara.md
+
+\section{Ringkasan}
+
+% TODO
+
+\section{Latihan}
+
+\begin{enumerate}
+  \item Jelaskan dengan contoh rekam medis mengapa \textit{Broken Object Level Authorization} menempati urutan pertama.
+  \item Bandingkan pemakaian \textit{API key} dan OAuth 2.0 \textit{client credentials} untuk integrasi dengan laboratorium mitra.
+  \item Kebocoran data Medikara pada 2025 terjadi lewat vendor. Tentukan dua butir OWASP API Security Top 10 yang paling relevan, lalu jelaskan alasannya.
+\end{enumerate}

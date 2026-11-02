@@ -1,6 +1,6 @@
 # Prompt Ilustrasi Bab 14
 
-Alat: imagegen bawaan. Aset: `figures/ch14-agen-terkendali.jpg`, 1536 x 1024 piksel, kompresi JPEG tanpa perubahan isi. Status: ilustrasi belum dipasang pada bab atau slide sesi 14. Bab memakai diagram konsep `figures/ch14-diagram-konsep.png` dan diagram TikZ.
+Alat: imagegen bawaan. Aset: `figures/ch14-agen-terkendali.jpg`, 1536 x 1024 piksel, kompresi JPEG tanpa perubahan isi. Status: ilustrasi disimpan sebagai arsip dan tidak dipasang pada bab atau slide sesi 14. Bab memakai diagram konsep `figures/ch14-diagram-konsep.png` dan diagram TikZ.
 
 Prompt yang dipakai:
 

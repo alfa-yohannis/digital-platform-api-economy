@@ -114,6 +114,7 @@ paths:
     get:
       operationId: bacaJanjiTemu
       summary: Membaca status satu janji temu.
+      description: Hanya janji temu milik pihak yang diwakili token yang dapat dibaca. Operasi ini tidak mengubah keadaan.
       tags: [janji-temu]
       security:
         - tokenMedikara: [janji.baca]

@@ -10,7 +10,7 @@ Salin templat sebelum mengisi. Contoh Medikara memakai data sintetis dan bukan b
 | [alur-janji-temu.arazzo.yaml](alur-janji-temu.arazzo.yaml) | Alur Arazzo tiga langkah di atas kontrak API-01 Bab 9 |
 | [periksa-alur-arazzo.py](periksa-alur-arazzo.py) | Memeriksa kecocokan operasi dan parameter alur Arazzo dengan kontrak, tanpa memanggil server |
 | [contoh-server-mcp](contoh-server-mcp) | Server MCP latihan dengan dua tool baca dan pratinjau pada data sintetis; baca petunjuk dan batas penggunaannya |
-| [illustration-prompt.md](illustration-prompt.md) | Asal ilustrasi `figures/ch14-agen-terkendali.jpg`, yang saat ini belum dipasang pada bab atau slide |
+| [illustration-prompt.md](illustration-prompt.md) | Asal ilustrasi `figures/ch14-agen-terkendali.jpg`, yang disimpan sebagai arsip dan tidak dipasang pada bab atau slide |
 
 ## Cara menjalankan
 
@@ -29,7 +29,7 @@ Skrip pertama hanya memakai pustaka standar Python. Skrip kedua memerlukan PyYAM
 | `python periksa-alur-arazzo.py` dengan PyYAML | Berjalan, 3 langkah lulus dan 0 temuan |
 | `python contoh-server-mcp/simulasi.py` | Berjalan |
 | `python contoh-server-mcp/periksa-demo.py` dengan `mcp==2.3.0` | Berjalan, empat pemeriksaan lulus |
-| MCP Inspector | Belum dijalankan, karena `npx` tidak tersedia pada mesin pemeriksaan |
+| MCP Inspector mode CLI, lini 1.x | Berjalan, `tools/list` menampilkan dua tool dan `tools/call` pada `tinjau_slot` berhasil. Antarmuka web belum dicoba |
 
 Lulus pada pemeriksaan di atas hanya berarti skrip dan contoh berjalan. Hasil itu bukan bukti bahwa agen aman dipakai. Konfigurasi produksi memerlukan tinjauan keamanan dan operasional.
 

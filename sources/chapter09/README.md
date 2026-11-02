@@ -26,7 +26,7 @@ prism mock kontrak-api-01-janji-temu.yaml
 
 Dua baris pertama adalah pemeriksaan struktur. Skrip hanya membaca berkas lokal dan tidak memanggil server. Lulus pemeriksaan tidak berarti arti kontrak sudah benar. Berkas latihan 2 memang menghasilkan temuan.
 
-Dua baris terakhir bersifat opsional dan membutuhkan Spectral dan Prism yang dipasang lewat Node.js. Periksa dukungan alat terhadap OpenAPI 3.2 sebelum dipakai. Kontrak API-01 tidak memakai bidang khusus versi 3.2, sehingga salinannya tetap valid sebagai 3.1.1 bila alat belum mendukung 3.2.
+Dua baris terakhir bersifat opsional dan membutuhkan Spectral dan Prism yang dipasang lewat Node.js. Saat diuji, Spectral 6.17.0 menerima kontrak 3.2.0 tanpa galat, dan Prism 5.14.2 menjawab 200 dengan token serta 401 tanpa token. Kontrak API-01 tidak memakai bidang khusus versi 3.2, sehingga salinannya tetap valid sebagai 3.1.1 bila versi alat lain belum mendukung 3.2.
 
 Mock server hanya dijalankan di komputer sendiri. Pemindaian atau uji beban pada sistem pihak lain tidak boleh dilakukan tanpa izin tertulis.
 

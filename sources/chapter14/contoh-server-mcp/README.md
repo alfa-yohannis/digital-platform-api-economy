@@ -20,7 +20,7 @@ Pada Linux atau macOS gunakan `.venv/bin/python`. Server berkomunikasi melalui s
 
 ## Pengujian dengan MCP Inspector (opsional)
 
-Dokumentasi SDK menyebut perintah `uv run mcp dev server.py` untuk membuka MCP Inspector, dan Inspector memerlukan `npx` dari Node.js. Status: langkah ini belum dijalankan pada pemeriksaan Bab 14, karena `npx` tidak tersedia pada mesin pemeriksaan. Keempat pemeriksaan di atas berjalan tanpa Inspector. Tim yang memakai Inspector mencatat versinya, karena dukungan revisi protokol perlu diperiksa sendiri.
+Dokumentasi SDK menyebut perintah `uv run mcp dev server.py` untuk membuka MCP Inspector, dan Inspector memerlukan `npx` dari Node.js. Status: perintah `uv` itu dan antarmuka web Inspector belum dicoba. Yang sudah dicoba adalah mode CLI, yaitu `npx @modelcontextprotocol/inspector --cli <python> server.py --method tools/list`, serta `tools/call` pada `tinjau_slot`. Keduanya berhasil. Inspector lini 1.x yang terunduh menampilkan pemberitahuan bahwa lini itu hanya menerima perbaikan keamanan. Keempat pemeriksaan di atas berjalan tanpa Inspector. Tim yang memakai Inspector mencatat versinya, karena dukungan revisi protokol perlu diperiksa sendiri.
 
 ## Percobaan
 

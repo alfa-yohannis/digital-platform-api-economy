@@ -296,7 +296,7 @@ PT Medikara Nusa Sehat ("Medikara Health") adalah **organisasi fiktif** yang dip
 
 | Folder | Isi |
 | --- | --- |
-| `figures/` | Gambar bersama untuk modul dan slide: diagram TikZ `chNN-nama.tex`, diagram konsep PNG dan SVG `chNN-diagram-konsep`, ilustrasi JPG, serta logo universitas dan foto gedung sebagai berkas asli. Daftarnya ada di `figures/README.md`. |
+| `figures/` | Gambar bersama untuk modul dan slide: diagram TikZ `chNN-nama.tex`, diagram konsep PNG dan SVG `chNN-diagram-konsep`, ilustrasi JPG arsip, serta logo universitas dan foto gedung sebagai berkas asli. Daftarnya ada di `figures/README.md`. |
 | `module/` | Naskah modul LaTeX. Berkas induk `digital-platform-api-economy.tex`, halaman judul `titlepage.tex`, empat belas bab `chapter01.tex` sampai `chapter14.tex`, rujukan inti dan rujukan lintas bab `references.bib`, rujukan khusus bab di `bib/chapterNN.bib`, font di `fonts/` sebagai berkas asli, dan PDF siap pakai `digital-platform-api-economy.pdf`. |
 | `slides/` | Slide Beamer. Pengaturan bersama di `preamble.tex` dan tema di `theme/` sebagai berkas asli. Sumber dan PDF siap pakai tiap pertemuan ada di `slides/sessionNN/`. |
 | `sources/` | Berkas pendukung tiap bab di `sources/chapterNN/`: lembar kerja, templat, data kasus, dan berkas teknis opsional yang dirujuk dari naskah modul. |

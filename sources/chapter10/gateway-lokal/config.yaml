@@ -1,0 +1,5 @@
+# Kegunaan: menetapkan APISIX sebagai mode standalone tanpa etcd. Cara pakai: dimuat otomatis oleh docker compose.
+deployment:
+  role: data_plane
+  role_data_plane:
+    config_provider: yaml

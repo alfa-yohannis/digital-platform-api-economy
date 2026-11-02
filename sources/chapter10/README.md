@@ -12,6 +12,7 @@ Salin templat sebelum mengisi. Contoh Medikara memakai data sintetis dan bukan b
 | [simulasi-batas-laju.py](simulasi-batas-laju.py) | Mengulang hitungan batas laju dan kuota Bab 6 dengan token bucket, tanpa memanggil sistem apa pun |
 | [contoh-header-deprecation.http](contoh-header-deprecation.http) | Contoh jawaban versi lama dengan header Deprecation dan Sunset, sumber listing Bab 10 |
 | [gateway-lokal/docker-compose.yaml](gateway-lokal/docker-compose.yaml) | Menjalankan Apache APISIX dan layanan contoh di komputer sendiri, untuk pendalaman opsional |
+| [gateway-lokal/config.yaml](gateway-lokal/config.yaml) | Menetapkan APISIX sebagai mode standalone tanpa etcd |
 | [gateway-lokal/apisix.yaml](gateway-lokal/apisix.yaml) | Rute API-01 dengan token, batas laju, dan kuota, sumber listing Bab 10 |
 | [gateway-lokal/layanan-contoh.py](gateway-lokal/layanan-contoh.py) | Layanan tiruan yang menjawab data sintetis di belakang gateway |
 | [gateway-lokal/buat-token-latihan.py](gateway-lokal/buat-token-latihan.py) | Membuat token latihan dengan rahasia yang hanya berlaku untuk contoh ini |
@@ -29,7 +30,7 @@ python simulasi-batas-laju.py
 
 Peringatan: jalankan hanya pada komputer sendiri. Rahasia pada berkas contoh tidak boleh dipakai di produksi. Uji beban dan pemindaian pada sistem milik orang lain memerlukan izin tertulis.
 
-Berkas gateway lokal sudah ditinjau terhadap dokumentasi APISIX, tetapi belum dijalankan pada waktu bab ditulis. Bila versi image berubah, periksa kembali dokumentasinya.
+Berkas gateway lokal sudah dijalankan dengan image `apache/apisix:3.19.0-debian`. Image ini membutuhkan `config.yaml`, karena variabel `APISIX_STAND_ALONE` saja membuat gateway berhenti saat dinyalakan. Bila versi image berubah, periksa kembali dokumentasinya.
 
 ```bash
 cd gateway-lokal
@@ -43,6 +44,6 @@ for i in $(seq 10); do curl -s -o /dev/null -w "%{http_code}\n" \
 docker compose down
 ```
 
-Hasil yang diharapkan: permintaan tanpa token dijawab 401, permintaan dengan token dijawab 200, dan sebagian permintaan cepat pada perulangan dijawab 429.
+Hasil yang diharapkan: permintaan tanpa token dijawab 401, permintaan dengan token dijawab 200, dan sebagian permintaan cepat pada perulangan dijawab 429. Saat diuji, dari 10 permintaan cepat, 3 dijawab 200 dan 7 dijawab 429.
 
 Skrip hanya dipakai pada data sintetis atau sumber berizin. Contoh teknis adalah latihan lokal. Konfigurasi produksi memerlukan tinjauan keamanan dan operasional.

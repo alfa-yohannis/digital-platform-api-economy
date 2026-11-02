@@ -25,7 +25,7 @@ python hitung-onboarding-portal.py
 
 Peringatan: jalankan hanya pada komputer sendiri. Sandbox ini memakai data sintetis dan tidak boleh diisi data pasien nyata. Uji pada sistem milik orang lain memerlukan izin tertulis.
 
-Skrip sandbox sudah dijalankan pada Python 3.12, dan keempat operasi serta enam skenario gagal sudah dicoba pada waktu bab ditulis. Perintah Redocly CLI belum dijalankan pada waktu bab ditulis, dan dokumentasi yang dibaca tidak menyebut dukungan OpenAPI 3.2 secara khusus. Bila kontrak ditolak, periksa versi alat. Redocly CLI versi 2 memerlukan Node.js 22.12.0 atau lebih baru.
+Skrip sandbox sudah dijalankan pada Python 3.12, dan keempat operasi serta enam skenario gagal sudah dicoba pada waktu bab ditulis. Perintah Redocly CLI sudah dicoba dengan versi 2.72.1 pada kontrak OpenAPI 3.2.0 dan menghasilkan satu berkas HTML. Bila kontrak ditolak pada versi lain, periksa versi alat. Redocly CLI versi 2 memerlukan Node.js 22.12.0 atau lebih baru.
 
 ```bash
 # Terminal 1: dokumentasi dari kontrak Bab 9

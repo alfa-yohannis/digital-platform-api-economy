@@ -21,6 +21,7 @@ paths:
     get:
       operationId: bacaIsiSumberDaya
       summary: ISI hal yang dicari dan batasnya.
+      description: ISI siapa yang boleh membaca dan data apa yang tidak ikut dijawab.
       tags: [isi-kelompok]
       security:
         - tokenOrganisasi: [isi.baca]
@@ -40,6 +41,7 @@ paths:
     post:
       operationId: buatIsiSumberDaya
       summary: ISI tindakan yang mengubah keadaan.
+      description: ISI akibat tindakan pada keadaan dan siapa yang boleh memintanya.
       tags: [isi-kelompok]
       security:
         - tokenOrganisasi: [isi.tulis]

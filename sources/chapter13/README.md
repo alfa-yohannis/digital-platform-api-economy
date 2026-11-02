@@ -24,7 +24,7 @@ python periksa-panduan-gaya.py contoh-kontrak-melanggar.yaml
 
 Hasil pemeriksa saat diuji: kontrak API-01 punya 4 operasi dan 0 temuan, sedangkan kontrak contoh punya 2 operasi dan 10 temuan. Kode keluar 1 berarti ada temuan.
 
-Aturan Spectral memerlukan Node.js dan belum dijalankan saat berkas ini disusun. Logika dua aturannya diuji lewat `periksa-panduan-gaya.py`. Periksa keluaran Spectral saat pertama kali dipakai.
+Aturan Spectral memerlukan Node.js. Saat diuji dengan Spectral 6.17.0, kontrak API-01 punya 0 galat, sedangkan kontrak contoh punya 4 galat, yaitu 2 untuk GAYA-01 dan 2 untuk GAYA-04. Logika yang sama juga diuji lewat `periksa-panduan-gaya.py`.
 
 ```
 npm install -g @stoplight/spectral-cli

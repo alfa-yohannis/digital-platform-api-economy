@@ -1,0 +1,40 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000},
+  tahap/.style={draw, rounded corners, fill=blue!8, text width=1.75cm, minimum height=1.15cm, align=center},
+  tekan/.style={tahap, fill=orange!12},
+  akhir/.style={tahap, fill=green!10},
+  gerbang/.style={draw, rounded corners, fill=praditagreen!15, text width=2.05cm, minimum height=1.05cm, align=center, font=\tiny},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  putus/.style={-{Stealth[length=2mm]}, thin, dashed}
+]
+  \node[tahap] (buat) at (0,0) {\textbf{Pembuatan}\\{\tiny\mdseries desain, bangun, uji}};
+  \node[tahap] (terbit) at (2.5,0) {\textbf{Penerbitan}\\{\tiny\mdseries tersedia bagi mitra}};
+  \node[tekan] (nilai) at (5,0) {\textbf{Realisasi nilai}\\{\tiny\mdseries janji nilai terbukti}};
+  \node[tahap] (rawat) at (7.5,0) {\textbf{Pemeliharaan}\\{\tiny\mdseries perubahan terkendali}};
+  \node[akhir] (pensiun) at (10,0) {\textbf{Pensiun}\\{\tiny\mdseries pemakai selesai pindah}};
+
+  \draw[panah] (buat) -- (terbit);
+  \draw[panah] (terbit) -- (nilai);
+  \draw[panah] (nilai) -- (rawat);
+  \draw[panah] (rawat) -- (pensiun);
+
+  \node[gerbang] (g1) at (1.25,-1.5) {\textbf{Gerbang 1}\\kontrak ditinjau, uji otorisasi lulus};
+  \node[gerbang] (g2) at (3.75,-1.5) {\textbf{Gerbang 2}\\klinik uji berhasil, dukungan siap};
+  \node[gerbang] (g3) at (6.25,-1.5) {\textbf{Gerbang 3}\\ukuran nilai tercapai dan tercatat};
+  \node[gerbang] (g4) at (8.75,-1.5) {\textbf{Gerbang 4}\\pemakai aktif nol atau pengecualian};
+
+  \draw[putus] (g1.north) -- (1.25,0);
+  \draw[putus] (g2.north) -- (3.75,0);
+  \draw[putus] (g3.north) -- (6.25,0);
+  \draw[putus] (g4.north) -- (8.75,0);
+
+  \draw[panah] (rawat.north) -- ++(0,0.4) -| node[pos=0.25, above, font=\tiny] {perubahan merusak: versi baru masuk lagi dari tahap pembuatan} (buat.north);
+
+  \node[draw, rounded corners, fill=blue!8, text width=11.3cm, minimum height=0.6cm, align=center] (katalog)
+    at (5,-2.75) {Katalog mencatat tahap, pemilik, dan versi tiap API, sehingga status dapat dibaca tanpa bertanya};
+  \draw[putus] (g1.south) -- (g1.south |- katalog.north);
+  \draw[putus] (g2.south) -- (g2.south |- katalog.north);
+  \draw[putus] (g3.south) -- (g3.south |- katalog.north);
+  \draw[putus] (g4.south) -- (g4.south |- katalog.north);
+\end{tikzpicture}

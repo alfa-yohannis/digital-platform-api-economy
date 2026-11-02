@@ -1,4 +1,14 @@
+% !TeX root = digital-platform-api-economy.tex
+% !TeX encoding = UTF-8
 \chapter{Manajemen Siklus Hidup API dan API Gateway}
+\label{ch:ch10}
+
+% Kolom rata kiri untuk tabel bab ini: G selebar sisa tabel, H selebar yang ditentukan.
+\newcolumntype{G}{>{\raggedright\arraybackslash}X}
+\newcolumntype{H}[1]{>{\raggedright\arraybackslash}p{#1}}
+% Tanda kutip tunggal dibaca sebagai teks pada berkas konfigurasi.
+\lstdefinestyle{ch10yaml}{language=yaml, morestring=[b]', captionpos=b, xleftmargin=8pt, columns=fullflexible, keepspaces=true}
+\lstdefinestyle{ch10http}{language=http, captionpos=b, xleftmargin=8pt, columns=fullflexible, keepspaces=true}
 
 \section*{Tujuan Pembelajaran}
 \begin{itemize}
@@ -9,78 +19,1056 @@
 
 \section{Pendahuluan}
 
-% TODO
-% Cakupan: perubahan API di satu rumah sakit dapat memutus integrasi mitra tanpa pemberitahuan,
-% sementara tidak ada catatan mitra mana yang memakai versi mana.
+Klinik mitra yang sudah terhubung masih bergantung pada versi \textit{Application Programming Interface} (API) lama. Tim
+Medikara ingin memensiunkannya agar biaya turun, tetapi penghentian mendadak dapat menghentikan pendaftaran. Misalkan
+API-01 Jadwal dan Janji Temu sudah berjalan setahun, dan 12 dari 40 klinik mitra belum pindah ke versi baru. Bila versi
+lama ditutup hari ini, 720 pemesanan per hari gagal. Bila versi lama dibiarkan, Medikara membayar satu antarmuka
+tambahan Rp45 juta per tahun tanpa batas waktu. Pertanyaan kemudian muncul: kapan versi lama boleh ditutup, siapa yang
+memutuskan, dan di mana aturan itu dijalankan?
+
+Manajemen API menjawab pertanyaan itu. Manajemen API menghubungkan keputusan versi, operasi platform, komunikasi mitra,
+dan tanggung jawab layanan. Bab ini meneruskan tiga janji dari bab sebelumnya. Bab 6 menjanjikan penerapan kebijakan
+keamanan pada \textit{API gateway}. Bab 8 mencatat lapisan bersama Rp300 juta per tahun secara terpisah, karena
+rancangannya baru dibahas di sini. Bab 9 menyerahkan satu keputusan, yaitu lama masa transisi versi. Portal pengembang
+dibahas di Bab 11. Infrastruktur \textit{cloud}, Kubernetes, dan rincian \textit{service mesh} dibahas di IT40713. Angka
+tambahan yang diawali kata ``Misalkan'' adalah asumsi latihan. Kesimpulan untuk organisasi nyata harus diuji dengan
+wawancara, dokumen, dan pengukuran yang berizin. Hasil bab ini menjadi bagian C3 dalam cetak biru transformasi digital.
+
+Rujukan utama bab ini dipakai untuk membedakan konsep dan membangun alasan keputusan, bukan untuk menggantikan penilaian
+konteks organisasi. Tahap siklus hidup mengikuti Medjaoui dkk. \cite{medjaoui2021continuous}. Pola evolusi versi
+mengikuti Zimmermann dkk. \cite{zimmermann2022patterns}. Tanda pensiun pada \textit{HyperText Transfer Protocol} (HTTP)
+mengikuti \textit{Request for Comments} (RFC) 8594 \cite{c10-rfc8594} dan RFC 9745 \cite{c10-rfc9745}. Pola penempatan
+\textit{gateway} mengikuti panduan \textit{National Institute of Standards and Technology} (NIST) SP 800-228
+\cite{nist-sp800-228}. Keamanan token mengikuti RFC 9700 \cite{rfc9700}.
+
+\IfFileExists{../figures/ch10-diagram-konsep.png}{%
+
+Gambar \ref{fig:ch10-ilustrasi-bab} merangkum hubungan komponen dan konsep utama bab ini.
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=\textwidth]{../figures/ch10-diagram-konsep.png}
+  \caption{Gateway dan pengelolaan siklus hidup API}
+  \label{fig:ch10-ilustrasi-bab}
+\end{figure}
+}{}
 
 \section{Siklus Hidup API}
 
-% TODO
-% Cakupan: tahap siklus hidup dari perancangan, pembangunan, publikasi, pemakaian, pemeliharaan,
-% sampai pensiun; tingkat kematangan API menurut Medjaoui dkk.; keputusan dan pemilik keputusan di
-% tiap tahap.
-% Kasus Medikara: API jadwal dokter dari rancangan sampai dipakai klinik mitra.
+Versi lama tidak tiba-tiba menjadi masalah. Sejak kapan pertanyaan tentang penghentian seharusnya sudah dijawab?
+
+Siklus hidup API adalah rangkaian tahap yang dilalui satu API sejak gagasan sampai dihentikan. Medjaoui dkk. memakai
+lima tahap, yaitu \textit{create}, \textit{publish}, \textit{realize}, \textit{maintain}, dan \textit{retire}
+\cite{medjaoui2021continuous}. Bab ini menyebutnya pembuatan, penerbitan, realisasi nilai, pemeliharaan, dan pensiun.
+Pembuatan mencakup penemuan kebutuhan, perancangan, pembangunan, serta pengujian. Penerbitan membuat API tersedia bagi
+pemakai. Realisasi nilai berarti API mulai menghasilkan nilai yang dijanjikan. Pemeliharaan menjaga API tetap sesuai
+dengan kontraknya. Pensiun menyelesaikan pemakai aktif, lalu menghentikan API. Setiap perpindahan memerlukan bukti yang
+sesuai risikonya. Status API harus terlihat di katalog.
+
+Analoginya kendaraan dinas. Kendaraan punya tahap pembelian, pemeriksaan, pemakaian, perawatan, dan penghentian. Setiap
+tahap punya dokumen dan penanggung jawab yang berbeda. Kendaraan yang tidak dipakai lagi tetap membayar pajak sampai
+surat penghapusannya selesai.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item API-02 Hasil Pemeriksaan tidak diterbitkan hanya karena kodenya selesai. Bukti otorisasi serta jalur dukungan
+        harus tersedia. Misalkan gerbang penerbitan ditinjau 5 orang selama 2 jam, atau 10 jam dan Rp600.000. Bab 6
+        memisalkan satu kredensial bersama yang bocor memaksa 40 klinik mitra menggantinya selama 2 jam per klinik, atau
+        80 jam dan Rp4,8 juta. Satu kejadian itu setara dengan 8 kali tinjauan.
+  \item API yang pensiun tetap memerlukan penyelesaian pengguna aktif dan arsip keputusan. Menghapus kode tidak
+        menyelesaikan kewajiban layanan. Sebaliknya, API tanpa keputusan pensiun terus memakan biaya. Misalkan satu
+        antarmuka tidak lagi dipakai, tetapi dibiarkan hidup tiga tahun. Biayanya 3 $\times$ Rp45 juta, atau Rp135 juta.
+        Biaya itu belum menghitung risikonya. \textit{Open Worldwide Application Security Project} (OWASP) mencatat
+        penyerang biasanya masuk lewat versi lama yang dibiarkan berjalan tanpa tambalan, dan menjadikan ketiadaan
+        rencana pensiun per versi sebagai tanda kelemahan \cite{owasp-api9}. NIST menyebut API semacam ini
+        \textit{zombie API} dan meminta organisasi menyimpan inventarisnya \cite{nist-sp800-228}.
+\end{enumerate}
+
+Gambar \ref{fig:ch10-siklus} memperlihatkan lima tahap itu dengan empat gerbang di antaranya. Tabel
+\ref{tab:ch10-gerbang} menyebut keputusan penting di tiap tahap. Medjaoui dkk. menyusun tonggak untuk tiap tahap
+\cite{medjaoui2021continuous}, sedangkan isi gerbang pada gambar adalah penyesuaian bab ini untuk API-01. Panah di atas
+gambar perlu diperhatikan: perubahan yang merusak tidak mengubah API lama, melainkan memulai siklus baru bagi versi
+berikutnya.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch10-siklus-hidup.tex}
+  \caption{Lima tahap siklus hidup API dan empat gerbang bukti}
+  \label{fig:ch10-siklus}
+\end{figure}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Keputusan penting, bukti, dan pemilik di tiap tahap, dengan contoh API-01}
+  \label{tab:ch10-gerbang}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{1.95cm}GGH{2.2cm}}
+    \hline
+    \textbf{Tahap} & \textbf{Keputusan penting} & \textbf{Bukti pada API-01} & \textbf{Pemilik keputusan} \\ \hline
+    Pembuatan & Layak dibangun atau tidak, dan apa isi kontraknya & Kanvas Bab 8, kontrak Bab 9, uji otorisasi objek & Manajer Layanan Rawat Jalan \\ \hline
+    Penerbitan & Siapa yang boleh memakai, dan kapan & 5 klinik uji berhasil, jalur dukungan siap, rencana cadangan saat Sistem Informasi Manajemen Rumah Sakit (SIMRS) diperbarui & Manajer Layanan Rawat Jalan, Kepala Keamanan Informasi \\ \hline
+    Realisasi nilai & Apakah janji nilai terbukti & Telepon konfirmasi turun dari 10 ke 2 persen, atau dari 240 ke 48 per hari & Manajer Layanan Rawat Jalan \\ \hline
+    Pemeliharaan & Perubahan mana yang dikerjakan & Penilaian tiga gerbang Bab 9, 12 usulan per triwulan dengan kapasitas 6 & Pemilik produk, tim integrasi \\ \hline
+    Pensiun & Kapan dihentikan, dan apa penggantinya & Pemakai aktif nol atau pengecualian tercatat. Pemicu Bab 8: klinik mitra aktif di bawah 30 & Manajer Layanan Rawat Jalan \\ \hline
+  \end{tabularx}
+\end{table}
+
+Dua hal pada siklus hidup sering tertukar, yaitu tahap API dan rilis perangkat lunak. Pembagiannya begini. Rilis adalah
+perubahan kode yang dikirim ke server. Tahap adalah posisi API dalam hubungannya dengan pemakai dan nilai. Misalkan
+API-01 mendapat 20 rilis per tahun tanpa perubahan kontrak. API itu tetap berada pada tahap pemeliharaan. Sebaliknya,
+API tanpa satu pun rilis baru dapat berpindah ke tahap pensiun, karena klinik mitra aktif turun di bawah 30.
+
+Keputusan memakai gerbang punya dua konsekuensi. Pertama, ada biaya. Misalkan empat gerbang masing-masing berbiaya
+Rp600.000. Satu API menanggung Rp2,4 juta sepanjang umurnya, dan API-06, API-01, serta API-02 pada portofolio Bab 8
+menanggung Rp7,2 juta. Kedua, setiap tahap harus punya pemilik. INT-10 memperlihatkan akibat sebaliknya: 12 sambungan
+resep tidak punya pemilik, sehingga tidak ada yang dapat memutuskan apa pun tentangnya. Bab 8 menaksir penelusurannya 24
+jam, atau Rp1,44 juta.
+
+\subsection{Tingkat Kematangan API}
+
+Tiap API punya tahapnya sendiri. Bagaimana menilai kemampuan organisasi mengelola seluruh API?
+
+Kematangan dinilai dari kemampuan organisasi memelihara kontrak dan hasil pengguna, bukan dari jumlah fitur
+\textit{gateway}. Salah satu model yang diterbitkan adalah \textit{API Management Focus Area Maturity Model}
+(API-m-FAMM) \cite{c10-overeem2022}. Data sumbernya memuat 80 praktik dan 20 kapabilitas yang dibagi ke dalam 6 area
+fokus, disusun dari tinjauan literatur, wawancara ahli, dan studi kasus \cite{mathijssen2020}. Tiap praktik
+ditempatkan pada satu tingkat kematangan di dalam kapabilitasnya. Karena itu hasil penilaian lebih berguna dibaca per
+area daripada dirangkum menjadi satu angka.
+
+Analoginya rapor per mata pelajaran. Nilai rata-rata 7 tidak memberi tahu orang tua bahwa anaknya mendapat 10 untuk
+matematika dan 4 untuk bahasa. Pelajaran yang perlu dibantu hanya terlihat dari nilai per mata pelajaran.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Misalkan tim menilai 20 kapabilitas itu dan menemukan bukti pada 6 kapabilitas, atau 30 persen. Angka 30 persen
+        tidak menunjukkan langkah berikutnya. Letaknya lebih berguna: area pengelolaan siklus hidup memuat 3
+        kapabilitas, yaitu pengelolaan versi, pemisahan API dari aplikasi, dan pemberitahuan pembaruan
+        \cite{mathijssen2020}. Medikara belum punya satu pun API mitra menurut Bab 8, sehingga buktinya 0 dari 3.
+  \item Misalkan Medikara membeli \textit{gateway} dengan 100 fitur dan memakai 6 fitur. Jumlah fitur tidak mengubah
+        register risiko Bab 6: RA-03 tetap mencatat 12 sambungan resep tanpa pemilik, dan RA-07 tetap mencatat kuota 300
+        panggilan per hari yang belum diterapkan. Keduanya selesai oleh pemilik dan keputusan, bukan oleh pembelian.
+\end{enumerate}
+
+Tabel \ref{tab:ch10-kematangan} memetakan keenam area itu pada Medikara. Kolom keadaan berisi pemisalan dari bab
+sebelumnya, bukan hasil penilaian memakai instrumen API-m-FAMM. Tim yang ingin memakai modelnya perlu membaca praktik
+dan syaratnya pada sumber asli.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Enam area fokus API-m-FAMM dan keadaan Medikara pada pemisalan bab ini}
+  \label{tab:ch10-kematangan}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{2.4cm}GGH{1.9cm}}
+    \hline
+    \textbf{Area fokus} & \textbf{Kapabilitas} & \textbf{Keadaan Medikara} & \textbf{Dikerjakan di} \\ \hline
+    \textit{Lifecycle Management} & Versi, pemisahan API dari aplikasi, pemberitahuan pembaruan & Belum ada API mitra dan kebijakan versi & Bab 9, Bab 10 \\ \hline
+    \textit{Security} & Autentikasi, otorisasi, deteksi ancaman, enkripsi & Register RA-01 sampai RA-07 sudah ada & Bab 6, Bab 10 \\ \hline
+    \textit{Performance} & Sumber daya, lalu lintas & Kuota 300 masih rancangan & Bab 10 \\ \hline
+    \textit{Observability} & Pemantauan, pencatatan, analitik & Catatan rinci hanya 7 hari pada kasus insiden & Bab 6, Bab 10 \\ \hline
+    \textit{Community} & \textit{Onboarding}, dukungan, dokumentasi, komunitas, portofolio & Belum ada portal mitra & Bab 11 \\ \hline
+    \textit{Commercial} & \textit{Service Level Agreement} (SLA), monetisasi, akun & Skema Rp3 juta per klinik per bulan masih usulan & Bab 2, Bab 12 \\ \hline
+  \end{tabularx}
+\end{table}
+
+Dua model kematangan juga sering tertukar. Pembagiannya begini. API-m-FAMM menilai kemampuan organisasi mengelola API.
+\textit{Richardson Maturity Model} menilai gaya desain satu API, dari satu titik panggilan pada tingkat 0 sampai kontrol
+\textit{hypermedia} pada tingkat 3, dan Fowler menyebutnya alat belajar \cite{c10-fowler-rmm}. API-01 memakai sumber
+daya, metode HTTP, dan kode status, sehingga berada pada tingkat 2. Angka itu tidak menyatakan apa pun tentang masa
+transisi, kuota, atau pemilik.
 
 \section{Versi dan Deprecation}
 
-% TODO
-% Cakupan: kebijakan versi (kapan versi baru diperlukan, cara penamaan versi); deprecation dan
-% pensiun API; tenggat dan cara pemberitahuan kepada mitra; kaitan dengan kompatibilitas pada Bab 9.
-% Kasus Medikara: mitra yang masih memakai API versi lama.
+Bab 9 berhenti pada kalimat ``lama masa transisi diputuskan di Bab 10''. Berapa lama versi lama harus tetap berjalan
+sesudah versi baru terbit?
+
+Versi menjelaskan kontrak yang didukung. \textit{Deprecation} memberi tahu pemakai bahwa kontrak tidak lagi dianjurkan
+dan akan dihentikan. RFC 9745 menegaskan bahwa tindakan ini tidak mengubah perilaku sumber daya, sehingga konsumen masih
+dapat memakainya seperti semula \cite{c10-rfc9745}. Kebijakan menyebut alasan, jadwal, pengganti, cara menguji, dan
+bantuan migrasi. Lamanya transisi diputuskan dari ketergantungan serta risiko. Versi baru tidak membebaskan penyedia
+dari komunikasi kepada pemakai lama. Pada API-m-FAMM, pemberitahuan itu berdiri sebagai kapabilitas tersendiri, dengan
+saluran seperti catatan perubahan, surel, portal, dan \textit{header} peringatan \cite{mathijssen2020}.
+
+Analoginya perubahan nomor telepon layanan. Nomor lama tidak langsung diputus. Pelanggan diberi tahu lebih dulu, nomor
+baru sudah dapat dicoba, dan selama masa pengalihan kedua nomor tetap tersambung. Nomor lama baru ditutup sesudah
+penelepon yang tersisa diketahui.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Misalkan 12 klinik masih memakai versi lama saat versi itu ditutup. Tiap klinik menangani 60 pemesanan per hari,
+        sehingga 720 pemesanan per hari gagal. Bila tiap pemesanan berpindah ke telepon 3 menit, bebannya 36 jam per
+        hari, atau Rp2,16 juta per hari. Menjalankan versi lama sebulan lagi berbiaya Rp3,75 juta, yaitu Rp45 juta
+        dibagi 12 bulan. Biaya sebulan itu setara dengan kurang dari 2 hari penutupan yang keliru. Karena itu tim
+        menghubungi pemilik setiap mitra dan memantau perpindahan berdasarkan identitas klien.
+  \item Tenggat tiga bulan bukan aturan universal. Vendor Medikara+ menyatakan butuh 4 bulan untuk mengubah aplikasi,
+        seperti pada pemisalan Bab 8. Penutupan pada bulan ketiga berarti sebulan tanpa API untuk 28.000 janji temu.
+        Dengan telepon 3 menit, bebannya 1.400 jam, atau Rp84 juta. Memperpanjang tiga bulan hanya berbiaya 3 $\times$
+        Rp3,75 juta, atau Rp11,25 juta. Mitra dengan proses persetujuan panjang dapat memerlukan rencana khusus.
+\end{enumerate}
+
+Dua hal pada bahasan ini sering tertukar, yaitu \textit{deprecation} dan \textit{sunset}. Pembagiannya begini.
+\textit{Deprecation} adalah pengumuman: API masih bekerja, tetapi jangan membangun di atasnya lagi. \textit{Sunset}
+adalah waktu ketika API kemungkinan besar tidak lagi menjawab. RFC 8594 memperlakukan waktu itu sebagai petunjuk, bukan
+jaminan, dan sesudahnya interaksi kemungkinan gagal dengan kode 4xx \cite{c10-rfc8594}. RFC 9745 melarang waktu
+\textit{sunset} lebih awal daripada waktu \textit{deprecation} \cite{c10-rfc9745}. Tabel \ref{tab:ch10-deprecation}
+merangkum pembagiannya pada API-01, termasuk kode 410 dari RFC 9110 \cite{rfc9110}.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Tiga keadaan versi lama dan tanda yang diterima pemakai}
+  \label{tab:ch10-deprecation}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{1.9cm}GGH{2.4cm}}
+    \hline
+    \textbf{Keadaan} & \textbf{Arti} & \textbf{Perilaku API-01 versi 1} & \textbf{Tanda} \\ \hline
+    Didukung & Kontrak berlaku penuh & Menjawab seperti kontrak, perbaikan masih masuk & Status di katalog \\ \hline
+    \textit{Deprecation} & Kontrak tidak dianjurkan, pengganti sudah tersedia & Tetap menjawab seperti semula, klinik baru tidak diterima & \textit{Header} \texttt{Deprecation}, surel, portal \\ \hline
+    \textit{Sunset} & Kontrak dihentikan pada waktu yang diumumkan & Sesudah waktu itu menjawab 410 dengan tautan panduan & \textit{Header} \texttt{Sunset}, kode 410 \\ \hline
+  \end{tabularx}
+\end{table}
+
+Masa hidup versi dapat dijanjikan dengan beberapa cara. Zimmermann dkk. menulisnya sebagai pola, dan Tabel
+\ref{tab:ch10-pola-versi} membandingkannya. Pola Two in Production sudah dipilih Bab 9 untuk API-01. Pada pola ini dua
+versi berjalan bergiliran dan tumpang tindih, sehingga klien yang berubah lebih lambat tetap sempat berpindah
+\cite{zimmermann2022patterns}.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Pola masa hidup versi menurut Zimmermann dkk. dan biayanya pada Medikara}
+  \label{tab:ch10-pola-versi}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{2.4cm}GGG}
+    \hline
+    \textbf{Pola} & \textbf{Janji kepada pemakai} & \textbf{Cocok untuk} & \textbf{Pada Medikara} \\ \hline
+    Experimental Preview & Boleh mencoba, tanpa jaminan & Mengumpulkan masukan sebelum versi terbit & Versi 2 di \textit{sandbox} untuk 5 klinik uji \\ \hline
+    Two in Production & Dua versi berjalan berdampingan & Klien yang berubah dengan kecepatan berbeda & Rp3,75 juta per bulan tumpang tindih \\ \hline
+    Limited Lifetime Guarantee & Tanggal berakhir diketahui sejak awal & Klien yang perlu kepastian rencana & Tanggal ditulis di perjanjian kerja sama \\ \hline
+    Aggressive Obsolescence & Klien dipaksa berhenti memakai versi lama & Kerentanan serius atau pemakai sedikit & Hanya untuk pengecualian keamanan \\ \hline
+  \end{tabularx}
+\end{table}
+
+Adakah angka baku untuk lama transisi? Tidak ada. GitHub menjanjikan versi \textit{Representational State Transfer}
+(REST) sebelumnya tetap didukung paling sedikit 24 bulan sesudah versi baru terbit \cite{c10-github-versions}. Pedoman
+Zalando mewajibkan persetujuan klien sebelum penutupan, kesepakatan rentang waktu dengan mitra eksternal, dan pemantauan
+pemakaian versi yang akan berakhir \cite{zalando-guidelines}. Espinha dkk., seperti dibahas di Bab 9, mengingatkan bahwa
+penyedia API web dapat memaksa klien berpindah kapan saja \cite{espinha2014}. GitHub melayani pengembang dalam
+jumlah besar yang tidak dikenalnya. Medikara melayani 41 konsumen yang semuanya punya kontak, sehingga angka 24 bulan
+tidak perlu disalin. Dasar yang dapat dipakai adalah waktu konsumen paling lambat.
+
+Gambar \ref{fig:ch10-linimasa} menyusun dasar itu menjadi jadwal API-01, dan Tabel \ref{tab:ch10-opsi-transisi}
+membandingkan tiga pilihan lama transisi. Biaya migrasi diambil dari Bab 9: 80 jam vendor ditambah 160 jam klinik, atau
+240 jam dan Rp14,4 juta. Biaya itu sama pada ketiga pilihan.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch10-linimasa-deprecation.tex}
+  \caption{Linimasa masa transisi 6 bulan pada API-01 dan pemisalan sisa pemakai versi 1}
+  \label{fig:ch10-linimasa}
+\end{figure}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Tiga pilihan lama transisi API-01 pada 41 konsumen. Seluruh angka adalah pemisalan latihan}
+  \label{tab:ch10-opsi-transisi}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{GH{2.15cm}H{2.0cm}H{2.0cm}}
+    \hline
+    \textbf{Unsur} & \textbf{3 bulan} & \textbf{6 bulan} & \textbf{12 bulan} \\ \hline
+    Dua versi berjalan, Rp3,75 juta per bulan & Rp11,25 juta & Rp22,5 juta & Rp45 juta \\ \hline
+    Medikara+ belum siap, Rp84 juta per bulan & Rp84 juta & Rp0 & Rp0 \\ \hline
+    Migrasi, 240 jam & Rp14,4 juta & Rp14,4 juta & Rp14,4 juta \\ \hline
+    \textbf{Jumlah} & \textbf{Rp109,65 juta} & \textbf{Rp36,9 juta} & \textbf{Rp59,4 juta} \\ \hline
+  \end{tabularx}
+\end{table}
+
+\begin{kasus}[title={Kasus Medikara Health: Masa Transisi API-01}]
+Misalkan setahun sesudah API-01 berjalan, strategi ``Satu Pasien, Satu Rekam Medis'' menuntut pengenal pasien yang baru.
+Penilaian tiga gerbang Bab 9 menggolongkan penggantian tipe \texttt{pasien} sebagai perubahan merusak, sehingga versi
+utama berikutnya berjalan pada alamat \texttt{/v2}. Seluruh rincian ini adalah data latihan.
+
+Tim menghitung dari konsumen paling lambat. Vendor Medikara+ butuh 4 bulan, ditambah 1 bulan untuk uji bersama dan 1
+bulan cadangan. Hasilnya 6 bulan. Manajer Layanan Rawat Jalan menerima biaya tumpang tindih Rp22,5 juta. Pilihan 3 bulan
+terlihat Rp11,25 juta lebih murah pada biaya operasi, tetapi jumlahnya Rp109,65 juta. Pilihan 12 bulan menambah Rp22,5
+juta tanpa konsumen yang membutuhkannya.
+
+Rapat menghasilkan tiga aturan tertulis.
+\begin{enumerate}
+  \item Klinik baru langsung memakai versi 2 sejak versi itu terbit. Jumlah pemakai versi 1 hanya boleh turun.
+  \item Misalkan pada bulan ke-5 masih ada 3 klinik. Tim memberi pendampingan 8 jam per klinik, atau 24 jam dan Rp1,44
+        juta. Biaya itu lebih kecil daripada Rp3,75 juta untuk memperpanjang seluruh versi sebulan. Perpanjangan hanya
+        diberikan sekali, paling lama 1 bulan, dengan alasan tertulis.
+  \item Misalkan versi 1 terbukti punya kerentanan serius. Kepala Keamanan Informasi boleh memangkas masa transisi
+        menjadi 14 hari. Pengecualian ini memakai pola Aggressive Obsolescence, dan klinik yang terdampak mendapat
+        bantuan lebih dulu.
+\end{enumerate}
+
+Sebuah usulan belum menjadi keputusan sebelum pemilik menerima konsekuensinya. Tanggal \textit{sunset} ditulis di
+perjanjian kerja sama, karena pada Bab 9 perjanjian itu mengatur tanggung jawab, sedangkan kontrak API mengatur
+perilaku. Bukti yang dapat mengubah keputusan adalah pernyataan vendor bahwa rilisnya butuh lebih dari 4 bulan.
+\end{kasus}
+
+Keputusan masa transisi punya dua konsekuensi. Pertama, Medikara harus mengetahui siapa yang masih memakai versi lama.
+Pengetahuan itu bergantung pada identitas klien per klinik dari Bab 6. Bila satu kredensial dipakai bersama 40 klinik,
+angka 12 pemakai pada contoh tadi tidak dapat diketahui. Kedua, aturan itu harus dijalankan pada setiap permintaan:
+versi mana menuju ke mana, dan siapa yang masih memanggil versi lama. Hal itu menjadi tugas \textit{API gateway}.
+
+\begin{pendalaman}[title={Pendalaman Teknis (opsional): Membaca Header Deprecation dan Sunset}]
+Listing \ref{lst:ch10-header} memperlihatkan jawaban API-01 versi 1 selama masa transisi. Nilai \texttt{Deprecation}
+berupa tanggal bertipe \textit{Structured Field}, yaitu jumlah detik sejak 1 Januari 1970 dengan awalan \texttt{@}
+\cite{c10-rfc9745}. Nilai \texttt{Sunset} memakai format tanggal HTTP \cite{c10-rfc8594}. Pada contoh,
+\texttt{@1846022400} berarti 1 Juli 2028 pukul 00.00 waktu universal. \textit{Sunset} jatuh pada 31 Desember 2028, tidak
+lebih awal daripada \textit{deprecation}, sesuai RFC 9745. Tautan \texttt{rel="deprecation"} mengarah ke panduan
+migrasi. \textit{Header} ini dapat ditambahkan oleh \textit{gateway} tanpa mengubah layanan. Pedoman Zalando juga
+menyarankan klien memantau kedua \textit{header} itu \cite{zalando-guidelines}.
+
+\begin{lstlisting}[style=ch10http, caption={Jawaban versi 1 selama masa transisi, tersedia di \berkas{sources/chapter10/contoh-header-deprecation.http}}, label={lst:ch10-header}]
+HTTP/1.1 200 OK
+Content-Type: application/json
+Deprecation: @1846022400
+Sunset: Sun, 31 Dec 2028 23:59:59 GMT
+Link: <https://api.medikara.example/migrasi-v2>; rel="deprecation"
+\end{lstlisting}
+\end{pendalaman}
 
 \section{API Gateway}
 
-% TODO
-% Cakupan: posisi API gateway di antara pengguna dan layanan; fungsi routing, autentikasi, rate
-% limiting, kuota, transformasi, dan pencatatan; penerapan kebijakan keamanan dari Bab 6 di
-% gateway; risiko gateway sebagai titik kegagalan tunggal.
-% Kasus Medikara: satu gateway bersama untuk lima rumah sakit.
-% Pendalaman teknis: menjalankan gateway open source di Docker dan menerapkan rate limiting serta
-% validasi token pada satu API contoh.
+Aturan versi sudah ditulis, dan kebijakan keamanan Bab 6 sudah ada. Siapa yang menjalankannya pada setiap permintaan?
+
+\textit{API gateway} menerima permintaan dan menerapkan kebijakan bersama, seperti \textit{routing}, pemeriksaan token,
+\textit{rate limiting}, kuota, transformasi, serta pencatatan. Dokumentasi Azure API Management memberikan daftar
+serupa: \textit{gateway} berperan sebagai muka bagi layanan di belakangnya, meneruskan panggilan, memeriksa kredensial,
+menegakkan kuota dan batas laju, mengubah bentuk pesan, dan mengirim catatan pemantauan \cite{azure-apim}. Otorisasi
+objek dan aturan bisnis tetap berada pada layanan yang memahami konteksnya. NIST menyebut pembagian ini pola
+\textit{hybrid}: kebijakan lintas layanan berada di \textit{gateway} bersama, sedangkan kebijakan khusus aplikasi berada
+pada tim aplikasi \cite{nist-sp800-228}. \textit{Gateway} dapat menjadi titik konsentrasi kegagalan, sehingga
+kapasitas, redundansi, dan konfigurasi perlu dikelola.
+
+Analoginya pos pemeriksaan di gerbang kompleks. Petugas pos memeriksa surat masuk, kartu tamu, dan jumlah tamu hari itu,
+lalu menunjukkan gedung tujuan. Petugas pos tidak membaca berkas. Petugas ruang arsip tetap menentukan berkas yang boleh
+dibaca.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item \textit{Gateway} memeriksa token klinik, batas laju 1 permintaan per detik dari pemisalan Bab 6, dan kuota 300
+        per hari. Layanan janji temu tetap memeriksa hak fasilitas serta ketersediaan slot. Kebutuhan satu klinik 195
+        panggilan per hari, sehingga kuota menyisakan 105. Pola 155 panggilan per malam pada kasus insiden Bab 6 berada
+        di bawah kuota. \textit{Gateway} meloloskannya, dan hanya pemeriksaan hak atas objek yang dapat menghentikannya.
+  \item Kesalahan konfigurasi \textit{routing} dapat memutus semua mitra sekaligus. Misalkan 30 menit pada jam layanan
+        10 jam per hari. Klinik kehilangan 120 pemesanan dan Medikara+ kehilangan 56 pemesanan, atau 176 pemesanan. Bila
+        perubahan lebih dulu diterapkan pada 5 klinik uji, kesalahan yang sama hanya mengenai 15 pemesanan. Perubahan
+        kebijakan memerlukan pengujian dan cara pemulihan.
+\end{enumerate}
+
+Gambar \ref{fig:ch10-posisi} memperlihatkan urutan pemeriksaan pada satu permintaan. Gambar ini memperluas gambar empat
+pemeriksaan pada Bab 6 dengan batas laju, \textit{routing} ke versi, dan ketersediaan slot. Tabel \ref{tab:ch10-fungsi}
+merangkum fungsi tiap kebijakan beserta batasnya.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch10-posisi-gateway.tex}
+  \caption{Posisi \textit{API gateway} pada satu permintaan API-01, dengan kode jawaban bila pemeriksaan gagal}
+  \label{fig:ch10-posisi}
+\end{figure}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Fungsi \textit{API gateway}, penerapannya pada API-01, dan hal yang tidak diselesaikannya}
+  \label{tab:ch10-fungsi}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{1.8cm}GGG}
+    \hline
+    \textbf{Fungsi} & \textbf{Yang dikerjakan} & \textbf{Pada API-01} & \textbf{Yang tidak diselesaikan} \\ \hline
+    \textit{Routing} & Memilih layanan dan versi tujuan & \texttt{/janji-temu} ke versi 1, \texttt{/v2/janji-temu} ke versi 2 & Salah rute memutus semua mitra \\ \hline
+    Autentikasi & Memeriksa token: tanda tangan, masa berlaku, penerima & Token 15 menit dari Bab 6 & Hak atas pasien tertentu \\ \hline
+    \textit{Rate limiting} & Membatasi permintaan per satuan waktu & Misalkan 1 per detik per klinik & Penarikan pelan dan lama \\ \hline
+    Kuota & Membatasi jumlah dalam periode & 300 per hari per klinik & Akses ke objek yang salah \\ \hline
+    Transformasi & Mengubah bentuk pesan atau \textit{header} & Menambah \texttt{Deprecation} dan \texttt{Sunset} & Aturan bisnis tidak pindah ke sini \\ \hline
+    Pencatatan & Mengirim telemetri minimum & Paling banyak 444.000 catatan per bulan & Tidak mencegah kejadian \\ \hline
+  \end{tabularx}
+\end{table}
+
+RFC 9700 memberi dasar untuk baris autentikasi. Hak token dibatasi seperlunya, dan token dibatasi untuk server penerima
+tertentu. Server yang bukan tujuannya wajib menolak permintaan itu \cite{rfc9700}. Permintaan yang melampaui batas laju
+atau kuota dijawab 429, seperti pada Bab 6, dan boleh menyebut waktu tunggu lewat \texttt{Retry-After}
+\cite{rfc6585}.
+
+Seberapa tepat batas itu? Jangan menganggapnya sebagai meteran. Dokumentasi Amazon API Gateway menyatakan
+\textit{throttling} dan kuota diterapkan secara \textit{best-effort}, dan perlu dipandang sebagai target, bukan batas
+atas yang dijamin \cite{aws-throttling}. Akibatnya, kuota di \textit{gateway} cukup untuk melindungi sistem, tetapi
+penagihan langganan klinik memerlukan catatan pemakaian yang direkonsiliasi. Monetisasi dibahas di Bab 12.
+
+Batas per klinik juga tidak melindungi SIMRS. Rata-rata bebannya kecil: 7.800 panggilan per hari dari klinik ditambah
+3.360 panggilan per hari dari Medikara+, atau 11.160 panggilan. Dalam 10 jam layanan, angka itu sekitar 0,31 permintaan
+per detik. Namun 40 klinik yang masing-masing patuh pada batas 1 per detik dapat mencapai 40 permintaan per detik.
+Misalkan adaptor SIMRS hanya sanggup 20 permintaan per detik. Karena itu tim memasang dua batas, yaitu 1 per detik per
+klinik dan 20 per detik untuk seluruh API-01. Batas kedua menimbulkan pertanyaan keadilan: saat antrean penuh, klinik
+yang tertib ikut menerima 429. Kuota menjawab sebagian masalah itu, karena satu klinik tidak dapat menghabiskan jatah
+klinik lain sepanjang hari.
+
+\subsection{Menerapkan Kebijakan Keamanan Bab 6}
+
+Bab 6 menjanjikan bahwa temuan risikonya ditelusuri lagi di sini. Berapa banyak yang benar-benar diselesaikan
+\textit{gateway}? Tabel \ref{tab:ch10-register} membaca ketujuh baris register satu per satu.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Register risiko Bab 6 dan tempat penyelesaiannya pada rancangan Bab 10}
+  \label{tab:ch10-register}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{1.0cm}GH{2.0cm}G}
+    \hline
+    \textbf{ID} & \textbf{Temuan Bab 6} & \textbf{Tempat utama} & \textbf{Tindakan} \\ \hline
+    RA-01 & Akun vendor membaca 140 tabel SIMRS & \textit{Gateway} dan layanan & Akses basis data ditutup, Medikara+ hanya lewat API-01 \\ \hline
+    RA-02 & API bawaan diduga tidak memeriksa hubungan layanan & Layanan bisnis & Hak atas objek, tidak dapat di \textit{gateway} \\ \hline
+    RA-03 & 12 sambungan resep tanpa pemilik & Katalog & Pemilik dicari lebih dulu, baru diputuskan \\ \hline
+    RA-04 & Rekap 36 perusahaan lewat surel & Di luar \textit{gateway} & Belum menjadi API, tetap antrean Bab 8 \\ \hline
+    RA-05 & Identitas 3 laboratorium tidak diuji & \textit{Gateway} & Token per laboratorium saat API-02 terbit \\ \hline
+    RA-06 & Jawaban SATUSEHAT tidak diperiksa & Layanan pengirim & Arah keluar, tidak melewati \textit{gateway} ini \\ \hline
+    RA-07 & Kuota 300 belum diterapkan & \textit{Gateway} & Kuota dan batas laju per klinik \\ \hline
+  \end{tabularx}
+\end{table}
+
+Hasilnya perlu dibaca jujur. Dari tujuh baris, \textit{gateway} memimpin 2 baris, membantu 1 baris, dan tidak
+menyelesaikan 4 baris. Dua baris dengan skor tertinggi pada Bab 6, RA-01 dan RA-02, masih memerlukan pekerjaan di luar
+\textit{gateway}. NIST juga mengingatkan bahwa \textit{gateway} di perimeter dapat dilewati penyerang yang sudah berada
+di dalam, sehingga kebijakan yang hanya berada di sana ikut terlewati \cite{nist-sp800-228}. Karena itu Medikara
+tidak memakai \textit{gateway} sebagai satu-satunya lapisan.
+
+Dua hal pada \textit{gateway} sering tertukar, yaitu kebijakan lintas layanan dan aturan bisnis. Pembagiannya begini.
+Kebijakan lintas layanan berlaku sama untuk banyak API dan tidak perlu mengetahui isi kasus. Aturan bisnis perlu
+mengetahui slot, pasien, atau kontrak. Thoughtworks menempatkan \textit{gateway} yang terlalu berambisi pada posisi
+\textit{Hold}: \textit{gateway} berguna untuk autentikasi dan pembatasan laju, sedangkan logika domain tetap berada di
+aplikasi atau layanan \cite{c10-thoughtworks-gateway}. Bab 9 memisalkan pembatalan paling lambat 2 jam sebelum slot
+mulai. Bila aturan itu ditulis di \textit{gateway}, \textit{gateway} harus mengetahui jam slot dari SIMRS, dan setiap
+perubahan aturan menunggu antrean tim platform. Penandanya sederhana: kebijakan yang perlu membaca data pasien atau slot
+tidak berada di \textit{gateway}.
+
+Aturan akses pada Bab 3 ditulis sebagai berkas yang dapat ditinjau dan diberi versi, lalu dibaca \textit{API gateway}.
+Bab ini memakai cara yang sama. Kuota, batas laju, dan rute disimpan sebagai berkas yang ditinjau sebelum diterapkan.
+Pada diagram konsep, inilah makna panah ``kebijakan disetujui'' dari siklus hidup ke \textit{gateway}. Perubahan
+kebijakan melewati pemilik, bukan langsung diketik pada layar administrasi.
+
+\begin{kasus}[title={Kasus Medikara Health: Kebijakan Gateway untuk API-01}]
+Misalkan Manajer Layanan Rawat Jalan, Kepala Keamanan Informasi, dan tim integrasi menyepakati kebijakan pertama sebelum
+API-01 terbit. Seluruh rincian ini adalah data latihan.
+
+Rapat menghasilkan empat keputusan.
+\begin{enumerate}
+  \item Token diperiksa di \textit{gateway}, sedangkan \textit{scope} \texttt{janji.tulis} dan hak atas objek diperiksa
+        di layanan, sesuai gambar empat pemeriksaan pada Bab 6. Kepala Keamanan Informasi memegang aturan token.
+  \item Kuota 300 per hari dan batas laju 1 per detik berlaku per klinik, dan 20 per detik berlaku untuk seluruh API-01.
+        Manajer Layanan Rawat Jalan memegang angka kuota, karena angka itu juga tertulis di perjanjian kerja sama.
+  \item Telemetri minimum memuat ID permintaan, identitas klien, versi, operasi, kode jawaban, dan keputusan akses,
+        tanpa isi klinis. Pada batas atas 444.000 catatan per bulan dan 500 \textit{byte} per catatan, penyimpanan 90
+        hari hanya sekitar 666 MB, seperti pada Bab 6.
+  \item \textit{Gateway} dipasang dua salinan. Perubahan konfigurasi diterapkan lebih dulu pada 5 klinik uji, dan versi
+        konfigurasi sebelumnya disimpan untuk pemulihan.
+\end{enumerate}
+
+Keputusan terakhir perlu dihitung. Bab 5 memisalkan rantai pemesanan 99,40 persen, atau 168 pemesanan gagal per bulan
+dari 28.000. Misalkan satu \textit{gateway} punya ketersediaan 99,9 persen. Rantainya turun menjadi sekitar 99,30
+persen, atau sekitar 196 pemesanan. Dengan dua salinan yang gagal saling lepas, angkanya kembali ke sekitar 168.
+Kegagalan akibat konfigurasi tidak saling lepas: konfigurasi yang keliru mengenai kedua salinan sekaligus. NIST menyebut
+risiko komponen bersama ini \textit{shared fate} \cite{nist-sp800-228}. Redundansi melindungi dari kerusakan mesin,
+sedangkan penerapan bertahap melindungi dari kesalahan manusia. Keduanya diperlukan.
+\end{kasus}
+
+\begin{pendalaman}[title={Pendalaman Teknis (opsional): Algoritma Batas Laju dan Penghitung Bersama}]
+Dokumentasi Amazon API Gateway menjelaskan \textit{token bucket}. Token bertambah dengan laju tetap, tiap permintaan
+memakai satu token, dan kapasitas ember menentukan ledakan singkat yang masih diterima \cite{aws-throttling}.
+\textit{Plugin} \texttt{limit-req} pada Apache APISIX memakai \textit{leaky bucket}, dengan parameter \texttt{rate} dan
+\texttt{burst}, dan \texttt{nodelay} membuat permintaan dalam \texttt{burst} tidak ditunda \cite{c10-apisix-limit-req}.
+Skrip \berkas{sources/chapter10/simulasi-batas-laju.py} mengulang hitungan Bab 6 dengan \textit{token bucket}. Pada 5
+permintaan per detik selama 12 jam, tanpa batas ada 216.000 permintaan, dengan batas 1 per detik ada 43.200 permintaan,
+dan dengan kuota 300 penarikan berhenti setelah 60 detik.
+
+Satu hal mudah terlewat saat \textit{gateway} dipasang dua salinan. Pada \texttt{limit-count}, kebijakan \texttt{local}
+membuat tiap salinan menghitung sendiri, sehingga jumlah yang diizinkan mendekati kuota dikali jumlah salinan
+\cite{c10-apisix-limit-count}. Kuota 300 per hari pada dua salinan dapat menjadi sekitar 600. Kebijakan \texttt{redis}
+menyatukan penghitung, dengan biaya satu komponen tambahan yang harus dijaga.
+
+Saat ini belum ada RFC untuk memberi tahu sisa kuota kepada klien. Rancangan \textit{Internet-Draft} mengusulkan
+\textit{field} \texttt{RateLimit} dan \texttt{RateLimit-Policy}, tetapi statusnya masih berjalan
+\cite{c10-ratelimit-draft}. Karena itu kontrak API-01 tetap memakai 429 dan \texttt{Retry-After}.
+\end{pendalaman}
 
 \section{Platform Manajemen API}
 
-% TODO
-% Cakupan: komponen gateway, portal pengembang, analitik, dan pengelola kebijakan; katalog API;
-% hubungan dengan portal pengembang pada Bab 11 dan metrik pada Bab 12.
+\textit{Gateway} hanya menjalankan kebijakan. Siapa yang menulis kebijakan, memberi tahu mitra, dan membaca hasilnya?
+
+Platform manajemen API mencakup \textit{gateway}, portal, katalog, analitik, dan pengelolaan kebijakan. Komponen
+tersebut dapat disediakan satu produk atau beberapa alat yang diintegrasikan. Azure API Management, misalnya, terdiri
+atas \textit{gateway}, \textit{management plane}, dan portal pengembang \cite{azure-apim}. Pada istilahnya,
+\textit{gateway} disebut juga \textit{data plane}, yaitu bagian yang melayani setiap permintaan, dan \textit{management
+plane} disebut juga \textit{control plane}, yaitu bagian tempat kebijakan ditulis dan analitik dibaca. Pemilihan
+arsitektur perlu memetakan sumber identitas, aliran konfigurasi, kepemilikan data analitik, serta hubungan lingkungan
+uji dan produksi.
+
+Analoginya pusat layanan. Pusat layanan memerlukan loket, meja informasi, petugas, dan buku catatan. Meja loket saja
+belum membentuk layanan yang lengkap. Pelanggan yang datang tidak tahu harus ke mana, dan pengelola tidak tahu loket
+mana yang paling sibuk.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Portal mengarahkan mitra ke dokumentasi dan kredensial uji. \textit{Gateway} mengukur operasi yang dipakai
+        dengan tetap meminimalkan data \textit{log}. Pada batas atas Bab 6, ada 444.000 catatan per bulan dan sekitar
+        2,7 GB per tahun. Bila isi jawaban ikut dicatat, volumenya 266,4 GB per tahun, dan \textit{log} berubah menjadi
+        salinan kedua rekam medis. Karena itu diagram konsep menulis ``telemetri minimum''.
+  \item Katalog mencatat pemilik API dan status versi. Analitik menghubungkan pemakaian dengan keberhasilan perjalanan
+        pengguna. Misalkan \textit{dashboard} mencatat 99 persen jawaban berhasil, tetapi telepon konfirmasi masih 240
+        per hari. Angka pertama terlihat sehat, tetapi janji nilai API-01 belum terbukti, dan penghematan Rp172,8 juta
+        per tahun belum terjadi. Telemetri saja tidak cukup, sehingga catatan telepon ikut dibaca.
+\end{enumerate}
+
+Diagram konsep pada Gambar \ref{fig:ch10-ilustrasi-bab} memperlihatkan hubungan komponen itu. Portal dan katalog memandu
+pemakaian mitra pengguna, yaitu klien terdaftar. \textit{API gateway} meneruskan permintaan ke layanan bisnis. Telemetri
+minimum dari \textit{gateway} dan layanan bisnis masuk ke analitik dan dukungan, yang membaca penggunaan dan insiden, lalu menjadi bukti perubahan bagi siklus hidup
+API. Siklus hidup mengirim kebijakan yang disetujui ke \textit{gateway}, serta versi dan tenggat ke portal. Tabel
+\ref{tab:ch10-komponen} merinci tiap komponen.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Komponen platform manajemen API, pertanyaan yang dijawabnya, dan pemakainya pada Medikara}
+  \label{tab:ch10-komponen}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{1.8cm}GGH{2.3cm}}
+    \hline
+    \textbf{Komponen} & \textbf{Pertanyaan yang dijawab} & \textbf{Contoh pada API-01} & \textbf{Pemakai utama} \\ \hline
+    \textit{Gateway} & Apakah permintaan ini boleh diteruskan? & Token, laju, kuota, rute versi & Klien mitra, tim integrasi \\ \hline
+    Portal & Bagaimana cara mulai dan apa yang berubah? & Panduan, kredensial uji, jadwal \textit{sunset} (rinci di Bab 11) & Petugas teknis klinik \\ \hline
+    Katalog & API apa yang ada, milik siapa, pada tahap apa? & API-01, Manajer Layanan Rawat Jalan, tahap pemeliharaan & Pemilik produk, audit \\ \hline
+    Analitik & Siapa memakai apa, dan apakah berhasil? & Pemakai versi 1 per klinik, rasio 201 dan 409 & Pemilik produk, dukungan \\ \hline
+    Pengelolaan kebijakan & Aturan apa yang berlaku, siapa menyetujui? & Berkas kuota dan rute yang ditinjau & Keamanan, tim integrasi \\ \hline
+  \end{tabularx}
+\end{table}
+
+Empat pertanyaan arsitektur perlu dijawab sebelum memilih produk. Pertama, dari mana identitas berasal? Pada rancangan
+Bab 8, jawabannya API-06 Identitas dan Akses, sehingga produk yang dipilih harus menerima token dari layanan itu. Kedua,
+bagaimana konfigurasi mengalir? Medikara memakai berkas yang ditinjau, lalu diterapkan pada 5 klinik uji sebelum seluruh
+klinik. Ketiga, siapa memiliki data analitik? Medikara adalah pengendali data, sehingga jawaban ``tersimpan di
+penyedia'' harus diuji terhadap batas lokasi data. Keempat, apa yang terjadi bila \textit{control plane} tidak tersedia?
+Permintaan yang sedang berjalan sebaiknya tetap dilayani, dan hal ini perlu diuji pada produk yang dipilih, bukan
+diasumsikan.
+
+NIST juga menganjurkan tim platform API terpusat yang menyediakan platform swalayan bagi tim aplikasi, serta inventaris
+seluruh API \cite{nist-sp800-228}. Anjuran itu perlu ditimbang dengan ukuran Medikara. Bab 8 memisalkan tim
+integrasi hanya 4 orang, dan tim platform 6 orang pada IT40713 mengurus fondasi \textit{cloud}, sehingga ``tim platform API'' tidak dapat berarti unit baru. Seksi berikutnya menghitung berapa jam
+yang tersedia.
 
 \section{Memilih Platform Manajemen API}
 
-% TODO
-% Cakupan: pilihan open source, layanan cloud, dan hibrida; kriteria (fungsi, biaya, kendali,
-% keterampilan tim, lokasi data, ketergantungan pada penyedia); matriks keputusan; ekonomi cloud
-% dan FinOps dibahas rinci di IT40713.
-% Kasus Medikara: pertimbangan lokasi data pasien dan kemampuan tim TI internal.
+Bab 4 dan Bab 8 memakai angka Rp300 juta per tahun untuk lapisan bersama. Produk apa yang muat dalam angka itu?
+
+Alternatif platform dibandingkan pada biaya total, kemampuan kebijakan, dukungan, lokasi data, portabilitas, dan
+keterampilan tim. \textit{Open source} mengurangi sebagian biaya lisensi, tetapi tetap memerlukan operasi. Layanan
+\textit{cloud} mengalihkan sebagian operasi, tetapi menciptakan ketergantungan serta biaya berulang. Harga harus
+diverifikasi pada waktu keputusan, bukan dibakukan dalam modul. Contoh layanan \textit{cloud} adalah Amazon API Gateway
+dan Azure API Management. Contoh \textit{open source} adalah Apache APISIX. Batas antarjenis juga tidak tajam: Azure
+menyediakan \textit{self-hosted gateway} yang berjalan di lingkungan pelanggan dan dikelola dari layanan \textit{cloud},
+antara lain untuk memenuhi aturan setempat \cite{azure-apim}.
+
+Analoginya menyewa gedung dengan pengelola dan mengelola gedung sendiri. Penyewa membayar sewa berulang, tetapi tidak
+perlu memikirkan genset dan petugas kebersihan. Pemilik gedung tidak membayar sewa, tetapi harus menggaji teknisi dan
+siaga saat listrik padam. Kedua pilihan punya biaya tersembunyi yang berbeda.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Misalkan lisensi nol, tetapi dua staf diperlukan untuk operasi. Perbandingan biaya harus memasukkan tenaga serta
+        kesiagaan. Dengan 160 jam per bulan seperti pada Bab 8, dua staf berarti 3.840 jam, atau Rp230,4 juta per tahun.
+        Biaya itu lebih besar daripada lisensi Rp180 juta pada contoh layanan \textit{cloud} di Tabel
+        \ref{tab:ch10-biaya}.
+  \item Misalkan layanan \textit{cloud} menyimpan \textit{log} di lokasi yang tidak sesuai kebijakan. Fitur yang baik
+        tidak menghapus batas lokasi data. Pada batas atas 444.000 catatan per bulan, ada 5.328.000 catatan per tahun
+        yang memuat identitas klien dan ID objek. Undang-Undang (UU) Nomor 27 Tahun 2022 Pasal 56 membolehkan transfer
+        ke luar wilayah hukum Indonesia dengan syarat berjenjang: perlindungan negara tujuan setara atau lebih tinggi,
+        atau pelindungan yang memadai dan mengikat, atau persetujuan subjek data \cite{uu27-2022-pdp}. Dengan sekitar
+        1,2 juta kunjungan per tahun, jalur persetujuan satu per satu tidak praktis. Bila catatan itu memuat atau dapat
+        dihubungkan ke data kesehatan, aturan sektor lebih dahulu berlaku. Peraturan Pemerintah (PP) 28/2024 Pasal 966 menempatkan pusat data
+        kesehatan di dalam wilayah Indonesia, dan Pasal 972 meminta izin Menteri untuk transfer \cite{pp28-2024-kesehatan},
+        seperti dibaca IT40813 Bab 3.
+\end{enumerate}
+
+Tabel \ref{tab:ch10-biaya} menghitung biaya tiga alternatif pada horizon yang sama, yaitu 3 tahun. Seluruh angkanya
+pemisalan latihan dan bukan harga produk. Pagunya Rp300 juta per tahun, atau Rp900 juta selama 3 tahun. Penyiapan
+dikerjakan pelaksana luar pada tarif Rp60.000 per jam, sehingga tidak memakai jam tim integrasi.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Biaya tiga alternatif selama 3 tahun, dalam juta rupiah. Seluruh angka adalah pemisalan latihan}
+  \label{tab:ch10-biaya}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{GH{1.95cm}H{1.95cm}H{1.95cm}}
+    \hline
+    \textbf{Komponen} & \textbf{A: \textit{cloud} terkelola} & \textbf{B: \textit{open source} sendiri} & \textbf{C: komersial sendiri} \\ \hline
+    Lisensi atau langganan per tahun & 180 & 0 & 96 \\ \hline
+    Infrastruktur dan penyimpanan \textit{log} per tahun & 12 & 48 & 48 \\ \hline
+    Staf operasi per tahun, Rp115,2 juta per staf & 57,6 (0,5 staf) & 230,4 (2 staf) & 115,2 (1 staf) \\ \hline
+    Kesiagaan di luar jam kerja per tahun & 12 & 24 & 12 \\ \hline
+    \textbf{Jumlah per tahun} & \textbf{261,6} & \textbf{302,4} & \textbf{271,2} \\ \hline
+    Penyiapan satu kali & 24 (400 jam) & 72 (1.200 jam) & 48 (800 jam) \\ \hline
+    \textbf{Total 3 tahun} & \textbf{808,8} & \textbf{979,2} & \textbf{861,6} \\ \hline
+    Terhadap pagu Rp900 juta & 91,2 di bawah & 79,2 di atas & 38,4 di bawah \\ \hline
+    Jam operasi per tahun & 960 & 3.840 & 1.920 \\ \hline
+    Terhadap cadangan 1.080 jam & Sisa 120 jam & Kurang 2.760 jam & Kurang 840 jam \\ \hline
+  \end{tabularx}
+\end{table}
+
+Tabel itu mudah disalahbaca. Alternatif B bukan selalu termahal. Bila 1 staf terbukti cukup, biaya tahunannya turun
+menjadi Rp187,2 juta, totalnya Rp633,6 juta, dan B menjadi yang termurah. Satu asumsi jumlah staf membalik kesimpulan.
+Hal yang sama berlaku bagi A. Misalkan Rp60 juta dari langganan Rp180 juta bergantung pada trafik. Bila trafik dua kali
+lipat, totalnya naik Rp180 juta menjadi Rp988,8 juta, dan A melampaui pagu. Perbandingan biaya perlu mencatat asumsi
+yang paling menentukan, bukan hanya jumlahnya.
+
+Baris terakhir tabel mengambil angka dari Bab 8. Sisa kapasitas tim integrasi 1.080 jam disimpan sebagai cadangan.
+Alternatif A memakai 960 jam, sehingga cadangan tinggal 120 jam, atau sekitar 1,6 persen dari 7.680 jam. Keadaan itu sah
+untuk diterima, tetapi harus diputuskan dengan sadar.
+
+Bagaimana memilih bila tiap alternatif punya kelebihan? Gambar \ref{fig:ch10-peta} memisahkan dua jenis syarat. Tiga
+gerbang pertama menyaring: bila tidak dipenuhi, kelebihan lain tidak dapat menutupinya. Matriks berbobot membandingkan
+hal yang masih boleh ditukar. Tabel \ref{tab:ch10-matriks} memuat matriksnya, dengan skor 1 sampai 5 dan bobot berjumlah
+100.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch10-peta-keputusan.tex}
+  \caption{Peta keputusan pemilihan platform: tiga gerbang penyaring, lalu matriks berbobot}
+  \label{fig:ch10-peta}
+\end{figure}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Matriks berbobot tiga alternatif. Skor adalah pemisalan latihan dan dapat diuji pada \berkas{sources/chapter10/matriks-pemilihan-platform-api.csv}}
+  \label{tab:ch10-matriks}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{2.6cm}H{0.9cm}H{0.6cm}H{0.6cm}H{0.6cm}G}
+    \hline
+    \textbf{Kriteria} & \textbf{Bobot} & \textbf{A} & \textbf{B} & \textbf{C} & \textbf{Dasar skor} \\ \hline
+    Biaya total & 25 & 4 & 2 & 3 & Tabel \ref{tab:ch10-biaya} \\ \hline
+    Kemampuan kebijakan & 15 & 4 & 4 & 5 & Token, kuota, rute versi, penerapan bertahap \\ \hline
+    Dukungan & 10 & 5 & 2 & 4 & Janji layanan penyedia dan jalur eskalasi \\ \hline
+    Lokasi data & 20 & 3 & 5 & 5 & A belum punya bukti tertulis \\ \hline
+    Portabilitas & 10 & 2 & 5 & 3 & Kebijakan yang dapat dibawa keluar \\ \hline
+    Keterampilan tim & 20 & 4 & 2 & 3 & Jam dan pengalaman tim integrasi \\ \hline
+    \textbf{Nilai} & \textbf{100} & \textbf{3,70} & \textbf{3,20} & \textbf{3,80} & Jumlah bobot kali skor, dibagi 100 \\ \hline
+  \end{tabularx}
+\end{table}
+
+\begin{kasus}[title={Kasus Medikara Health: Memilih dari Selisih 0,10}]
+Misalkan tim integrasi, Manajer Keuangan, petugas pelindungan data, dan Kepala Keamanan Informasi membaca Tabel
+\ref{tab:ch10-matriks}. Seluruh rincian ini adalah data latihan. C unggul 0,10 atas A. Haruskah C dipilih?
+
+Tim menolak memutuskan dari selisih itu. Skor lokasi data A bernilai 3 hanya karena buktinya belum ada, bukan karena
+terbukti buruk. Bila penyedia memberi bukti tertulis bahwa konfigurasi dan \textit{log} berada pada wilayah yang sesuai,
+skornya menjadi 4, dan nilai A menjadi 3,90. Satu dokumen membalik urutan. Bila bukti itu tidak ada, A tetap dapat
+dipertahankan dengan \textit{self-hosted gateway} atau dengan \textit{log} yang disimpan Medikara, tetapi biayanya harus
+dihitung ulang.
+
+Rapat menghasilkan tiga keputusan.
+\begin{enumerate}
+  \item Misalkan uji coba 2 minggu dengan 2 orang, atau 160 jam dan Rp9,6 juta, pada A dan C. Uji coba memakai data
+        sintetis dan API contoh. Yang diuji adalah token dari API-06, kuota per klinik, rute versi, dan lokasi
+        \textit{log}.
+  \item A menjadi pilihan bersyarat, karena lebih murah Rp52,8 juta daripada C dan muat dalam cadangan jam. C menjadi
+        cadangan bila bukti lokasi gagal. B ditolak untuk saat ini, dengan pemicu tinjauan: Medikara punya 2 staf yang
+        terlatih, atau trafik dua kali lipat.
+  \item Manajer Keuangan memegang pagu Rp300 juta per tahun. Bab 4 dan Bab 8 tetap memakai angka itu sampai harga nyata
+        tersedia. Rata-rata A Rp269,6 juta per tahun, sehingga ada ruang Rp30,4 juta.
+\end{enumerate}
+
+Pilihan A punya harga. Misalkan keluar dari produk memerlukan 800 jam, atau Rp48 juta. Harga itu ditekan dengan
+menyimpan kontrak OpenAPI dan berkas kebijakan milik Medikara di luar produk, sehingga yang dipindahkan hanya
+penerapannya. Catatan tim menyebut bukti yang belum tersedia: harga nyata, wilayah penyimpanan, dan jumlah staf yang
+benar-benar dibutuhkan.
+\end{kasus}
+
+Keputusan memakai matriks punya dua konsekuensi. Pertama, bobot harus disepakati sebelum skor diisi. Misalkan bobot
+keterampilan diturunkan dari 20 menjadi 10, dan bobot portabilitas dinaikkan dari 10 menjadi 20. Nilai A turun menjadi
+3,50, sedangkan C tetap 3,80. Perubahan bobot sesudah skor terlihat mudah dipakai untuk membenarkan pilihan yang sudah
+disukai. Kedua, matriks hanya menilai alternatif yang masuk daftar. Daftar yang seluruhnya produk \textit{cloud} tidak
+pernah dapat menyimpulkan bahwa \textit{cloud} kurang cocok. Skrip \berkas{sources/chapter10/hitung-matriks-platform.py}
+menghitung biaya, nilai, dan pengaruh perubahan bobot.
 
 \section{API Gateway dan Service Mesh}
 
-% TODO
-% Cakupan: perbedaan lalu lintas dari luar ke dalam dan lalu lintas antarlayanan; peran gateway dan
-% service mesh secara singkat; service mesh dan komunikasi antarlayanan dibahas rinci di IT40713.
+Medikara sudah punya gerbang untuk mitra. Apakah komunikasi di dalam juga memerlukan alat yang sama?
+
+\textit{API gateway} berfokus pada akses ke kemampuan API, sedangkan \textit{service mesh} membantu komunikasi
+antarlayanan pada lingkungan tertentu. NIST SP 800-204A menjelaskan \textit{service mesh} sebagai pendekatan berbasis
+\textit{proxy} yang menerapkan autentikasi, otorisasi, enkripsi, dan pemantauan antarlayanan secara seragam tanpa
+mengubah kode tiap layanan \cite{c10-nist-sp800-204a}. Keduanya dapat memiliki fungsi yang beririsan, tetapi berbeda
+ruang pengelolaan. Memasang keduanya tanpa kebutuhan menambah kompleksitas. Arsitektur komunikasi internal, Kubernetes,
+dan \textit{service mesh} dibahas lebih rinci dalam IT40713.
+
+Analoginya gerbang kawasan dan pengaturan jalan di dalam kawasan. Gerbang menentukan siapa yang masuk. Rambu dan satpam
+di dalam mengatur kendaraan yang sudah masuk. Keduanya berkaitan, tetapi kawasan dengan dua gedung tidak memerlukan
+lampu lalu lintas.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Mitra klinik memakai \textit{gateway} untuk masuk ke layanan Medikara. Komunikasi internal dapat memerlukan
+        kontrol tersendiri sesuai arsitektur target. NIST mencatat bahwa pada pola \textit{gateway} terpusat, lalu
+        lintas internal ikut memutar lewat \textit{gateway} \cite{nist-sp800-228}. Bab 8 memisalkan tiap lapisan
+        menambah 30 milidetik. Bila 3 lapisan API-01 saling memanggil lewat \textit{gateway}, tambahannya 90 milidetik
+        per panggilan, atau 270 milidetik per pemesanan pada 3 panggilan.
+  \item Organisasi kecil dengan sedikit layanan dapat mempertahankan kontrol yang lebih sederhana. Kebutuhan observasi
+        dan keamanan menjadi alasan, bukan tren alat. Misalkan mengurus sertifikat dan pemantauan tanpa \textit{mesh}
+        memakan 16 jam per layanan per tahun, atau Rp960.000. Misalkan mengoperasikan \textit{mesh} memakan 0,5 staf,
+        atau Rp57,6 juta per tahun. Titik impasnya 60 layanan. Pada 12 layanan, cara sederhana berbiaya Rp11,52 juta,
+        sehingga \textit{mesh} lebih mahal Rp46,08 juta per tahun.
+\end{enumerate}
+
+Gambar \ref{fig:ch10-mesh} memperlihatkan dua ruang itu, dan Tabel \ref{tab:ch10-mesh} membedakan tanggung jawabnya.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch10-gateway-mesh.tex}
+  \caption{\textit{API gateway} mengatur lalu lintas masuk, sedangkan kendali antarlayanan berada di dalam lingkungan layanan}
+  \label{fig:ch10-mesh}
+\end{figure}
+
+\begin{table}[!htb]
+  \centering
+  \caption{\textit{API gateway} dan \textit{service mesh} menurut ruang pengelolaannya}
+  \label{tab:ch10-mesh}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{2.2cm}GG}
+    \hline
+    \textbf{Unsur} & \textbf{\textit{API gateway}} & \textbf{\textit{Service mesh}} \\ \hline
+    Ruang & Batas akses API, bagi pengguna internal atau mitra & Komunikasi antarlayanan di lingkungan operasional \\ \hline
+    Pertanyaan utama & Siapa mitra ini, dan seberapa banyak ia boleh memakai? & Layanan mana boleh memanggil layanan mana? \\ \hline
+    Pemilik keputusan & Pemilik produk, tim integrasi, keamanan & Tim platform atau operasi \\ \hline
+    Fungsi beririsan & Autentikasi, batas laju, telemetri & Autentikasi, batas laju, telemetri \\ \hline
+    Pemicu pada Medikara & API mitra pertama terbit & Misalkan lebih dari 60 layanan, atau audit menuntut enkripsi seragam \\ \hline
+    Biaya kompleksitas & Rp808,8 juta selama 3 tahun pada A & Misalkan Rp57,6 juta per tahun \\ \hline
+  \end{tabularx}
+\end{table}
+
+Dua hal di sini sering tertukar, yaitu \textit{service mesh} dan pola \textit{gateway} terdistribusi. Pembagiannya
+begini. NIST membagi penempatan kebijakan menjadi tiga pola: terpusat, \textit{hybrid}, dan terdistribusi, yaitu
+\textit{gateway} khusus tiap aplikasi yang sering dipasang di samping tiap salinan layanan. Ketiganya dapat mencapai
+seluruh kontrol pada panduan itu \cite{nist-sp800-228}. \textit{Service mesh} adalah salah satu teknologi yang
+membantu menjalankan pola terdistribusi. Medikara memilih pola \textit{hybrid} untuk saat ini, karena tim integrasi
+hanya 4 orang dan layanannya sedikit.
+
+\begin{kasus}[title={Kasus Medikara Health: Menunda Service Mesh dengan Pemicu Tertulis}]
+Misalkan vendor menawarkan \textit{service mesh} sebagai paket lanjutan. Target tiga tahun Medikara adalah 12 layanan.
+Seluruh rincian ini adalah data latihan. Tim membandingkan Rp57,6 juta dengan Rp11,52 juta per tahun, serta 960 jam
+dengan cadangan yang tinggal 120 jam sesudah pilihan A. Tawaran itu ditolak untuk saat ini.
+
+Penolakan ditulis beserta pemicu. Keputusan ditinjau bila jumlah layanan melewati 60, bila audit internal menuntut
+enkripsi antarlayanan yang seragam, atau bila insiden membuktikan bahwa kendali per layanan gagal. Temuan audit tentang
+kontrol akses yang lemah membuat pemicu kedua dapat terjadi lebih cepat daripada pemicu pertama. Rincian teknisnya
+diserahkan kepada IT40713.
+\end{kasus}
 
 \section{Aktivitas: Rancangan Manajemen API}
 
-% TODO
-% Tujuan aktivitas: merancang cara API target dikelola sepanjang hidupnya.
-% Peran dalam tim: anggota berlatar bisnis dan hukum menyusun kebijakan versi dan tata cara
-% pemberitahuan deprecation kepada mitra; anggota berlatar teknis menggambar posisi gateway dan
-% aliran permintaan.
-% Langkah: gambar arsitektur manajemen API target; tentukan kebijakan di gateway; susun kebijakan
-% siklus hidup dan versi; bandingkan tiga alternatif platform manajemen API dalam matriks
-% keputusan; tulis catatan keputusan.
-% Luaran dan tonggak capstone: rancangan manajemen API dan kebijakan siklus hidup, masuk ke C3.
-% Berkas sources yang direncanakan: sources/chapter10/kebijakan-siklus-hidup-api.md,
-% sources/chapter10/matriks-pemilihan-platform-api.csv,
-% sources/chapter10/docker-compose-gateway.yml (opsional)
+\textbf{Tujuan.} Tim merancang arsitektur manajemen API target dan kebijakan siklus hidup API untuk API prioritas dari
+Pertemuan 9. Hasilnya artefak C3 yang dapat ditelusuri dari persoalan layanan sampai keputusan tim. Organisasi nyata
+digunakan dengan izin dan anonimisasi. Medikara menjadi alternatif bila akses tidak tersedia.
+
+\textbf{Pembagian peran.}
+\begin{itemize}
+  \item Anggota berlatar bisnis dan hukum menyusun kebijakan versi dan tata cara pemberitahuan \textit{deprecation}
+        kepada mitra.
+  \item Anggota berlatar kesehatan atau akuntansi menghitung dampak layanan dan biaya tiap pilihan.
+  \item Anggota berlatar teknis menggambar posisi \textit{gateway} dan aliran permintaan.
+  \item Koordinator mencatat keputusan dan memastikan kedua kelompok menyepakati istilah.
+  \item Penelaah menantang asumsi tanpa mengganti bukti dengan pendapat.
+\end{itemize}
+
+\textbf{Langkah kerja.}
+\begin{enumerate}
+  \item Salin ID kontrak, pemilik, dan jumlah konsumen dari luaran Bab 9. Tetapkan tahap API itu pada Tabel
+        \ref{tab:ch10-gerbang}.
+  \item Gambar posisi \textit{gateway}, portal, identitas, serta layanan bisnis, dengan Gambar \ref{fig:ch10-posisi}
+        sebagai contoh. Tandai pemeriksaan yang berada di \textit{gateway} dan yang berada di layanan, lalu telusuri
+        register risiko Bab 6 seperti Tabel \ref{tab:ch10-register}.
+  \item Isi gerbang persetujuan dari desain sampai pensiun pada salinan
+        \berkas{sources/chapter10/kebijakan-siklus-hidup-api.md}.
+  \item Hitung masa transisi dari konsumen paling lambat. Bandingkan minimal tiga pilihan seperti Tabel
+        \ref{tab:ch10-opsi-transisi}.
+  \item Tulis pemberitahuan kepada mitra pada salinan \berkas{sources/chapter10/templat-pemberitahuan-deprecation.md}.
+        Mintakan pendapat satu calon mitra, atau anggota yang berperan sebagai mitra.
+  \item Bandingkan tiga alternatif platform pada salinan \berkas{sources/chapter10/biaya-platform-3-tahun.csv} dan
+        \berkas{sources/chapter10/matriks-pemilihan-platform-api.csv}. Terapkan gerbang pada Gambar \ref{fig:ch10-peta}
+        lebih dulu, lalu matriks.
+  \item Ubah satu asumsi dan satu bobot. Catat apakah urutannya berubah.
+  \item Susun jadwal migrasi versi dan bukti kesiapan sebagai bagian C3. Catat keputusan, alternatif yang ditolak,
+        pemilik, dan pemicu tinjauan.
+\end{enumerate}
+
+\textbf{Luaran.} Tim menyerahkan rancangan manajemen API dan kebijakan siklus hidup: gambar arsitektur, tabel gerbang,
+jadwal transisi, surat pemberitahuan, matriks keputusan, catatan keputusan beserta alternatif yang ditolak, dan tautan
+bukti.
+
+\textbf{Kaitan dengan capstone.} Luaran ini menjadi rancangan manajemen API dan kebijakan siklus hidup pada tonggak C3
+Kondisi Target. Kontrak Bab 9 menjadi masukannya, dan alur \textit{onboarding} mitra di Bab 11 memakai portal serta
+gerbang penerbitan yang ditetapkan di sini. ID dan versi artefak dipertahankan saat dipakai bab berikutnya.
+
+\textbf{Kriteria penilaian.} Penilaian mencakup ketepatan konsep 25 persen, keterlacakan bukti 30 persen, alasan
+keputusan dan pengorbanan 30 persen, serta keterbacaan artefak 15 persen. Keterbacaan dinilai dari kemampuan anggota
+non-teknis menjelaskan kembali mengapa masa transisi dipilih dan apa yang diperiksa \textit{gateway}.
+
+\textbf{Berkas pendukung.} Daftar lengkap tersedia pada \berkas{sources/chapter10/README.md}. Templat tidak menggantikan
+percakapan dengan pemilik proses, dan ketidakpastian dicatat secara terbuka. Harga yang dicantumkan wajib menyebut
+sumber dan tanggal. Data pribadi pasien atau karyawan tidak boleh dipakai. Data organisasi nyata dipakai dengan izin dan
+dianonimkan.
+
+\begin{pendalaman}[title={Pendalaman Teknis (opsional): Menjalankan Gateway Open Source di Docker}]
+Pendalaman ini menjalankan Apache APISIX pada mode \textit{standalone}, yaitu konfigurasi dibaca dari berkas
+\texttt{apisix.yaml} tanpa basis data konfigurasi \cite{c10-apisix-mode}. Listing \ref{lst:ch10-apisix} memperlihatkan
+satu rute API-01 dengan tiga kebijakan. \texttt{jwt-auth} memeriksa \textit{JSON Web Token} (JWT), dan klaim
+\texttt{key} pada token menentukan \textit{consumer} \cite{c10-apisix-jwt}. \texttt{limit-req} membatasi laju
+\cite{c10-apisix-limit-req}. \texttt{limit-count} menjalankan kuota \cite{c10-apisix-limit-count}. Baris \texttt{\#END}
+wajib ada, karena tanpa baris itu aturannya tidak dimuat \cite{c10-apisix-mode}.
+
+\textbf{Peringatan.} Jalankan hanya pada komputer sendiri dengan rahasia latihan. Rahasia pada berkas contoh tidak boleh
+dipakai di produksi. Uji beban dan pemindaian pada sistem milik orang lain memerlukan izin tertulis.
+
+\begin{lstlisting}[style=ch10yaml, caption={Rute API-01 dengan token, batas laju, dan kuota, tersedia di \berkas{sources/chapter10/gateway-lokal/apisix.yaml}}, label={lst:ch10-apisix}]
+routes:
+  - id: api-01-janji-temu
+    uris:
+      - /janji-temu
+      - /janji-temu/*
+      - /jadwal-dokter
+    plugins:
+      jwt-auth: {}
+      limit-req:
+        rate: 1
+        burst: 2
+        nodelay: true
+        rejected_code: 429
+        key_type: var
+        key: consumer_name
+      limit-count:
+        count: 300
+        time_window: 86400
+        rejected_code: 429
+        key_type: var
+        key: consumer_name
+        policy: local
+    upstream:
+      type: roundrobin
+      nodes:
+        "layanan-contoh:8000": 1
+\end{lstlisting}
+
+Listing \ref{lst:ch10-perintah} memuat urutan perintahnya. Baris kedua menghasilkan token latihan. Baris keempat tanpa
+token dijawab 401. Baris kelima memakai token dan dijawab 200. Perulangan pada dua baris terakhir mengirim 10 permintaan
+cepat, sehingga sebagian dijawab 429. Berkas contoh ini sudah ditinjau terhadap dokumentasi, tetapi belum dijalankan
+pada waktu bab ditulis, sehingga hasilnya perlu dibandingkan oleh mahasiswa.
+
+\begin{lstlisting}[language=bash, captionpos=b, xleftmargin=8pt, caption={Menjalankan dan menguji \textit{gateway} lokal, tersedia di \berkas{sources/chapter10/README.md}}, label={lst:ch10-perintah}]
+docker compose up -d
+TOKEN=$(python buat-token-latihan.py)
+URL=http://localhost:9080/jadwal-dokter
+curl -i $URL
+curl -i -H "Authorization: $TOKEN" $URL
+for i in $(seq 10); do curl -s -o /dev/null -w "%{http_code}\n" \
+  -H "Authorization: $TOKEN" $URL; done
+\end{lstlisting}
+\end{pendalaman}
 
 \section{Ringkasan}
 
-% TODO
+Manajemen API dimulai dari pengakuan bahwa satu API punya umur. Lima tahapnya adalah pembuatan, penerbitan, realisasi
+nilai, pemeliharaan, dan pensiun. Setiap perpindahan memerlukan bukti dan pemilik. Biaya gerbang kecil, sekitar
+Rp600.000 per tinjauan pada pemisalan bab ini. Kematangan tidak diukur dari fitur produk, melainkan dari kapabilitas per
+area, seperti pada API-m-FAMM. Medikara yang belum punya API mitra berada pada titik awal di area pengelolaan siklus
+hidup, seberapa pun canggih produk yang dibeli.
+
+\textit{Deprecation} dan \textit{sunset} adalah dua keadaan yang berbeda. API yang di-\textit{deprecate} tetap bekerja
+seperti semula, sedangkan \textit{sunset} menandai waktu API berhenti menjawab. Lama masa transisi tidak punya angka
+baku, sehingga dihitung dari konsumen paling lambat. Pada API-01, vendor Medikara+ yang butuh 4 bulan menghasilkan
+transisi 6 bulan dengan biaya tumpang tindih Rp22,5 juta. Pilihan 3 bulan terlihat lebih murah pada operasi, tetapi
+jumlahnya Rp109,65 juta. Inilah jawaban atas keputusan yang diserahkan Bab 9.
+
+\textit{API gateway} menjalankan kebijakan bersama pada setiap permintaan: \textit{routing}, token, batas laju, kuota,
+transformasi, dan pencatatan. Otorisasi objek dan aturan bisnis tetap berada pada layanan. Dari tujuh baris register
+risiko Bab 6, \textit{gateway} memimpin 2 baris, membantu 1 baris, dan tidak menyelesaikan 4 baris. \textit{Gateway}
+juga menjadi komponen bersama, sehingga dua salinan melindungi dari kerusakan mesin, tetapi penerapan bertahap
+diperlukan untuk kesalahan konfigurasi.
+
+Platform manajemen API mencakup \textit{gateway}, portal, katalog, analitik, dan pengelolaan kebijakan. Pemilihannya
+memisahkan syarat yang menyaring dari kriteria yang boleh ditukar. Lisensi nol tidak berarti murah: dengan 2 staf,
+alternatif \textit{open source} pada contoh bab ini mencapai Rp979,2 juta, melampaui pagu Rp900 juta, tetapi menjadi
+yang termurah bila 1 staf terbukti cukup. Selisih 0,10 pada matriks dapat dibalik oleh satu dokumen bukti.
+\textit{Service mesh} punya ruang pengelolaan sendiri, dan pada Medikara ditunda dengan pemicu tertulis, sambil
+menyerahkan rinciannya kepada IT40713.
+
+Pesan utama bab ini adalah mempertahankan hubungan antara masalah layanan, pilihan yang dipertimbangkan, dan bukti
+keputusan. \textit{Gateway} dapat dibeli, tetapi keputusan tentang siapa boleh memakai apa, sampai kapan, dan siapa
+menanggung akibatnya tidak dapat dibeli. Artefak C3 perlu menyebut pemilik serta pemicu peninjauan. Keputusan yang baik
+menjelaskan manfaat yang diharapkan sekaligus akibat yang harus ditanggung organisasi.
 
 \section{Latihan}
 
+\subsection*{Latihan 1: Menyiapkan Pensiun Versi}
+
+Misalkan seorang mitra masih memakai API versi lama yang akan dipensiunkan. Susun langkah komunikasi dan tenggat yang
+adil bagi kedua pihak. Latihan ini membuktikan kemampuan menghitung tenggat dari kebutuhan konsumen dan menuliskan
+kewajiban kedua pihak, bukan sekadar menetapkan tanggal.
+
 \begin{enumerate}
-  \item Misalkan seorang mitra masih memakai API versi lama yang akan dipensiunkan. Susun langkah komunikasi dan tenggat yang adil bagi kedua pihak.
-  \item Jelaskan fungsi \textit{API gateway} dengan analogi pos pemeriksaan, lalu sebutkan batas analogi tersebut.
-  \item Bandingkan layanan manajemen API dari penyedia \textit{cloud} dengan produk \textit{open source} yang dipasang sendiri, dari sisi biaya, kendali, dan keterampilan tim.
+  \item Daftar semua pemakai versi lama beserta kontak yang sudah dikonfirmasi.
+  \item Hitung waktu yang dibutuhkan konsumen paling lambat, lalu tentukan tanggal \textit{sunset}.
+  \item Susun komunikasi dan dukungan migrasi menurut urutan waktu.
+  \item Tentukan syarat penutupan serta pengecualian, lalu hitung biaya perpanjangan dan biaya penutupan yang keliru.
+\end{enumerate}
+
+Tabel \ref{tab:ch10-lat1-contoh} merupakan contoh alasan untuk satu klinik mitra pada API-01, bukan satu-satunya jawaban
+yang benar. Klinik itu menangani 60 pemesanan per hari, dan misalkan vendornya butuh 2 bulan.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 1: jadwal adil bagi satu klinik mitra pada masa transisi 6 bulan}
+  \label{tab:ch10-lat1-contoh}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{1.4cm}GGG}
+    \hline
+    \textbf{Waktu} & \textbf{Langkah} & \textbf{Kewajiban kedua pihak} & \textbf{Bukti} \\ \hline
+    Bulan 0 & Surat pemberitahuan, \textit{header} aktif & Medikara memberi alasan dan panduan. Klinik mengonfirmasi penerima & Kontak terkonfirmasi \\ \hline
+    Bulan 2 & Klinik mencoba \textit{sandbox} & Medikara menyediakan data sintetis. Klinik menguji 6 skenario & Hasil uji tercatat \\ \hline
+    Bulan 4 & Klinik pindah ke versi 2 & Vendor klinik selesai. Medikara memantau identitas klien & Panggilan versi 1 nol selama 5 hari \\ \hline
+    Bulan 5 & Tinjau kesiapan & Bila belum siap, pendampingan 8 jam, Rp480.000 & Pemakai tersisa jelas \\ \hline
+    Bulan 6 & \textit{Sunset} & Sesudahnya versi 1 menjawab 410. Bila ditutup keliru, 60 pemesanan per hari, atau Rp180.000 per hari, berpindah ke telepon & Keputusan tercatat \\ \hline
+  \end{tabularx}
+\end{table}
+
+Isi hasil tim pada Tabel \ref{tab:ch10-lat1-hasil}, dan tambahkan rujukan bukti dalam catatan kerja.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 1}
+  \label{tab:ch10-lat1-hasil}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{1.4cm}GGG}
+    \hline
+    \textbf{Waktu} & \textbf{Langkah} & \textbf{Kewajiban kedua pihak} & \textbf{Bukti} \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textbf{Pertanyaan analisis.}
+\begin{enumerate}
+  \item Dari angka tim, pada titik berapa satu klinik yang belum siap lebih murah dibantu daripada ditunggu? Tunjukkan
+        hitungannya.
+  \item Apa tindakan bila satu mitra belum siap pada hari \textit{sunset}, dan bukti apa yang membuat perpanjangan dapat
+        diterima?
+  \item Bagaimana biaya penyedia dan risiko pasien pada data tim saling menimbang? Asumsi mana yang paling mengubah
+        hasil?
+\end{enumerate}
+
+\subsection*{Latihan 2: Menguji Analogi Gateway}
+
+Jelaskan fungsi \textit{API gateway} dengan analogi pos pemeriksaan, lalu sebutkan batas analogi tersebut. Latihan ini
+membuktikan kemampuan memisahkan pemeriksaan umum dari pemeriksaan yang membutuhkan konteks bisnis, serta mengenali
+bagian analogi yang menyesatkan.
+
+\begin{enumerate}
+  \item Jelaskan pemeriksaan pada gerbang kepada rekan non-teknis memakai analogi pos.
+  \item Pisahkan pemeriksaan yang membutuhkan konteks bisnis, dengan membaca Gambar \ref{fig:ch10-posisi}.
+  \item Gambar lokasi kedua kontrol pada API prioritas tim.
+  \item Cari minimal dua hal yang tidak dijelaskan analogi itu, lalu hitung akibatnya.
+\end{enumerate}
+
+Tabel \ref{tab:ch10-lat2-contoh} merupakan contoh alasan pada API-01, bukan satu-satunya jawaban yang benar.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 2: pos pemeriksaan dan batas analoginya pada API-01}
+  \label{tab:ch10-lat2-contoh}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{2.0cm}GGG}
+    \hline
+    \textbf{Pemeriksaan} & \textbf{Pada analogi} & \textbf{Pada API-01} & \textbf{Batas analogi} \\ \hline
+    Token & Pos memeriksa kartu tamu & \textit{Gateway} memeriksa token 15 menit & Kartu tamu tidak kedaluwarsa dalam 15 menit \\ \hline
+    Kuota & Pos menghitung tamu per hari & 300 per hari per klinik, kebutuhan 195 & Pos tidak menghitung tepat seperti meteran, dan dua salinan dapat menghitung sekitar 600 \\ \hline
+    Hak atas objek & Petugas arsip menentukan berkas & Layanan memeriksa hubungan klinik dan pasien & 155 panggilan per malam lolos pos, dan pos tidak tahu isinya \\ \hline
+    Kegagalan & Pos ditutup, kompleks lumpuh & 99,40 menjadi 99,30 persen, 28 pemesanan gagal tambahan per bulan & Dua pos dapat salah secara bersamaan karena satu aturan yang keliru \\ \hline
+  \end{tabularx}
+\end{table}
+
+Isi hasil tim pada Tabel \ref{tab:ch10-lat2-hasil}, dan tambahkan rujukan bukti dalam catatan kerja.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 2}
+  \label{tab:ch10-lat2-hasil}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{2.0cm}GGG}
+    \hline
+    \textbf{Pemeriksaan} & \textbf{Pada analogi} & \textbf{Pada API tim} & \textbf{Batas analogi} \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textbf{Pertanyaan analisis.}
+\begin{enumerate}
+  \item Dengan membaca kuota dan kebutuhan pada API tim, pola penyalahgunaan sebesar apa yang lolos dari
+        \textit{gateway}?
+  \item Mengapa \textit{gateway} tidak cukup untuk mencegah kelemahan otorisasi tingkat objek? Rujuk register risiko
+        tim.
+  \item Berapa tambahan kegagalan bila \textit{gateway} menjadi titik gagal tunggal pada API tim, dan berapa yang masih
+        tersisa sesudah dua salinan?
+\end{enumerate}
+
+\subsection*{Latihan 3: Membandingkan Pilihan Platform}
+
+Bandingkan layanan manajemen API dari penyedia \textit{cloud} dengan produk \textit{open source} yang dipasang sendiri,
+dari sisi biaya, kendali, dan keterampilan tim. Latihan ini membuktikan kemampuan membandingkan pada horizon yang sama
+dan menemukan asumsi yang membalik kesimpulan.
+
+\begin{enumerate}
+  \item Tetapkan horizon biaya yang sama.
+  \item Kumpulkan harga dari sumber publik, lalu catat sumber dan tanggalnya.
+  \item Nilai layanan \textit{cloud} dan pengelolaan sendiri pada ketiga sisi.
+  \item Ubah satu asumsi yang paling menentukan, lalu hitung kembali.
+  \item Tuliskan keputusan berikut kondisi peninjauan.
+\end{enumerate}
+
+Tabel \ref{tab:ch10-lat3-contoh} merupakan contoh alasan dengan angka Tabel \ref{tab:ch10-biaya}, bukan satu-satunya
+jawaban yang benar.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 3: \textit{cloud} terkelola dan \textit{open source} dipasang sendiri selama 3 tahun}
+  \label{tab:ch10-lat3-contoh}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{1.8cm}GGG}
+    \hline
+    \textbf{Sisi} & \textbf{\textit{Cloud} terkelola} & \textbf{\textit{Open source} sendiri} & \textbf{Asumsi yang membalik} \\ \hline
+    Biaya & Rp808,8 juta, langganan Rp180 juta per tahun & Rp979,2 juta, lisensi Rp0, 2 staf & 1 staf cukup: B Rp633,6 juta. Trafik dua kali: A Rp988,8 juta \\ \hline
+    Kendali & Operasi sebagian dialihkan, lokasi \textit{log} perlu bukti & Kendali konfigurasi dan lokasi penuh & Bukti lokasi tertulis menaikkan skor A dari 3 ke 4 \\ \hline
+    Keterampilan & 960 jam, cadangan tinggal 120 jam & 3.840 jam, kurang 2.760 jam & Tim sudah punya 2 staf terlatih \\ \hline
+  \end{tabularx}
+\end{table}
+
+Isi hasil tim pada Tabel \ref{tab:ch10-lat3-hasil}, dan tambahkan rujukan bukti dalam catatan kerja.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 3}
+  \label{tab:ch10-lat3-hasil}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{1.8cm}GGG}
+    \hline
+    \textbf{Sisi} & \textbf{\textit{Cloud} terkelola} & \textbf{\textit{Open source} sendiri} & \textbf{Asumsi yang membalik} \\ \hline
+    Biaya & \dots & \dots & \dots \\ \hline
+    Kendali & \dots & \dots & \dots \\ \hline
+    Keterampilan & \dots & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textbf{Pertanyaan analisis.}
+\begin{enumerate}
+  \item Biaya apa yang paling mudah terlupakan pada data tim, dan berapa persen nilainya dari total?
+  \item Keterampilan apa menjadi prasyarat keputusan, dan berapa jam kapasitas tim yang tersedia untuk memenuhinya?
+  \item Pada berapa jumlah staf atau trafik urutan kedua alternatif berbalik? Tunjukkan hitungannya.
 \end{enumerate}

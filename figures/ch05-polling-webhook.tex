@@ -1,0 +1,34 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000},
+  biasa/.style={draw, rounded corners, fill=blue!8, text width=1.8cm, minimum height=0.95cm, align=center},
+  induk/.style={draw, rounded corners, fill=praditagreen!15, text width=1.8cm, minimum height=0.95cm, align=center},
+  tekan/.style={draw, rounded corners, fill=orange!12, text width=1.8cm, minimum height=0.95cm, align=center},
+  akhir/.style={draw, rounded corners, fill=green!10, text width=1.8cm, minimum height=0.95cm, align=center},
+  sia/.style={draw, rounded corners, fill=red!22, text width=3.0cm, minimum height=0.5cm, align=center, font=\tiny},
+  judul/.style={font=\scriptsize\bfseries, anchor=west},
+  ket/.style={font=\tiny, align=center},
+  panah/.style={-{Stealth[length=2mm]}, thick}
+]
+  % Bagian atas: klinik bertanya berulang, hampir semua jawaban kosong.
+  \node[judul] at (0,2.05) {\textit{Polling} tiap menit: penerima bertanya berulang};
+  \node[biasa] (k) at (1.02,0.85) {40 klinik mitra};
+  \node[induk] (a) at (6.7,0.85) {API hasil laboratorium};
+  \draw[panah] ([yshift=0.2cm]k.east) -- node[above, ket] {2.400 permintaan per jam} ([yshift=0.2cm]a.west);
+  \draw[panah] ([yshift=-0.2cm]a.west) -- node[below, ket] {20 berisi hasil baru, 2.380 kosong} ([yshift=-0.2cm]k.east);
+  \node[sia] at (9.85,1.15) {720 per klinik per hari,\\melampaui kuota 300};
+  \node[ket] at (9.85,0.5) {Tunda rata-rata 30 detik};
+
+  % Bagian bawah: urutan sama dengan diagram konsep bab.
+  \node[judul] at (0,-0.35) {\textit{Webhook}: pengirim memberi tahu ketika fakta terjadi};
+  \node[induk] (l) at (1.02,-1.5) {Layanan bisnis\\{\tiny\mdseries hasil laboratorium}};
+  \node[tekan] (e) at (4.12,-1.5) {\textit{Event} bisnis\\{\tiny\mdseries fakta: hasil tersedia}};
+  \node[tekan] (p) at (7.22,-1.5) {Pengirim notifikasi\\{\tiny\mdseries \textit{retry}, rekonsiliasi}};
+  \node[akhir] (w) at (10.32,-1.5) {\textit{Endpoint webhook}\\{\tiny\mdseries sistem klinik}};
+  \draw[panah] (l.east) -- node[above, ket] {mencatat\\kejadian} (e.west);
+  \draw[panah] (e.east) -- node[above, ket] {memicu\\pengiriman} (p.west);
+  \draw[panah] (p.east) -- node[above, ket] {\textit{payload}\\notifikasi} (w.west);
+  \draw[panah, dashed] (w.south) -- ++(0,-0.4) -| node[pos=0.25, below, ket]
+    {rekonsiliasi berkala lewat REST: 40 permintaan per jam} (l.south);
+  \node[ket] at (5.67,-3.15) {20 kiriman per jam, ditambah kiriman ulang bila gagal. Sistem klinik lalu memperbarui status.};
+\end{tikzpicture}

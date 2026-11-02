@@ -1,0 +1,41 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  kotak/.style={draw, rounded corners, minimum height=0.95cm, minimum width=2.7cm,
+                align=center, font=\scriptsize\bfseries},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  duaarah/.style={{Stealth[length=2mm]}-{Stealth[length=2mm]}, thick},
+  ket/.style={font=\tiny, align=center, fill=white, inner sep=1.5pt}
+]
+  \node[kotak, fill=praditagreen!15, minimum width=2.6cm, minimum height=1.15cm] (inti)
+    at (0,0) {Medikara+\\{\tiny\mdseries orkestrator: aturan, API mitra}};
+
+  \node[kotak, fill=orange!12] (pasien) at (-4.55,0)
+    {Pasien dan karyawan\\{\tiny\mdseries pengguna}};
+
+  \node[kotak, fill=blue!8] (klinik) at (-3.5,2.1)
+    {40 klinik mitra\\{\tiny\mdseries pelengkap: layanan}};
+  \node[kotak, fill=blue!8] (lab) at (3.5,2.1)
+    {3 laboratorium mitra\\{\tiny\mdseries pelengkap: hasil pemeriksaan}};
+  \node[kotak, fill=blue!8] (apotek) at (4.55,0)
+    {Apotek daring\\{\tiny\mdseries pelengkap: obat}};
+  \node[kotak, fill=blue!8] (asuransi) at (3.5,-2.1)
+    {9 asuransi swasta\\{\tiny\mdseries pelengkap dan pembayar}};
+  \node[kotak, fill=blue!8] (perusahaan) at (-3.5,-2.1)
+    {36 perusahaan klien\\{\tiny\mdseries pembayar dan saluran}};
+
+  \node[kotak, fill=gray!35, minimum width=3.6cm] (wajib) at (0,2.95)
+    {BPJS Kesehatan, SATUSEHAT\\{\tiny\mdseries pihak wajib, bukan sisi pasar}};
+  \node[kotak, fill=gray!35, minimum width=3.6cm] (vendor) at (0,-2.95)
+    {Vendor Medikara+\\{\tiny\mdseries pemasok aplikasi}};
+
+  \draw[duaarah] (klinik) -- node[ket] {uang, data, layanan} (inti);
+  \draw[duaarah] (lab) -- node[ket] {uang, data} (inti);
+  \draw[duaarah] (apotek) -- node[ket] {uang, data} (inti);
+  \draw[duaarah] (asuransi) -- node[ket] {uang, data} (inti);
+  \draw[duaarah] (perusahaan) -- node[ket] {uang, data agregat} (inti);
+  \draw[duaarah] (pasien) -- node[ket] {data, reputasi} (inti);
+  \draw[panah] (klinik.south west) ++(0.35,0) -- node[ket] {layanan}
+    ([xshift=0.2cm]pasien.north);
+  \draw[panah, dashed] (inti) -- node[ket] {data wajib} (wajib);
+  \draw[panah, dashed] (vendor) -- node[ket] {jasa aplikasi} (inti);
+\end{tikzpicture}

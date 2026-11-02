@@ -1,0 +1,36 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  kotak/.style={draw, rounded corners, minimum height=0.95cm, minimum width=2.5cm,
+                align=center, font=\scriptsize\bfseries},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  duaarah/.style={{Stealth[length=2mm]}-{Stealth[length=2mm]}, thick},
+  ket/.style={font=\tiny, align=center, fill=white, inner sep=1.5pt}
+]
+  \node[kotak, fill=praditagreen!15, minimum width=2.7cm, minimum height=1.1cm] (inti)
+    at (0,0) {Medikara+\\{\tiny\mdseries platform}};
+
+  \node[kotak, fill=orange!12] (pasien) at (-4.6,0)
+    {Pasien\\{\tiny\mdseries mencari dan memesan}};
+  \node[kotak, fill=orange!12] (dokter) at (4.6,0)
+    {Dokter klinik mitra\\{\tiny\mdseries membuka jadwal}};
+  \node[kotak, fill=blue!8] (perusahaan) at (-2.4,2.0)
+    {Perusahaan klien\\{\tiny\mdseries layanan karyawan}};
+  \node[kotak, fill=blue!8] (asuransi) at (2.4,2.0)
+    {Asuransi swasta\\{\tiny\mdseries penjaminan biaya}};
+  \node[kotak, fill=blue!8, minimum width=3.4cm] (apotek) at (0,-2.75)
+    {Apotek dan laboratorium mitra\\{\tiny\mdseries resep dan hasil pemeriksaan}};
+
+  \draw[duaarah] (pasien) -- node[ket, above] {cari, pesan, bayar} (inti);
+  \draw[duaarah] (dokter) -- node[ket, above] {jadwal, layanan} (inti);
+  \draw[duaarah] (perusahaan) -- (inti);
+  \draw[duaarah] (asuransi) -- (inti);
+  \draw[duaarah] (apotek) -- (inti);
+
+  % Busur dilandaikan agar tidak menyentuh kotak apotek, dan labelnya di luar panah tengah.
+  \draw[panah, dashed, gray!70!black] (pasien.south) to[out=-40, in=-140, looseness=0.6]
+    node[ket, below, pos=0.2, xshift=-4pt] {interaksi langsung:\\janji temu dan konsultasi}
+    (dokter.south);
+
+  \node[font=\tiny, anchor=north, align=center, text=gray!60!black] at (0,-3.4)
+    {oranye: sisi interaksi inti \quad biru: calon sisi tambahan};
+\end{tikzpicture}

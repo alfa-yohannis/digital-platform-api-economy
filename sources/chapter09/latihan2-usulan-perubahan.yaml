@@ -1,0 +1,79 @@
+# Potongan usulan versi berikutnya API-01 untuk Latihan 2 Bab 09, data sintetis.
+# Cara pakai: bandingkan dengan kontrak-api-01-janji-temu.yaml, lalu nilai tiap butir.
+openapi: 3.2.0
+info:
+  title: API-01 Jadwal dan Janji Temu, usulan perubahan
+  summary: Potongan usulan vendor. Belum disetujui pemilik produk.
+  description: >-
+    Dalam usulan ini, 201 berarti permintaan tercatat di antrean vendor. Slot
+    baru dikunci sesudah itu. Bentuk jawaban 201 tidak berubah. Bagian yang
+    tidak berubah, seperti security dan jawaban galat, tidak ditulis ulang.
+  version: 1.1.0
+servers:
+  - url: https://api.medikara.example
+    description: Alamat fiktif untuk latihan.
+paths:
+  /janji-temu:
+    get:
+      operationId: daftarJanjiTemu
+      summary: Operasi baru. Daftar janji temu milik konsumen pemanggil.
+      responses:
+        '200':
+          description: Daftar janji temu.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JanjiTemu'
+    post:
+      operationId: buatJanjiTemu
+      summary: Mengunci slot dan membuat janji temu.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JanjiTemuBaru'
+      responses:
+        '201':
+          description: Permintaan tercatat di antrean vendor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JanjiTemu'
+components:
+  schemas:
+    JanjiTemuBaru:
+      type: object
+      required: [slot, pasien, alasanKunjungan]
+      properties:
+        slot:
+          type: string
+        pasien:
+          type: integer
+          description: Berubah dari teks PSN-58213 menjadi angka 58213.
+        alasanKunjungan:
+          type: string
+          description: Bidang wajib baru, ditulis bebas oleh petugas.
+    JanjiTemu:
+      type: object
+      required: [id, slot, pasien, status]
+      properties:
+        id:
+          type: string
+        slot:
+          type: string
+        pasien:
+          type: integer
+        status:
+          type: string
+          enum:
+            - menunggu
+            - terkonfirmasi
+            - ditolak
+            - dibatalkan
+            - dijadwalkanUlang
+        lokasi:
+          type: string
+          description: Bidang opsional baru, ruang praktik.

@@ -1,0 +1,53 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  ket/.style={font=\tiny, align=left, inner sep=1pt}
+]
+  % Skala: 1 jam sama dengan 0,085 cm. Setiap baris memuat keadaan saat ini dan sasaran.
+  \def\skala{0.085}
+  \foreach \nama/\baris/\kerjakini/\tunggukini/\kerjasasaran/\tunggusasaran/\labelkini/\labelsasaran in {
+    {Pendaftaran mitra}/0/1/0/1/0/{1 jam}/{1 jam},
+    {Verifikasi}/1/1/24/1/4/{25 jam}/{5 jam},
+    {\textit{Sandbox}}/2/0.5/16/0.5/0/{16,5 jam}/{0,5 jam},
+    {Uji integrasi}/3/24/40/16/16/{64 jam}/{32 jam},
+    {Persetujuan pemilik}/4/1/40/1/16/{41 jam}/{17 jam},
+    {Akses produksi}/5/1/8/1/4/{9 jam}/{5 jam}%
+  } {
+    \pgfmathsetmacro{\ybawah}{-\baris*0.85}
+    \pgfmathsetmacro{\yatas}{\ybawah+0.3}
+    \pgfmathsetmacro{\ysasaran}{\ybawah-0.26}
+    \pgfmathsetmacro{\xkerjakini}{\kerjakini*\skala}
+    \pgfmathsetmacro{\xtotalkini}{(\kerjakini+\tunggukini)*\skala}
+    \pgfmathsetmacro{\xkerjasasaran}{\kerjasasaran*\skala}
+    \pgfmathsetmacro{\xtotalsasaran}{(\kerjasasaran+\tunggusasaran)*\skala}
+    \node[anchor=east, text width=2.5cm, align=right] at (-0.1,\ybawah+0.02) {\nama};
+    \fill[red!22] (0,\ybawah) rectangle (\xtotalkini,\yatas);
+    \fill[blue!30] (0,\ybawah) rectangle (\xkerjakini,\yatas);
+    \draw[gray] (0,\ybawah) rectangle (\xtotalkini,\yatas);
+    \node[anchor=west, font=\tiny] at (\xtotalkini+0.05,\ybawah+0.15) {\labelkini};
+    \fill[orange!12] (0,\ysasaran) rectangle (\xtotalsasaran,\ybawah-0.04);
+    \fill[blue!30] (0,\ysasaran) rectangle (\xkerjasasaran,\ybawah-0.04);
+    \draw[gray] (0,\ysasaran) rectangle (\xtotalsasaran,\ybawah-0.04);
+    \node[anchor=west, font=\tiny] at (\xtotalsasaran+0.05,\ybawah-0.15) {\labelsasaran};
+  }
+  \draw[thick] (0,0.4) -- (0,-4.75);
+
+  % Panggilan pertama terjadi pada tahap sandbox, sesudah dua tahap menunggu.
+  \node[draw, rounded corners, fill=green!10, text width=2.3cm, align=center, font=\tiny] (pp) at (6.7,-1.1)
+    {\textbf{Panggilan pertama}\\ saat ini 42,5 jam\\ sasaran 6,5 jam};
+  \draw[panah] (pp.west) -- (2.15,-1.55);
+
+  % Keterangan warna dan jumlah seluruh tahap.
+  \fill[blue!30] (3.3,0.33) rectangle (3.55,0.5);
+  \draw[gray] (3.3,0.33) rectangle (3.55,0.5);
+  \node[ket, anchor=west] at (3.6,0.41) {waktu kerja};
+  \fill[red!22] (4.75,0.33) rectangle (5,0.5);
+  \draw[gray] (4.75,0.33) rectangle (5,0.5);
+  \node[ket, anchor=west] at (5.05,0.41) {tunggu saat ini};
+  \fill[orange!12] (6.45,0.33) rectangle (6.7,0.5);
+  \draw[gray] (6.45,0.33) rectangle (6.7,0.5);
+  \node[ket, anchor=west] at (6.75,0.41) {tunggu sasaran};
+
+  \node[draw, rounded corners, fill=blue!8, text width=2.3cm, align=center, font=\tiny] at (6.7,-3.55)
+    {\textbf{Seluruh tahap}\\ saat ini 156,5 jam, 19,6 hari kerja, 82 persen tunggu\\ sasaran 60,5 jam, 7,6 hari kerja};
+\end{tikzpicture}

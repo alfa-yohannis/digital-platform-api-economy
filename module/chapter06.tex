@@ -1,4 +1,15 @@
+% !TeX root = digital-platform-api-economy.tex
+% !TeX encoding = UTF-8
 \chapter{Keamanan API: OAuth 2.0 dan OWASP API Security Top 10}
+\label{ch:ch06}
+
+% Kolom rata kiri untuk tabel bab ini: Q selebar sisa tabel, T selebar yang ditentukan.
+\newcolumntype{Q}{>{\raggedright\arraybackslash}X}
+\newcolumntype{T}[1]{>{\raggedright\arraybackslash}p{#1}}
+\lstdefinestyle{ch06python}{language=Python, basicstyle=\ttfamily\scriptsize, keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape, stringstyle=\color{red}, showstringspaces=false, breaklines=true,
+  frame=lines, numbers=left, numberstyle=\tiny\color{gray}, backgroundcolor=\color{lightgray!10}, tabsize=2,
+  captionpos=b, xleftmargin=8pt}
 
 \section*{Tujuan Pembelajaran}
 \begin{itemize}
@@ -9,79 +20,955 @@
 
 \section{Pendahuluan}
 
-% TODO
-% Cakupan: kebocoran data pasien skala kecil lewat vendor pada 2025 dan temuan audit tentang kontrol
-% akses yang lemah; membuka API ke mitra memperluas permukaan serangan.
+Bab 5 ditutup dengan peta integrasi dan tiga titik masalah. Peta itu menjawab siapa menunggu siapa, tetapi belum
+menjawab siapa boleh melihat apa. Insiden vendor Medikara pada 2025 memperlihatkan bahwa hubungan yang sah tetap
+dapat menjadi jalur kebocoran. Organisasi perlu memeriksa bukan hanya siapa yang memanggil \textit{Application
+Programming Interface} (API), tetapi juga rekam medis milik siapa yang dibaca, untuk tujuan apa, serta apakah akses
+tersebut masih diperlukan. Pertanyaan kemudian muncul: bila vendor punya kontrak dan kredensial yang sah, di mana
+kendali itu hilang?
 
-\section{Pola Insiden Keamanan API}
+Bab ini menjawabnya lewat pembedaan yang sering kabur: identitas, izin, dan hak atas objek. Bahasannya meliputi pola
+insiden kebocoran, autentikasi dan otorisasi, \textit{API key}, token, dan \textit{scope}, dua alur OAuth 2.0,
+OpenID Connect, persetujuan pemilik data, profil untuk data berisiko tinggi, OWASP API Security Top 10, serta
+pembatasan konsumsi dan pencatatan akses. Kerangka keamanan informasi organisasi dibahas rinci di IT40813 IT
+Governance, Risk \& Compliance, sedangkan penerapan kebijakannya pada \textit{API gateway} dibahas di Bab 10. Angka
+tambahan yang diawali kata ``Misalkan'' adalah asumsi latihan. Kesimpulan untuk organisasi nyata harus diuji dengan
+wawancara, dokumen, dan pengukuran yang berizin. Hasil bab ini menjadi bagian tonggak C2 dalam cetak biru
+transformasi digital.
 
-% TODO
-% Cakupan: pola umum insiden API (akses ke data milik orang lain, kredensial bocor, API lama yang
-% terlupakan); kekhawatiran baru tentang panggilan berlebihan dari agen AI menurut Postman 2025;
-% biaya insiden bagi organisasi kesehatan.
-% Kasus Medikara: kronologi fiktif kebocoran lewat vendor sebagai bahan analisis.
+Rujukan utama bab ini dipakai untuk membedakan konsep dan membangun alasan keputusan, bukan untuk menggantikan
+penilaian konteks organisasi. Daftar risiko diambil dari OWASP API Security Top 10 edisi 2023 \cite{owasp-api2023}.
+Peran dan alur OAuth 2.0 diambil dari \textit{Request for Comments} (RFC) 6749 \cite{rfc6749}, sedangkan praktik
+keamanannya yang terbaru diambil dari RFC 9700 \cite{rfc9700}. Profil untuk data berisiko tinggi diambil dari
+\textit{Financial-grade API} (FAPI) 2.0 \cite{fapi2}. Batas hukum atas data pasien diambil dari Undang-Undang (UU)
+27/2022 tentang Pelindungan Data Pribadi (PDP) \cite{uu27-2022-pdp} dan Peraturan Menteri Kesehatan (Permenkes)
+24/2022 tentang Rekam Medis \cite{permenkes24-2022}.
+
+\IfFileExists{../figures/ch06-diagram-konsep.png}{%
+
+Gambar \ref{fig:ch06-ilustrasi-bab} merangkum hubungan komponen dan konsep utama bab ini.
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=\textwidth]{../figures/ch06-diagram-konsep.png}
+  \caption{Token valid tetap memerlukan izin atas objek}
+  \label{fig:ch06-ilustrasi-bab}
+\end{figure}
+}{}
+
+\section{Pola Insiden Kebocoran Data Lewat API}
+
+Laporan kebocoran data sering berjudul ``peretasan''. Bila dibaca lebih teliti, sejumlah insiden lewat API memakai
+jalur yang memang tersedia, tanpa cara masuk yang rumit. Pertanyaannya, pola apa yang berulang?
+
+Risiko API muncul ketika kemampuan dan data diekspos melebihi kewenangan pemanggil. Insiden dapat berasal dari
+otorisasi objek yang lemah, autentikasi yang salah, konsumsi berlebihan, dan kepercayaan berlebih pada pihak ketiga.
+API memperbesar akibatnya, karena jalurnya dirancang untuk dipanggil mesin dalam jumlah besar. Daftar OWASP membantu
+mengajukan pertanyaan pemeriksaan, tetapi bukan bukti bahwa semua penyebab insiden telah ditemukan.
+
+Analoginya kartu gedung. Pegawai yang mempunyai kartu gedung belum tentu berhak membuka setiap lemari arsip. Kartu
+menjawab siapa yang masuk, sedangkan kunci lemari menjawab arsip mana yang boleh dibuka. Gedung dengan kartu yang
+ketat tetap bocor bila lemarinya tidak terkunci.
+
+Dua contoh nyata dari laporan publik:
+\begin{enumerate}
+  \item T-Mobile, perusahaan telekomunikasi Amerika Serikat, melaporkan kepada otoritas pasar modal bahwa seorang
+        pelaku memperoleh data lewat satu API tanpa otorisasi. Pengambilan pertama terjadi sekitar 25 November 2022,
+        dan perusahaan mengenalinya pada 5 Januari 2023, atau 41 hari kemudian. Temuan awal menyebut sekitar 37 juta
+        akun pelanggan, walaupun banyak akun tidak memuat seluruh bidang data \cite{c06-tmobile8k}. Bila
+        dirata-ratakan, angkanya sekitar 900.000 akun per hari. Yang mahal pada kasus ini adalah lamanya jalur itu
+        berjalan tanpa terlihat.
+  \item Google Threat Intelligence Group melaporkan pencurian data dari sistem Salesforce milik banyak perusahaan.
+        Aktivitasnya mulai paling awal 8 Agustus 2025 dan berlangsung paling tidak sampai 18 Agustus 2025. Pelaku
+        memakai token OAuth curian milik Salesloft Drift, sebuah aplikasi pihak ketiga. Pada 20 Agustus 2025, atau 12
+        hari sesudah aktivitas paling awal, token aktif aplikasi itu dicabut. Laporan yang sama menegaskan bahwa
+        masalahnya bukan celah pada platform inti Salesforce \cite{c06-gtig-drift}. Platform yang kuat tetap dapat
+        kehilangan data lewat token milik mitranya.
+\end{enumerate}
+
+Dua insiden itu berbeda jalur, tetapi pertanyaan pemeriksaannya sama. Tabel \ref{tab:ch06-unsur} merangkum lima unsur
+yang perlu diperiksa pada setiap integrasi, beserta butir OWASP yang paling dekat. Butir OWASP dibahas lebih rinci
+pada seksi tersendiri.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lima unsur yang diperiksa pada setiap integrasi}
+  \label{tab:ch06-unsur}
+  \small
+  \begin{tabularx}{\textwidth}{T{1.9cm}QQT{1.5cm}}
+    \hline
+    \textbf{Unsur} & \textbf{Pertanyaan} & \textbf{Kegagalan yang umum} & \textbf{Butir OWASP} \\ \hline
+    Identitas & Siapa pemanggil, dan apakah buktinya masih sah? & Kredensial dipakai bersama, masa berlaku tidak diperiksa & API2 \\ \hline
+    Kewenangan & Objek, bidang, dan aksi mana yang boleh? & Token sah membaca pasien lain & API1, API3, API5 \\ \hline
+    Konsumsi & Berapa banyak yang boleh diambil? & Data ditarik terus tanpa batas & API4, API6 \\ \hline
+    Inventaris & Jalur apa saja yang hidup, dan siapa pemiliknya? & Versi lama aktif, aliran data ke pihak ketiga tidak tercatat & API9 \\ \hline
+    Kepercayaan & Apakah masukan dari pihak ketiga diperiksa? & Respons vendor diterima tanpa validasi & API10 \\ \hline
+  \end{tabularx}
+\end{table}
+
+Enkripsi koneksi tidak menjawab kelima pertanyaan itu. Misalkan respons vendor diterima tanpa validasi, dan 1 persen
+dari 1.100 hasil per bulan pada INT-06 memuat ID pasien yang salah. Sebanyak 11 hasil per bulan tetap diteruskan ke
+Sistem Informasi Manajemen Rumah Sakit (SIMRS) walaupun koneksinya terenkripsi. Enkripsi melindungi perjalanan data,
+bukan kebenaran isinya atau hak penerimanya.
+
+\begin{kasus}[title={Kasus Medikara Health: Insiden Vendor 2025}]
+Fakta dasar kasus hanya menyebut kebocoran data pasien skala kecil lewat vendor pada 2025. Misalkan catatan
+pemeriksaan internal memuat rincian berikut. Seluruh rincian ini adalah data latihan, tersedia di
+\berkas{sources/chapter06/kronologi-insiden-medikara.md}.
+\begin{enumerate}
+  \item Akun dukungan milik vendor masih aktif setelah kontrak pekerjaan selesai.
+  \item Akun itu memanggil \textit{endpoint} kunjungan pada API bawaan SIMRS di dua rumah sakit, 155 kali per malam
+        selama 8 malam, atau 1.240 rekam kunjungan. Pekerjaan vendor tidak punya hubungan layanan dengan rekam itu.
+        Jumlahnya sekitar 0,1 persen dari 1,2 juta kunjungan per tahun, sehingga skalanya kecil.
+  \item Semua panggilan membawa kredensial yang sah, sehingga autentikasi berhasil.
+  \item Medikara baru mengetahui kejadian pada hari ke-11, lewat keluhan pasien.
+  \item Catatan rinci hanya disimpan 7 hari. Rekam malam ke-5 sampai ke-8 (620 rekam) masih dapat ditelusuri, sedangkan
+        malam ke-1 sampai ke-4 (620 rekam) tinggal terlihat sebagai jumlah pada rekap harian.
+\end{enumerate}
+
+Apakah penyebabnya sudah diketahui? Belum. Fakta tersebut baru mendukung beberapa hipotesis, dan catatan yang ada hanya
+memuat ID aplikasi, bukan ID orang. Seksi OWASP dan Latihan 3 menguji hipotesis itu. Judul insiden tidak boleh
+menggantikan pemeriksaan bukti.
+\end{kasus}
 
 \section{Autentikasi, Otorisasi, dan Token}
 
-% TODO
-% Cakupan: perbedaan siapa yang mengakses dan apa yang boleh diakses; API key dan kelemahannya;
-% token akses dan masa berlakunya; scope dan prinsip hak akses minimum.
-% Kasus Medikara: hak akses vendor Medikara+ terhadap data SIMRS.
+Kasus tadi memperlihatkan autentikasi yang berhasil, tetapi kebocoran tetap terjadi. Pertanyaannya, apa beda memeriksa
+identitas dan memeriksa hak?
 
-\section{OAuth 2.0 dan OpenID Connect pada Tingkat Konsep}
+Autentikasi memeriksa identitas, sedangkan otorisasi memutuskan tindakan yang diizinkan. Pemeriksaan pertama menjawab
+``siapa pemanggil ini''. Pemeriksaan kedua menjawab ``apakah pemanggil ini boleh melakukan aksi ini pada objek ini''.
+Bab 1 sudah memperkenalkan akibatnya pada kode status: 401 untuk identitas yang belum terbukti, dan 403 untuk identitas
+yang terbukti tetapi tidak berhak. RFC 6750 memakai pembagian yang sama pada token. Token yang kedaluwarsa, dicabut,
+atau rusak dianjurkan dijawab 401, sedangkan hak yang kurang dianjurkan dijawab 403 \cite{c06-rfc6750}.
 
-% TODO
-% Cakupan: empat peran dalam OAuth 2.0 (RFC 6749); alur client credentials untuk sistem mitra; alur
-% authorization code dengan PKCE (Proof Key for Code Exchange) untuk aplikasi pengguna; OpenID
-% Connect untuk identitas; praktik terbaru dalam RFC 9700; OAuth 2.1 masih berupa draft IETF.
-% Pendalaman teknis: menelusuri alur authorization code dengan PKCE pada OAuth playground publik.
+Tiga alat dipakai untuk pemeriksaan itu. \textit{API key} umumnya mengidentifikasi aplikasi atau proyek dan bukan
+otomatis identitas pengguna. Token akses membawa atau merujuk hak tertentu dengan masa berlaku \cite{rfc6749}.
+Token jenis \textit{bearer} dapat dipakai pihak yang memegangnya, tanpa harus membuktikan kepemilikan kunci
+\cite{c06-rfc6750}. Karena itu token dijaga seperti kunci. \textit{Scope} membatasi jenis kemampuan,
+misalnya membaca hasil. Hak atas pasien, fasilitas, dan tujuan pemrosesan tetap harus diperiksa oleh layanan.
+
+Token juga sebaiknya dibatasi untuk server tujuan tertentu. RFC 9700 menyebutnya pembatasan \textit{audience}: server
+yang menerima token wajib menolak token yang bukan ditujukan kepadanya \cite{rfc9700}. Istilah ini berbeda dari
+audiens API pada Bab 4. Audiens API berarti kelompok pengguna: privat, mitra, atau publik. \textit{Audience} pada token
+berarti layanan tujuan token itu.
+
+Analoginya perpustakaan. Kartu anggota menunjukkan keanggotaan, sedangkan izin petugas menentukan arsip yang boleh
+dipinjam. Kartu kunjungan satu hari lebih aman daripada kartu seumur hidup bila hilang. Stempel ``boleh meminjam buku''
+pada kartu tidak berarti semua ruang arsip terbuka.
+
+Gambar \ref{fig:ch06-lapis-pemeriksaan} memecah jalur pada Gambar \ref{fig:ch06-ilustrasi-bab} menjadi empat
+pemeriksaan. \textit{API gateway} memeriksa akses umum. Layanan bisnis memeriksa aksi dan objek, karena hanya layanan
+yang mengetahui hubungan antara pemanggil dan pasien.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch06-lapis-pemeriksaan.tex}
+  \caption{Empat pemeriksaan pada satu permintaan: dua pemeriksaan umum di \textit{API gateway}, dua pemeriksaan hak di layanan bisnis}
+  \label{fig:ch06-lapis-pemeriksaan}
+\end{figure}
+
+Tabel \ref{tab:ch06-bukti} merangkum apa yang dijawab tiap bukti, dan apa yang tidak dijawabnya.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Tiap bukti menjawab satu pertanyaan, dan tidak menjawab pertanyaan berikutnya}
+  \label{tab:ch06-bukti}
+  \small
+  \begin{tabularx}{\textwidth}{T{1.7cm}QQT{2.3cm}}
+    \hline
+    \textbf{Bukti} & \textbf{Yang dijawab} & \textbf{Yang tidak dijawab} & \textbf{Yang dilakukan} \\ \hline
+    \textit{API key} & Aplikasi atau proyek mana yang memanggil & Pengguna mana, pasien mana & Lindungi dan rotasi \\ \hline
+    Token akses & Hak apa yang diberikan, sampai kapan, untuk layanan mana & Apakah objek ini termasuk hubungan layanan pemanggil & Periksa masa berlaku dan \textit{audience} \\ \hline
+    \textit{Scope} & Jenis aksi, misalnya membaca hasil & Pasien dan fasilitas mana & Beri sekecil mungkin \\ \hline
+    Objek pasien & Hubungan layanan antara pemanggil dan pasien & Apakah tujuannya sah menurut kontrak dan aturan & Periksa pada server \\ \hline
+  \end{tabularx}
+\end{table}
+
+Dua hal pada bahasan ini sering tertukar, yaitu \textit{scope} dan hak atas objek. Pembagiannya begini. \textit{Scope}
+menjawab aksi jenis apa, misalnya \texttt{hasil.baca}. Hak atas objek menjawab hasil milik pasien yang mana.
+\textit{Scope} ditetapkan saat token diterbitkan, sedangkan hak atas objek diperiksa pada setiap permintaan.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Token mitra dengan \textit{scope} membaca hasil hanya berlaku pada pasien yang dirujuk secara sah. Bab 5
+        memisalkan 240 hasil laboratorium per hari untuk 40 klinik mitra, atau rata-rata 6 hasil per klinik. Token
+        klinik A sah untuk keenam hasil itu. Bila layanan hanya memeriksa \textit{scope}, token yang sama terbuka untuk
+        seluruh 240 hasil, atau 40 kali kebutuhan. Sisanya, 234 hasil per hari, adalah risiko yang tidak memberi
+        manfaat.
+  \item Kredensial yang dipakai bersama mengaburkan jejak akses. Misalkan satu kredensial dipakai oleh 40 klinik mitra,
+        lalu bocor, dan penggantiannya butuh 2 jam kerja per klinik. Biayanya 40 $\times$ 2 jam $\times$ Rp60.000, atau
+        Rp4,8 juta, dan 20 hasil per jam tertahan selama pergantian. Dengan identitas per mitra, hanya satu klinik yang
+        dicabut, dengan biaya Rp120.000. Catatan akses juga dapat menunjuk klinik yang memanggil.
+\end{enumerate}
+
+Masa berlaku token memberi hitungan lain. Misalkan satu kredensial klinik bocor dan tidak terdeteksi selama 30 hari.
+Dengan kuota 300 panggilan per hari per klinik dari Bab 4, pencurinya memperoleh paling banyak 9.000 panggilan. Bila yang
+dicuri hanya token 15 menit, pencurinya memperoleh paling banyak 300 panggilan, yaitu kuota satu hari. Keputusan ini
+punya dua konsekuensi. Pertama, masa berlaku pendek mengecilkan akibat, tetapi menambah permintaan token. Kedua, masa
+berlaku pendek tidak menolong bila rahasia klien yang dicuri, karena pencuri dapat meminta token baru. Rotasi rahasia
+klien tetap dibutuhkan.
+
+\section{OAuth 2.0: Peran dan Dua Alur Utama}
+
+Token tadi datang dari mana, dan siapa yang berhak menerbitkannya? OAuth 2.0 menjawab pertanyaan ini.
+
+OAuth 2.0 mengatur pemberian akses terbatas kepada aplikasi pihak ketiga, baik atas nama pemilik sumber daya maupun
+atas nama aplikasi itu sendiri \cite{rfc6749}. Aplikasi tidak memegang sandi pemilik. Aplikasi menerima token dari server
+otorisasi, lalu memakai token itu untuk memanggil API. OAuth 2.0 mendefinisikan empat peran, yang dirangkum pada Tabel
+\ref{tab:ch06-peran}. Pada Gambar \ref{fig:ch06-ilustrasi-bab}, server sumber daya dipecah menjadi \textit{API gateway}
+dan layanan bisnis.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Empat peran OAuth 2.0 dan contohnya di Medikara}
+  \label{tab:ch06-peran}
+  \small
+  \begin{tabularx}{\textwidth}{T{3.1cm}QT{2.5cm}T{2.2cm}}
+    \hline
+    \textbf{Peran} & \textbf{Arti} & \textbf{Contoh Medikara} & \textbf{Dasar penilaian} \\ \hline
+    Pemilik sumber daya (\textit{resource owner}) & Pihak yang dapat memberi akses & Pasien atau organisasi & Kewenangan sesuai konteks \\ \hline
+    Klien (\textit{client}) & Aplikasi yang meminta akses & Medikara+, sistem laboratorium mitra & Identitas klien \\ \hline
+    Server otorisasi (\textit{authorization server}) & Menerbitkan token sesudah memeriksa pihak yang meminta & Layanan identitas Medikara & Kebijakan dan identitas \\ \hline
+    Server sumber daya (\textit{resource server}) & Melayani data bila permintaan sah & API hasil laboratorium & Memeriksa token dan hak \\ \hline
+  \end{tabularx}
+\end{table}
+
+Analoginya surat kuasa. Pemberi kuasa menandatangani surat yang membatasi tindakan penerima kuasa: apa yang boleh
+diurus, di mana, dan sampai kapan. Surat itu berbeda dari kartu identitas pemberi kuasa. Loket tetap memeriksa apakah
+urusannya sesuai isi surat.
+
+\subsection{Alur Client Credentials}
+
+Pada \textit{client credentials}, aplikasi bertindak untuk kepentingannya sendiri berdasarkan izin yang diberikan. Tidak
+ada pasien yang masuk dan tidak ada layar persetujuan. RFC 6749 membatasi alur ini untuk klien rahasia
+(\textit{confidential client}), yaitu klien yang mampu menjaga rahasianya, misalnya server laboratorium \cite{rfc6749}.
+Gambar \ref{fig:ch06-alur-client-credentials} memperlihatkan langkahnya.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch06-alur-client-credentials.tex}
+  \caption{Alur \textit{client credentials}: rahasia klien hanya dikirim ke server otorisasi, sedangkan API menerima token}
+  \label{fig:ch06-alur-client-credentials}
+\end{figure}
+
+Contoh berangka pada INT-06: laboratorium yang mengirim hasil dapat memakai \textit{client credentials} dengan hak yang
+sempit dan identitas klien tersendiri. INT-06 menghubungkan 3 laboratorium mitra dengan 1.100 pemeriksaan per bulan.
+Misalkan token berlaku 15 menit. Selama 12 jam layanan, satu laboratorium paling banyak meminta 48 token per hari, atau
+144 token per hari untuk ketiganya. Bila satu laboratorium putus kontrak, Medikara mencabut identitas kliennya, token
+terakhir mati paling lama 15 menit kemudian, dan dua laboratorium lain tidak terganggu. RFC 7009 menyediakan permintaan
+pencabutan token bila jeda itu perlu dipangkas \cite{c06-rfc7009}.
+
+\subsection{Alur Authorization Code dengan PKCE}
+
+Bagaimana bila aplikasi mewakili seorang pasien? Pada \textit{authorization code} dengan \textit{Proof Key for Code
+Exchange} (PKCE), aplikasi memperoleh otorisasi melalui pengalihan dan menebus kode dengan pembuktian terkait permintaan
+awal. Pasien masuk di server otorisasi, bukan di aplikasi, sehingga aplikasi tidak pernah melihat sandinya. Server
+otorisasi lalu mengembalikan kode otorisasi yang harus segera kedaluwarsa. RFC 6749 menganjurkan masa berlaku kode
+paling lama 10 menit \cite{rfc6749}.
+
+Aplikasi di ponsel adalah klien publik (\textit{public client}), karena rahasia yang ditanam di dalamnya dapat dibongkar.
+PKCE mengatasi hal ini. Pada awal setiap transaksi, aplikasi membuat rahasia acak bernama \texttt{code\_verifier}, lalu
+mengirim hasil hash-nya, \texttt{code\_challenge}, lewat pengalihan. Saat menebus kode, aplikasi mengirim
+\texttt{code\_verifier} aslinya, lalu server otorisasi mencocokkan hash-nya \cite{c06-rfc7636}. RFC 9700 mewajibkan PKCE
+untuk klien publik, menganjurkannya untuk klien rahasia, dan mewajibkan server otorisasi mendukungnya \cite{rfc9700}.
+Gambar \ref{fig:ch06-alur-pkce} memperlihatkan langkahnya.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch06-alur-pkce.tex}
+  \caption{Alur \textit{authorization code} dengan PKCE: langkah berwarna adalah tambahan PKCE}
+  \label{fig:ch06-alur-pkce}
+\end{figure}
+
+Analoginya penitipan barang. Karcis penitipan dapat difoto orang lain. Karena itu, loket juga mencatat sidik kata sandi
+saat barang dititipkan. Saat mengambil barang, pemilik menyebut kata sandinya. Orang yang hanya memotret karcis tidak
+dapat mengambil barang.
+
+Contoh berangka pada Medikara+: aplikasi pasien yang mewakili pengguna memerlukan alur yang sesuai konteks pengguna.
+Bab 4 mencatat 28.000 janji temu per bulan. Misalkan 0,1 persen sesi berlangsung pada perangkat yang kodenya tertangkap
+aplikasi lain, atau 28 sesi per bulan. Tanpa PKCE, kode yang tertangkap dapat ditebus, karena klien publik tidak punya
+rahasia. Dengan PKCE, penangkap kode tidak memegang \texttt{code\_verifier}, sehingga 28 sesi itu tidak menghasilkan
+token. Hak atas objek tetap diperiksa sesudahnya, karena PKCE hanya mengamankan cara token diperoleh.
+
+Tabel \ref{tab:ch06-alur} merangkum pilihan alur.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Memilih alur menurut pihak yang diwakili aplikasi}
+  \label{tab:ch06-alur}
+  \small
+  \begin{tabularx}{\textwidth}{QT{3.0cm}QT{2.2cm}}
+    \hline
+    \textbf{Keadaan} & \textbf{Alur} & \textbf{Alasan} & \textbf{Contoh Medikara} \\ \hline
+    Aplikasi server bertindak untuk dirinya, tanpa pengguna & \textit{Client credentials} & Tidak ada pasien yang perlu masuk, dan klien mampu menjaga rahasia & INT-06, laboratorium mitra \\ \hline
+    Aplikasi mewakili pasien atau dokter & \textit{Authorization code} dengan PKCE & Sandi hanya masuk ke server otorisasi, kode tidak dapat ditebus pihak lain & Medikara+ \\ \hline
+    Aplikasi meminta sandi pasien secara langsung & Tidak dipakai & RFC 9700 melarang alur sandi pemilik, karena sandi terpapar ke klien & Pola lama yang perlu dicari \\ \hline
+    Token diterbitkan langsung lewat pengalihan & Dihindari & RFC 9700 menyarankan tidak memakai alur \textit{implicit}, karena token rawan bocor & Pola lama yang perlu dicari \\ \hline
+  \end{tabularx}
+\end{table}
+
+\begin{kasus}[title={Kasus Medikara Health: Memilih Alur untuk Tiga Integrasi}]
+Tim menilai tiga integrasi yang kelak dibuka sebagai API.
+\begin{enumerate}
+  \item INT-06, 3 laboratorium mitra: \textit{client credentials}, satu identitas per laboratorium, dan \textit{scope}
+        \texttt{hasil.tulis}.
+  \item INT-03, Medikara+: \textit{authorization code} dengan PKCE. API privat jadwal dan janji temu menggantikan akun
+        basis data yang membaca 140 tabel, padahal kebutuhannya 2 tabel.
+  \item INT-07, 36 perusahaan klien: \textit{client credentials} per perusahaan. Layanan membatasi jawaban pada karyawan
+        peserta perusahaan itu.
+\end{enumerate}
+
+Keputusan ini punya dua konsekuensi. Pertama, Medikara memerlukan satu layanan identitas. Misalkan layanan itu dihitung
+satu antarmuka, atau Rp45 juta per tahun. Kedua, vendor Medikara+ harus mengubah aplikasinya, dan tiga sambungan basis
+data tidak hilang dalam sehari. Selama peralihan, ketiga sambungan itu tetap berisiko, sehingga tim memasang tenggat.
+Sebuah usulan belum menjadi keputusan sebelum pemilik menerima konsekuensinya. Karena itu Manajer Layanan Rawat Jalan
+menandatangani tenggat INT-03, dan catatan tim menyebut kondisi yang dapat mengubah keputusan, misalnya vendor yang menolak
+perubahan.
+\end{kasus}
+
+\begin{pendalaman}[title={Pendalaman Teknis (opsional): Isi Pesan dan Perhitungan PKCE}]
+Listing \ref{lst:ch06-token-lab} memperlihatkan langkah 1 pada Gambar \ref{fig:ch06-alur-client-credentials}. Nilainya
+sintetis, dan domain \texttt{.example} dicadangkan untuk contoh. Listing \ref{lst:ch06-pkce} menghitung
+\texttt{code\_challenge}. Skrip lengkapnya menguji fungsi ini dengan contoh RFC 7636 Lampiran B, tanpa memanggil server
+apa pun.
+
+\begin{lstlisting}[language=http, caption={Laboratorium meminta token, tersedia di \berkas{sources/chapter06/contoh-pesan-oauth.md}}, label={lst:ch06-token-lab}]
+POST /oauth2/token HTTP/1.1
+Host: auth.medikara.example
+Content-Type: application/x-www-form-urlencoded
+Authorization: Basic bGFiLXNpbnRldGlzOnJhaGFzaWEtc2ludGV0aXM=
+
+grant_type=client_credentials&scope=hasil.tulis
+\end{lstlisting}
+
+\begin{lstlisting}[style=ch06python, caption={Menghitung \texttt{code\_challenge} S256, tersedia di \berkas{sources/chapter06/hitung-pkce.py}}, label={lst:ch06-pkce}]
+def hitung_code_challenge(code_verifier):
+  """Menghitung S256: base64url dari SHA-256, tanpa tanda =.
+
+  Tanda = yang tersisa membuat pencocokan selalu gagal.
+  """
+  ringkasan = hashlib.sha256(code_verifier.encode("ascii")).digest()
+  hasil_kode = base64.urlsafe_b64encode(ringkasan).decode("ascii")
+  return hasil_kode.rstrip("=")
+\end{lstlisting}
+
+RFC 7636 menganjurkan 32 oktet acak, yang menjadi 43 karakter sesudah dikodekan \cite{c06-rfc7636}. RFC 9700 menyarankan
+metode S256, karena metode \texttt{plain} membuka \texttt{code\_verifier} pada permintaan otorisasi \cite{rfc9700}.
+Contoh pesan \textit{authorization code} tersedia pada berkas yang sama dengan Listing \ref{lst:ch06-token-lab}.
+\end{pendalaman}
+
+\section{OpenID Connect dan Persetujuan Pemilik Data}
+
+Sampai di sini token menjawab apa yang boleh dilakukan aplikasi. Dua pertanyaan tersisa. Siapa pengguna yang baru saja
+masuk? Dan siapa yang mengizinkan data pasien dibuka?
+
+OAuth 2.0 mengatur pemberian akses, sedangkan OpenID Connect menambahkan lapisan identitas di atas OAuth 2.0
+\cite{c06-oidc-core}. Hasilnya \textit{ID Token}, yaitu token keamanan yang memuat pernyataan tentang proses autentikasi
+pengguna oleh server otorisasi. \textit{Audience} dari \textit{ID Token} wajib memuat \texttt{client\_id} klien, sehingga
+token ini ditujukan kepada aplikasi, bukan kepada API \cite{c06-oidc-core}. Sebaliknya, token akses tidak dipakai sebagai
+pengganti bukti identitas pengguna. Tabel \ref{tab:ch06-oidc} merangkum perbedaannya.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Token akses dan \textit{ID Token} ditujukan kepada penerima yang berbeda}
+  \label{tab:ch06-oidc}
+  \small
+  \begin{tabularx}{\textwidth}{T{2.5cm}QQ}
+    \hline
+    \textbf{Unsur} & \textbf{Token akses (OAuth 2.0)} & \textbf{\textit{ID Token} (OpenID Connect)} \\ \hline
+    Yang dijawab & Apa yang boleh dilakukan klien & Siapa pengguna yang baru masuk \\ \hline
+    Ditujukan kepada & Server sumber daya & Klien \\ \hline
+    Dipakai untuk & Memanggil API & Memulai sesi masuk di aplikasi \\ \hline
+    Salah pakai yang umum & Dijadikan bukti masuk & Dikirim ke API sebagai izin \\ \hline
+  \end{tabularx}
+\end{table}
+
+Analoginya kartu identitas di loket. Kartu itu membuktikan siapa orangnya di depan petugas, tetapi tidak memberi hak
+mengambil arsip orang lain. Surat kuasa memberi hak mengambil arsip, tetapi tidak membuktikan siapa yang sedang berdiri
+di depan loket.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Misalkan portal mitra dipakai 120 dokter di 40 klinik mitra, atau 3 dokter per klinik, dan Medikara punya 3
+        aplikasi untuk dokter. Misalkan 10 persen dokter pindah per tahun, atau 12 dokter. Tanpa lapisan identitas
+        bersama, tiap dokter punya akun di tiap aplikasi, sehingga ada 36 akun yang harus ditutup. Satu akun yang
+        terlewat menjadi akun aktif tanpa pemilik, seperti akun dukungan pada kasus insiden. Dengan satu server
+        otorisasi, 12 penutupan akun sudah cukup.
+  \item Misalkan 1.000 pasien memberi izin kepada aplikasi pihak ketiga untuk membaca jadwalnya. Bila Medikara+ menerima
+        token akses apa pun sebagai bukti masuk, aplikasi itu dapat memakai token milik 1.000 pasien untuk masuk ke
+        Medikara+. Pemeriksaan \textit{ID Token} dengan \textit{audience} milik Medikara+ menutup jalur ini.
+\end{enumerate}
+
+Lalu siapa yang mengizinkan? Persetujuan (\textit{consent}) pemilik data punya dua lapis. Lapis hukum dimulai dari
+UU 27/2022, yang menggolongkan data dan informasi kesehatan sebagai data pribadi spesifik (Pasal 4). Pengendali data
+wajib punya dasar pemrosesan. Persetujuan eksplisit subjek data hanya satu dari enam dasar, di samping perjanjian,
+kewajiban hukum, kepentingan vital, tugas kepentingan umum, dan kepentingan sah lainnya (Pasal 20) \cite{uu27-2022-pdp}.
+Permenkes 24/2022 menambah aturan khusus. Isi rekam medis wajib dijaga kerahasiaannya (Pasal 32). Pembukaannya dilakukan
+atas persetujuan pasien atau tidak atas persetujuan pasien pada keadaan yang diatur, dengan permintaan tertulis atau
+elektronik, dan terbatas sesuai kebutuhan (Pasal 33) \cite{permenkes24-2022}. Lapis teknis adalah layar persetujuan pada
+alur \textit{authorization code}, tempat pasien mengizinkan satu klien memakai sejumlah \textit{scope}.
+
+Analoginya formulir izin tindakan di rumah sakit. Pasien menandatanganinya untuk satu tindakan tertentu. Formulir itu tidak
+berlaku untuk tindakan lain, dan tidak menggantikan aturan tentang siapa yang boleh melakukan tindakan.
+
+Dua hal pada bahasan ini sering tertukar, yaitu layar persetujuan dan dasar pemrosesan. Pembagiannya begini. Layar
+persetujuan mencatat izin pasien kepada satu klien. Dasar pemrosesan menjawab mengapa Medikara boleh memproses data itu
+sama sekali. Layar yang ditekan pasien belum tentu memadai sebagai dasar hukum, dan integrasi tanpa layar belum tentu
+melanggar. Tabel \ref{tab:ch06-persetujuan} memperlihatkan penalarannya. Isi kolom terakhir adalah hipotesis untuk diuji
+bersama fungsi hukum, bukan pendapat hukum.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Layar persetujuan dan dasar pemrosesan pada empat situasi Medikara}
+  \label{tab:ch06-persetujuan}
+  \small
+  \begin{tabularx}{\textwidth}{QT{2.4cm}T{1.9cm}Q}
+    \hline
+    \textbf{Situasi} & \textbf{Alur} & \textbf{Layar persetujuan} & \textbf{Dasar yang diuji fungsi hukum} \\ \hline
+    Pasien mengizinkan aplikasi pihak ketiga & \textit{Authorization code} dengan PKCE & Ada, per klien dan \textit{scope} & Persetujuan eksplisit untuk tujuan tertentu \\ \hline
+    Pasien memakai Medikara+ & \textit{Authorization code} dengan PKCE & Dicatat saat mendaftar & Perjanjian layanan atau persetujuan \\ \hline
+    Laboratorium mitra mengirim hasil rujukan & \textit{Client credentials} & Tidak ada & Perjanjian kerja sama, dan persetujuan pasien untuk pengobatan (Permenkes 24/2022 Pasal 34) \\ \hline
+    INT-01 dan INT-02 ke pihak wajib & Mengikuti spesifikasi pihak wajib, lihat Bab 7 & Tidak ada pada tiap panggilan & Kewajiban hukum. Klaim yang membuka isi rekam medis memakai persetujuan saat registrasi (Permenkes 24/2022 Pasal 34 ayat (7)) \\ \hline
+  \end{tabularx}
+\end{table}
+
+Dua contoh berangka memperlihatkan akibatnya:
+\begin{enumerate}
+  \item INT-01 memeriksa kepesertaan Badan Penyelenggara Jaminan Sosial (BPJS) Kesehatan per kunjungan, dengan 55.000
+        kunjungan per bulan. Pemeriksaan ini hanya menanyakan apakah seseorang peserta aktif, dan tidak membuka isi rekam medis.
+        Meminta 55.000 persetujuan di layar pada setiap panggilan tidak menyelesaikan apa pun bila dasarnya memang kewajiban
+        hukum atau perjanjian. Yang dibutuhkan adalah dasar yang tercatat, bukan layar tambahan. Klaim berbeda, karena klaim dapat
+        membuka isi rekam medis. Untuk keperluan itu Permenkes 24/2022 Pasal 34 ayat (7) meminta persetujuan pasien satu kali
+        saat registrasi \cite{permenkes24-2022}. Bab 7 membahas pembagian ini.
+  \item Misalkan 1.200 pasien mengizinkan aplikasi pihak ketiga membaca hasil laboratorium, lalu kontrak aplikasi berakhir.
+        Bila izin tercatat per klien, satu tindakan mencabut akses aplikasi itu. Bila tidak, tim menelusuri 1.200 izin.
+        Misalkan 5 menit per izin, atau 100 jam kerja, sehingga biayanya Rp6 juta pada tarif Rp60.000 per jam.
+\end{enumerate}
 
 \section{Profil Keamanan untuk Data Berisiko Tinggi}
 
-% TODO
-% Cakupan: FAPI (Financial-grade API) 2.0 Security Profile yang berstatus Final sejak Februari 2025;
-% token yang terikat pada pengirim; persetujuan (consent) pemilik data; relevansi bagi data
-% kesehatan dan keuangan.
-% Kasus Medikara: persetujuan pasien sebelum data dibagikan ke asuransi.
+RFC 6749 terbit pada 2012, dan cara menyerang terus berkembang. Pertanyaannya, praktik apa yang kini dianggap wajib, dan
+kapan organisasi perlu lebih ketat?
+
+RFC 9700 memperbarui praktik keamanan OAuth berdasarkan ancaman yang berkembang. Dokumen ini berstatus \textit{Best
+Current Practice} dan memperbarui RFC 6749 serta RFC 6750 \cite{rfc9700}. Arah penerapannya mencakup alur yang lebih aman,
+validasi pengalihan, dan pembatasan penyalahgunaan token. FAPI 2.0 adalah profil yang memperketat penggunaan OAuth untuk
+kebutuhan bernilai atau berisiko tinggi. Profil ini awalnya dikembangkan untuk aplikasi keuangan, tetapi spesifikasinya
+menyatakan dirancang untuk API yang membuka data bernilai tinggi dan sensitif, misalnya pada layanan kesehatan elektronik
+dan pemerintahan elektronik \cite{fapi2}. Pemilihan profil perlu mempertimbangkan dukungan seluruh pihak, bukan sekadar
+nama produk.
+
+Analoginya pengiriman barang. Pengiriman barang berharga memerlukan bukti serah terima yang lebih kuat daripada pengiriman
+brosur. Pengirim tidak memakai mobil lapis baja untuk brosur, tetapi juga tidak menitipkan perhiasan di kotak surat.
+
+Tabel \ref{tab:ch06-rfc9700} merangkum isi RFC 9700 yang paling berpengaruh bagi organisasi. Dua kelas istilah perlu
+dibedakan: ``wajib'' berasal dari \textit{MUST}, sedangkan ``sebaiknya'' berasal dari \textit{SHOULD} atau
+\textit{RECOMMENDED}. Token terikat pengirim (\textit{sender-constrained}) memakai \textit{mutual Transport Layer Security}
+(mTLS) \cite{c06-rfc8705} atau \textit{Demonstrating Proof of Possession} (DPoP) \cite{c06-rfc9449}, sehingga token curian
+tidak dapat dipakai pihak lain tanpa kuncinya.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Praktik utama RFC 9700 dan artinya bagi Medikara}
+  \label{tab:ch06-rfc9700}
+  \small
+  \begin{tabularx}{\textwidth}{T{2.0cm}QQ}
+    \hline
+    \textbf{Praktik} & \textbf{Isi RFC 9700} & \textbf{Arti bagi Medikara} \\ \hline
+    Alur aman & Klien publik wajib memakai PKCE, klien rahasia dianjurkan & Medikara+ dan portal mitra memakai kode dengan PKCE \\ \hline
+    Pengalihan & Server otorisasi wajib mencocokkan alamat pengalihan secara persis & Alamat terdaftar per klien, validasi ketat \\ \hline
+    Alur lama & Alur sandi pemilik dilarang, alur \textit{implicit} sebaiknya tidak dipakai & Vendor yang meminta sandi pasien masuk daftar kesenjangan \\ \hline
+    Token curian & Server sebaiknya memakai token terikat pengirim & Token API mitra diikat ke kunci milik klien \\ \hline
+    Hak minimum & Hak token sebaiknya sekecil kebutuhan, dan dibatasi \textit{audience}-nya & Token API hasil tidak berlaku di API tagihan \\ \hline
+    \textit{Refresh token} & Untuk klien publik, wajib terikat pengirim atau dirotasi & Medikara+ merotasi \textit{refresh token} \\ \hline
+  \end{tabularx}
+\end{table}
+
+Bagaimana dengan OAuth 2.1? Dokumen itu masih berupa \textit{Internet-Draft} di \textit{Internet Engineering Task Force}
+(IETF). Versi per Oktober 2026 adalah draf ke-16, terakhir diperbarui 2 September 2026, dan berlaku sampai 7 Maret 2027
+\cite{c06-oauth21}. Karena itu bab ini tidak menjadikannya patokan kepatuhan. Yang sudah terbit dan final adalah RFC 6749
+bersama RFC 9700.
+
+FAPI 2.0 lebih ketat daripada RFC 9700. Server otorisasi hanya mendukung klien rahasia, hanya menerbitkan token terikat
+pengirim lewat mTLS atau DPoP, mewajibkan PKCE metode S256, dan menolak permintaan otorisasi yang tidak dikirim lewat
+\textit{pushed authorization request} \cite{fapi2}. Syarat pertama berakibat langsung. Medikara+ di ponsel adalah klien
+publik, sehingga tidak dapat menjadi klien FAPI 2.0 tanpa perubahan arsitektur, misalnya menambah server perantara di sisi
+Medikara. Bab 7 memperlihatkan batas lainnya: spesifikasi BPJS Kesehatan dan SATUSEHAT ditentukan pihak wajib, sehingga
+Medikara tidak dapat memaksakan profil pilihannya di sana. Gambar \ref{fig:ch06-keputusan} merangkai pokok keputusan ini.
+Urutan pembahasan membantu penelusuran alasan, dan penerapannya tetap dapat berulang bila bukti berubah.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch06-peta-keputusan.tex}
+  \caption{Peta keputusan alur dan profil keamanan: apa pun jalurnya, layanan bisnis tetap memeriksa hak atas objek}
+  \label{fig:ch06-keputusan}
+\end{figure}
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Misalkan integrasi menangani data kesehatan lintas mitra. Tim menilai perlindungan token dan autentikasi klien
+        secara menyeluruh sebelum memilih profil. Misalkan profil ketat menambah 20 persen biaya perawatan per antarmuka,
+        atau Rp9 juta dari Rp45 juta. Bila diterapkan pada 20 sambungan aktif, tambahannya Rp180 juta per tahun. Misalkan 5
+        dari 20 sambungan itu membawa data klinis ke pihak luar. Bila hanya kelimanya yang diperketat, tambahannya Rp45 juta
+        per tahun, atau seperempatnya.
+  \item Misalkan 12 dari 40 klinik mitra memakai perangkat lunak yang mampu DPoP, dan 28 klinik belum. Mewajibkan DPoP sejak
+        hari pertama membuat 28 klinik tertahan, sehingga 168 dari 240 hasil per hari tetap lewat telepon. Kesenjangan itu
+        dicatat dengan rencana perbaikan dan keputusan risiko, bukan dilabeli patuh tanpa pengujian. Isinya: kontrol
+        pengganti, misalnya token lebih pendek dan \textit{scope} lebih sempit, pemilik, dan tenggat.
+\end{enumerate}
 
 \section{OWASP API Security Top 10 Edisi 2023}
 
-% TODO
-% Cakupan: sepuluh butir edisi 2023, dari Broken Object Level Authorization sampai Unsafe
-% Consumption of APIs; contoh tiap butir di sektor kesehatan; status edisi 2023 sebagai edisi
-% terbaru per Oktober 2026.
-% Kasus Medikara: pemetaan insiden 2025 ke butir yang relevan.
+Sampai di sini bahasan berpusat pada token. Padahal insiden pada Tabel \ref{tab:ch06-unsur} juga berasal dari hal lain.
+Daftar apa yang dipakai untuk memeriksa integrasi secara menyeluruh?
 
-\section{Pembatasan Konsumsi dan Pemantauan}
+Sepuluh kategori OWASP API Security 2023 meliputi otorisasi objek, autentikasi, otorisasi properti objek, konsumsi sumber
+daya, otorisasi fungsi, alur bisnis sensitif, \textit{Server Side Request Forgery} (SSRF), konfigurasi, inventaris, dan
+konsumsi API pihak lain \cite{owasp-api2023}. Kategori tersebut beririsan. Penilaian harus menghubungkan kategori dengan
+skenario, bukti, akibat, dan kontrol yang dapat diuji. Tabel \ref{tab:ch06-owasp} menerjemahkan kesepuluh butir ke bahasa
+sehari-hari.
 
-% TODO
-% Cakupan: rate limiting dan kuota; pencatatan akses dan jejak audit; deteksi pola akses tidak
-% wajar; inventaris API untuk mencegah API yang terlupakan; kerangka keamanan informasi organisasi
-% (ISO/IEC 27001, NIST CSF) dibahas rinci di IT40813.
+Analoginya daftar periksa keselamatan gedung. Daftar itu membantu inspeksi, tetapi petugas tetap perlu menelusuri
+penyebab masalah di lokasi. Tanda centang pada daftar bukan bukti bahwa gedung aman.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Sepuluh butir OWASP API Security Top 10 edisi 2023 dengan contoh Medikara}
+  \label{tab:ch06-owasp}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{T{2.9cm}QQT{2.4cm}}
+    \hline
+    \textbf{Butir} & \textbf{Arti sederhana} & \textbf{Contoh Medikara} & \textbf{Bukti yang dicari} \\ \hline
+    API1 \textit{Broken Object Level Authorization} & Pemanggil mengganti ID dan memperoleh objek pihak lain & Token klinik A membaca hasil pasien klinik B & Aturan hak per objek, catatan penolakan \\ \hline
+    API2 \textit{Broken Authentication} & Bukti identitas lemah atau salah diperiksa & Kredensial dipakai bersama, masa berlaku tidak diperiksa & Daftar akun, jadwal rotasi \\ \hline
+    API3 \textit{Broken Object Property Level Authorization} & Pemanggil melihat atau mengubah bidang yang bukan haknya & Rekap perusahaan memuat diagnosis, padahal cukup jumlah pemakaian & Contoh jawaban, daftar bidang \\ \hline
+    API4 \textit{Unrestricted Resource Consumption} & Tidak ada batas laju, ukuran, atau biaya & Satu klinik menarik ribuan hasil per jam & Konfigurasi kuota, batas waktu \\ \hline
+    API5 \textit{Broken Function Level Authorization} & Akun biasa menjalankan fungsi milik peran lain & Akun klinik memakai fungsi hapus hasil & Matriks peran dan fungsi \\ \hline
+    API6 \textit{Unrestricted Access to Sensitive Business Flows} & Alur bisnis sah dipakai berlebihan secara otomatis & Program otomatis memborong slot dokter di Medikara+ & Pola pemesanan, batas per pasien \\ \hline
+    API7 \textit{Server Side Request Forgery} & Server dipaksa memanggil alamat yang disodorkan pemanggil & Fitur ambil berkas rujukan dari tautan memanggil server internal & Daftar tujuan yang diizinkan \\ \hline
+    API8 \textit{Security Misconfiguration} & Konfigurasi longgar atau tidak mengikuti praktik baik & Pesan \textit{error} membuka rincian teknis SIMRS & Hasil tinjauan konfigurasi \\ \hline
+    API9 \textit{Improper Inventory Management} & API atau aliran data tanpa catatan dan pemilik & INT-10: 12 sambungan apotek tanpa pemilik & Inventaris Bab 4, alasan tiap aliran \\ \hline
+    API10 \textit{Unsafe Consumption of APIs} & Data dari API pihak ketiga dipercaya tanpa pemeriksaan & Hasil dari laboratorium langsung masuk SIMRS & Aturan validasi, batas waktu \\ \hline
+  \end{tabularx}
+\end{table}
+
+Mengapa \textit{Broken Object Level Authorization} (BOLA) menempati urutan pertama? OWASP menilainya mudah dieksploitasi,
+tersebar luas, dan mudah dideteksi, dengan dampak teknis sedang. Sebabnya sederhana. Server biasanya tidak melacak keadaan
+klien secara penuh, lalu mengandalkan ID objek yang dikirim klien. Penyerang cukup memanipulasi ID itu, dan ID mudah dikenali
+pada permintaan \cite{owasp-api1}. Pemeriksaan hak harus ada pada setiap \textit{endpoint} yang menerima ID objek. Membandingkan ID
+pengguna pada token dengan ID pada parameter hanya menyelesaikan sebagian kecil kasus \cite{owasp-api1}. ID acak
+dianjurkan, tetapi hanya menyulitkan penebakan dan tidak menggantikan pemeriksaan hak.
+
+Urutan itu perlu dibaca dengan kritis. OWASP memakai OWASP \textit{Risk Rating Methodology}, dan menyatakan edisi ini tidak
+berbasis data, sehingga tingkat prevalensi berasal dari konsensus tim. OWASP juga menyatakan penilaian itu tidak memperhitungkan
+dampak nyata pada bisnis, dan organisasi harus memutuskan sendiri risiko yang diterimanya \cite{c06-owasp-risks}. Bagi Medikara,
+dampak bisnis BOLA pada rekam medis lebih berat daripada pada katalog jadwal dokter, walaupun butirnya sama.
+
+Tiga butir otorisasi sering tertukar. Pembagiannya begini. API1 bertanya pasien yang mana. API3 bertanya bidang yang mana.
+API5 bertanya fungsi yang mana. Akun basis data pada INT-03 belum berbentuk API, tetapi pertanyaannya sama dengan API3:
+140 tabel terbaca, 2 tabel dibutuhkan.
+
+Butir API10 juga sering disalahartikan sebagai ``semua masalah vendor''. OWASP memaknainya sebagai API milik sendiri yang
+terlalu percaya pada data dari API pihak ketiga \cite{c06-owasp-api10}. Bila data Medikara keluar ke vendor, butir yang lebih
+dekat adalah API1, API2, atau API9. API9 memuat titik buta aliran data: data sensitif dibagikan ke pihak ketiga tanpa alasan
+bisnis yang disetujui, tanpa inventaris, atau tanpa kejelasan jenis datanya \cite{owasp-api9}.
+
+Dua contoh penerapan pada Medikara:
+\begin{enumerate}
+  \item Jika vendor membaca pasien lintas fasilitas, kategori otorisasi objek menjadi hipotesis awal. Pada kasus insiden,
+        1.240 rekam kunjungan terbaca tanpa hubungan layanan, dan token yang dipakai sah. Catatan akses dan konfigurasi
+        diperlukan untuk mengonfirmasi penyebabnya.
+  \item Jika sambungan lama masih aktif tanpa pemilik, inventaris yang buruk memperbesar permukaan serangan meskipun aplikasi
+        utama sudah diperbarui. Inventaris Bab 4 mencatat 12 dari 100 sambungan, yaitu INT-10, belum diketahui pemilik dan cara
+        kerjanya. Artinya 12 persen sambungan berada di luar pengawasan. Itu sebabnya INT-10 ikut dinilai, walaupun belum
+        termasuk tiga titik masalah Bab 5.
+\end{enumerate}
+
+\textbf{Peringatan.} Uji hak per objek hanya dilakukan pada sistem sendiri atau yang sudah berizin tertulis, pada lingkungan
+uji, dengan data sintetis. Mengganti ID pada sistem milik orang lain tetap termasuk akses tanpa izin, walaupun tokennya sah.
+
+Daftar sepuluh butir belum memberi prioritas. Pertanyaannya, temuan mana yang ditangani lebih dahulu? Tim memberi dua nilai
+pada tiap temuan, yaitu dampak dan kemungkinan, masing-masing dengan skala 1 sampai 3. Skornya adalah hasil kali keduanya.
+Skala ini sengaja sederhana untuk tonggak C2, karena penilaian risiko rinci dibahas di IT40813. Kode RA adalah daftar risiko API
+bab ini. Register organisasi ada di IT40813 Bab 5, dan akses vendor di sana tercatat sebagai R-01 dengan pemilik Medikara+. Gambar
+\ref{fig:ch06-matriks-risiko} memetakan contoh temuan Medikara, dan Tabel \ref{tab:ch06-register} memuat rinciannya. Baris
+RA-01, RA-02, RA-05, dan RA-06 mengikuti tiga titik masalah Bab 5. Baris RA-03 dan RA-04 mengikuti inventaris Bab 4, dan RA-07
+adalah baris usulan tanpa ID baru.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch06-matriks-risiko.tex}
+  \caption{Matriks dampak dan kemungkinan: angka dalam sel adalah skor, RA adalah ID temuan pada register risiko}
+  \label{fig:ch06-matriks-risiko}
+\end{figure}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh register risiko API Medikara (data latihan): D dampak, K kemungkinan}
+  \label{tab:ch06-register}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{T{0.9cm}T{1.3cm}T{0.9cm}QT{0.2cm}T{0.2cm}T{0.7cm}T{1.7cm}}
+    \hline
+    \textbf{ID} & \textbf{Integrasi} & \textbf{Butir} & \textbf{Temuan} & \textbf{D} & \textbf{K} & \textbf{Skor} & \textbf{Status bukti} \\ \hline
+    RA-01 & INT-03 & API3 & Akun vendor membaca 140 tabel SIMRS, kebutuhan 2 tabel & 3 & 3 & 9 & Terverifikasi \\ \hline
+    RA-02 & INT-03 & API1 & API bawaan di 2 rumah sakit diduga tidak memeriksa hubungan layanan & 3 & 3 & 9 & Hipotesis \\ \hline
+    RA-03 & INT-10 & API9 & 12 sambungan resep tanpa pemilik dan tanpa catatan aliran data & 3 & 2 & 6 & Belum terverifikasi \\ \hline
+    RA-04 & INT-07 & API3 & Rekap 36 perusahaan lewat surel memuat data karyawan lebih dari kebutuhan & 2 & 3 & 6 & Terverifikasi \\ \hline
+    RA-05 & INT-06 & API2 & Hasil dari 3 laboratorium lewat surel, identitas pengirim tidak diuji & 2 & 2 & 4 & Wawancara \\ \hline
+    RA-06 & INT-02 & API10 & Jawaban SATUSEHAT tidak diperiksa, 4 persen kunjungan klinik belum terkirim & 2 & 2 & 4 & Terverifikasi \\ \hline
+    RA-07 & Usulan API hasil & API4 & Kuota 300 panggilan per hari per klinik belum diterapkan karena API belum berjalan & 2 & 1 & 2 & Rancangan \\ \hline
+  \end{tabularx}
+\end{table}
+
+Skor tinggi dengan status ``Hipotesis'' tidak sama dengan temuan terbukti. RA-02 memperoleh skor 9, tetapi yang dibutuhkan
+berikutnya adalah uji berizin, bukan laporan yang menyatakan celah sudah ada. Sebaliknya, RA-03 memperoleh skor 6 tanpa bukti
+sama sekali, justru karena belum ada yang mengetahui cara kerjanya. Baris itu juga belum punya pemilik, sehingga skrip
+\berkas{sources/chapter06/hitung-risiko-api.py} menandainya.
+
+\begin{kasus}[title={Kasus Medikara Health: Membaca Insiden dengan Daftar OWASP}]
+Tim membaca lima fakta kasus insiden dengan Tabel \ref{tab:ch06-owasp}. Dua hipotesis paling kuat adalah API1, karena token
+sah menghasilkan 1.240 rekam tanpa hubungan layanan, dan API9, karena akun dukungan masih aktif setelah kontrak selesai, dan
+sepuluh baris inventaris Bab 4 tidak memuat akses itu. API2 dipertimbangkan, karena catatan hanya memuat ID aplikasi, sehingga
+kredensial diduga dipakai bersama. API10 ditolak, karena arah kejadiannya bukan data vendor yang masuk ke
+Medikara. API4 juga bukan penyebab utama, karena 155 panggilan per malam berada di bawah kuota 300 panggilan per hari.
+
+Biaya langsung dapat dihitung. Misalkan penanganan melibatkan 6 orang selama 5 hari kerja, atau 240 jam, sehingga biayanya Rp14,4
+juta. Misalkan pemberitahuan kepada 620 pasien yang dapat ditelusuri memakan 15 menit per pasien, atau 155 jam, sehingga biayanya
+Rp9,3 juta. Jumlahnya Rp23,7 juta, sekitar 49 kali biaya satu insiden integrasi senilai Rp480.000 pada Latihan Bab 4. Sanksi,
+kehilangan kepercayaan, dan akibat bagi pasien belum dihitung.
+
+Tim tidak menunggu penyebab pasti untuk mengurangi akibat. Akun dukungan tanpa penugasan aktif dicabut, kredensial bersama diganti,
+dan catatan rinci diperpanjang. Keputusan ini punya dua konsekuensi. Pertama, sebagian pekerjaan vendor berhenti sampai akun baru
+disetujui. Kedua, tim masih memegang dua hipotesis yang belum terbukti. Catatan tim menyebut bukti yang belum tersedia dan kondisi
+yang dapat mengubah keputusan.
+\end{kasus}
+
+\section{Pembatasan Konsumsi dan Pencatatan Akses}
+
+Kuota pada kasus tadi tidak menghentikan insiden. Lalu untuk apa pembatasan konsumsi, dan apa yang harus dicatat agar pertanyaan
+sesudah insiden dapat dijawab?
+
+\textit{Rate limiting} membatasi laju, kuota membatasi jumlah dalam periode, dan pengendalian sumber daya membatasi biaya operasi,
+misalnya ukuran data dan batas waktu \cite{c06-owasp-api4}. Permintaan yang melampaui batas dijawab dengan kode 429, yang sebaiknya
+menjelaskan keadaannya dan boleh menyebut waktu tunggu lewat \textit{header} \texttt{Retry-After} \cite{rfc6585}. Pencatatan harus
+mendukung penyelidikan tanpa membocorkan token atau isi rekam medis. Tabel \ref{tab:ch06-batas} merangkum batas tiap alat.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Tiap alat membatasi satu hal, dan tidak menyelesaikan hal lain}
+  \label{tab:ch06-batas}
+  \small
+  \begin{tabularx}{\textwidth}{T{2.5cm}T{2.7cm}QQ}
+    \hline
+    \textbf{Alat} & \textbf{Yang dibatasi} & \textbf{Contoh angka} & \textbf{Yang tidak diselesaikan} \\ \hline
+    Laju (\textit{rate limiting}) & Permintaan per satuan waktu & Misalkan 1 permintaan per detik & Penarikan pelan dan lama \\ \hline
+    Kuota & Jumlah dalam periode & 300 panggilan per hari per klinik & Akses ke objek yang salah \\ \hline
+    Sumber daya & Ukuran dan waktu operasi & Misalkan 50 baris per halaman & Hak atas data \\ \hline
+    Catatan akses & Tidak membatasi, membuktikan & ID permintaan dan keputusan akses & Tidak mencegah kejadian \\ \hline
+  \end{tabularx}
+\end{table}
+
+Analoginya loket pelayanan. Loket membatasi antrean dan jumlah layanan per hari, tetapi tetap menyimpan bukti transaksi seperlunya.
+Bukti itu berupa nomor antrean dan jenis layanan, bukan salinan seluruh berkas pasien.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Misalkan kredensial satu klinik disalahgunakan dengan laju 5 permintaan per detik. Tanpa batas, 12 jam menghasilkan 216.000
+        permintaan. Dengan batas laju 1 permintaan per detik, angkanya turun menjadi 43.200. Dengan kuota 300 panggilan per hari,
+        penarikan berhenti setelah 60 detik pada 300 panggilan, lalu dijawab 429. Respons 429 menjelaskan pengulangan yang wajar
+        tanpa menjanjikan akses tanpa batas. Kapasitas 40 klinik tetap 12.000 panggilan per hari, seperti pada Bab 4.
+  \item Catatan akses menyimpan ID permintaan, identitas mitra, operasi, dan hasil otorisasi. Isi klinis serta rahasia autentikasi tidak
+        dicatat ke \textit{log} biasa. Misalkan batas atas volumenya 84.000 panggilan Medikara+ ditambah kuota penuh klinik mitra, atau
+        444.000 catatan per bulan. Dengan 500 \textit{byte} per catatan, volumenya sekitar 2,7 GB per tahun. Bila isi jawaban ikut dicatat,
+        misalkan 50 KB per catatan, volumenya 266,4 GB per tahun, dan \textit{log} berubah menjadi salinan kedua rekam medis.
+\end{enumerate}
+
+OWASP menyebut token akses, sandi, kunci enkripsi, dan data pribadi sensitif seperti data kesehatan sebagai data yang umumnya tidak
+dicatat langsung, melainkan dibuang, disamarkan, atau dienkripsi. OWASP juga menyarankan peristiwa dari pihak ketiga yang ``dipercaya''
+tidak dikecualikan dari pencatatan \cite{c06-owasp-logging}. Tabel \ref{tab:ch06-catatan} memisahkan isi catatan.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Isi catatan akses: cukup untuk menyelidiki, tanpa menyalin rahasia dan isi klinis}
+  \label{tab:ch06-catatan}
+  \small
+  \begin{tabularx}{\textwidth}{QQ}
+    \hline
+    \textbf{Dicatat} & \textbf{Tidak dicatat} \\ \hline
+    ID permintaan dan waktu & Token akses dan rahasia klien \\ \hline
+    Identitas klien dan akun, sampai tingkat orang bila ada & Sandi pengguna \\ \hline
+    Operasi dan ID objek, disamarkan bila perlu & Isi rekam medis dan hasil pemeriksaan \\ \hline
+    Keputusan akses dan alasannya: diizinkan atau ditolak & Kunci enkripsi \\ \hline
+  \end{tabularx}
+\end{table}
+
+Pencatatan juga punya alasan hukum. UU 27/2022 Pasal 46 mewajibkan pengendali data memberi tahu subjek data dan lembaga secara tertulis
+paling lambat 3 $\times$ 24 jam bila terjadi kegagalan pelindungan data. Isinya minimal data yang terungkap, kapan dan bagaimana data
+terungkap, serta upaya penanganan \cite{uu27-2022-pdp}. Tanpa catatan rinci, kedua pertanyaan pertama tidak terjawab. Pada kasus insiden,
+620 rekam tidak dapat ditelusuri karena catatan rinci hanya disimpan 7 hari, padahal kejadian baru diketahui pada hari ke-11. Misalkan
+penyimpanan diperpanjang menjadi 90 hari. Pada volume tadi, catatan 90 hari hanya sekitar 666 MB, jauh lebih murah daripada kehilangan bukti.
+
+Pembatasan konsumsi dan pencatatan akses tidak menggantikan otorisasi. Pola 155 panggilan per malam lolos dari kuota, sehingga
+penghentiannya memerlukan pemeriksaan hak atas objek. Deteksinya memerlukan alarm berbasis pola, misalnya akun dukungan yang aktif di
+luar penugasan, atau satu akun yang membaca banyak pasien tanpa janji temu. Kontrol organisasi, penanganan insiden, dan penilaian risiko
+rinci dibahas di IT40813. Penerapan kebijakan ini pada \textit{API gateway} dibahas di Bab 10. Pengujian hanya dilakukan pada sistem
+sendiri atau yang berizin.
 
 \section{Aktivitas: Penilaian Risiko Keamanan API}
 
-% TODO
-% Tujuan aktivitas: menilai integrasi yang berjalan terhadap OWASP API Security Top 10 dan
-% menghasilkan daftar risiko berprioritas.
-% Peran dalam tim: anggota berlatar hukum, kesehatan, atau bisnis menilai dampak temuan terhadap
-% pasien, kepatuhan, dan reputasi; anggota berlatar teknis memeriksa bukti teknis seperti cara
-% autentikasi, pembatasan akses per objek, dan pencatatan akses.
-% Langkah: pilih integrasi berisiko dari peta integrasi Bab 5; isi daftar periksa per butir; beri
-% tingkat dampak dan kemungkinan; susun tiga rekomendasi perbaikan awal.
-% Luaran dan tonggak capstone: penilaian risiko keamanan API, masuk ke C2 dan menjadi masukan risk
-% register di IT40813.
-% Berkas sources yang direncanakan: sources/chapter06/daftar-periksa-owasp-api-2023.md,
-% sources/chapter06/register-risiko-api.csv, sources/chapter06/kronologi-insiden-medikara.md
+Tujuan aktivitas adalah menghasilkan penilaian risiko keamanan API yang dapat ditelusuri dari persoalan layanan sampai keputusan tim.
+Masukannya adalah peta integrasi dan tiga titik masalah dari Bab 5. Organisasi nyata digunakan dengan izin dan anonimisasi, dan Medikara
+menjadi alternatif bila akses tidak tersedia.
+
+\subsection*{Pembagian Peran}
+
+\begin{itemize}
+  \item Penilai dampak: anggota berlatar hukum, kesehatan, atau bisnis menilai dampak temuan terhadap pasien, kepatuhan, dan reputasi.
+  \item Pemeriksa teknis: anggota berlatar teknis memeriksa bukti teknis, misalnya cara autentikasi, pembatasan akses per objek, dan
+        pencatatan akses.
+  \item Koordinator: mencatat keputusan dan memastikan kedua kelompok menyepakati istilah.
+  \item Penelaah: menantang asumsi tanpa mengganti bukti dengan pendapat.
+\end{itemize}
+
+\subsection*{Langkah Kerja}
+
+\begin{enumerate}
+  \item Ambil peta integrasi Bab 5. Pilih tiga integrasi dengan akibat terbesar bila disalahgunakan, lalu tuliskan alasannya dengan angka.
+  \item Salin \berkas{sources/chapter06/daftar-periksa-owasp-api-2023.md}, satu lembar per integrasi. Susun skenario ancaman menurut
+        kategori OWASP, tanpa menguji sistem luar.
+  \item Pemeriksa teknis mengumpulkan bukti otorisasi, inventaris, dan pencatatan dari sumber berizin: dokumen, konfigurasi, kontrak, dan
+        wawancara. Baris yang belum jelas ditandai sebagai hipotesis, bukan ditebak.
+  \item Penilai dampak memberi nilai dampak 1 sampai 3 dengan alasan tertulis, termasuk data pribadi spesifik dan batas waktu pemberitahuan.
+  \item Tim memberi nilai kemungkinan, memindahkan temuan ke salinan \berkas{sources/chapter06/register-risiko-api.csv}, lalu menjalankan
+        \berkas{sources/chapter06/hitung-risiko-api.py}.
+  \item Tetapkan pemilik perbaikan, kontrol sementara, dan tanggal tinjau untuk setiap temuan tinggi. Tuliskan satu alternatif yang ditolak.
+  \item Bandingkan alur tiap integrasi dengan peta keputusan pada Gambar \ref{fig:ch06-keputusan}, lalu catat kesenjangannya.
+\end{enumerate}
+
+\textbf{Peringatan.} Data organisasi nyata wajib dianonimkan. Rekam medis, kredensial, dan data pribadi pasien atau karyawan tidak boleh
+dimasukkan. Bila dokumen organisasi tidak boleh dibagikan, tim mencatat metadata buktinya saja. Pemindaian keamanan, uji beban, dan uji hak
+akses hanya dilakukan pada sistem sendiri atau yang sudah berizin tertulis. Aktivitas ini cukup memakai dokumen dan wawancara.
+
+\subsection*{Luaran dan Kaitan dengan Capstone}
+
+Luaran aktivitas ini adalah penilaian risiko keamanan API: lembar periksa terisi, register risiko, dan satu halaman catatan keputusan. Luaran
+ini masuk ke tonggak C2 Kondisi Saat Ini, yang ditinjau menjelang Ujian Tengah Semester (UTS). ID dan versi artefak dipertahankan saat dipakai
+bab berikutnya. Temuan yang sama ditelusuri lagi pada penilaian interoperabilitas di Bab 7 dan pada rancangan \textit{API gateway} di Bab 10.
+
+\subsection*{Kriteria Penilaian}
+
+Tabel \ref{tab:ch06-kriteria-nilai} memuat kriteria penilaian singkat. Yang dinilai adalah alasan dan keterlacakan, bukan banyaknya temuan.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Kriteria penilaian Aktivitas Bab 6}
+  \label{tab:ch06-kriteria-nilai}
+  \small
+  \begin{tabularx}{\textwidth}{T{3.6cm}QT{1.1cm}}
+    \hline
+    \textbf{Kriteria} & \textbf{Yang diperiksa} & \textbf{Bobot} \\ \hline
+    Ketepatan konsep & Butir OWASP, autentikasi, otorisasi, dan alur tidak tertukar & 25\% \\ \hline
+    Keterlacakan bukti & Tiap temuan menunjuk sumber dan status bukti, hipotesis ditandai & 30\% \\ \hline
+    Alasan keputusan dan pengorbanan & Nilai dampak beralasan, alternatif yang ditolak tertulis, pemilik jelas & 30\% \\ \hline
+    Keterbacaan artefak & Pemilik proses non-teknis memahami temuan dan akibatnya & 15\% \\ \hline
+  \end{tabularx}
+\end{table}
+
+\subsection*{Berkas Pendukung}
+
+Daftar berkas tersedia pada \berkas{sources/chapter06/README.md}. Contoh register dan kronologi memakai data latihan sebagai pembanding, bukan
+sebagai jawaban. Templat tidak menggantikan percakapan dengan pemilik proses, dan ketidakpastian dicatat secara terbuka.
+
+\begin{pendalaman}[title={Pendalaman Teknis (opsional): Menelusuri PKCE di OAuth Playground}]
+Tim menelusuri alur \textit{authorization code} dengan PKCE pada OAuth \textit{playground} publik, yang memakai server otorisasi simulasi
+\cite{c06-oauth-playground}. Tim mencatat isi tiap pesan, lalu mencocokkannya dengan Gambar \ref{fig:ch06-alur-pkce}. Pakai hanya akun simulasi
+yang dibuat di \textit{playground} itu. Kredensial nyata tidak boleh dimasukkan. Berkas \berkas{sources/chapter06/contoh-pesan-oauth.md} menjadi
+pembanding, dan \berkas{sources/chapter06/hitung-pkce.py} menghitung ulang nilainya.
+\end{pendalaman}
 
 \section{Ringkasan}
 
-% TODO
+Risiko API muncul ketika kemampuan dan data diekspos melebihi kewenangan pemanggil. Insiden publik memperlihatkan pola itu: T-Mobile melaporkan
+sekitar 37 juta akun lewat satu API yang baru dikenali sesudah 41 hari, dan token curian milik aplikasi pihak ketiga dipakai mengambil data dari
+Salesforce banyak perusahaan. Insiden vendor Medikara pada 2025 berpola sama pada skala kecil. Kredensialnya sah, tetapi 1.240 rekam kunjungan
+terbaca tanpa hubungan layanan.
+
+Autentikasi memeriksa identitas, sedangkan otorisasi memutuskan tindakan yang diizinkan. \textit{API key} menunjuk aplikasi. Token membawa hak yang
+berjangka untuk layanan tertentu. \textit{Scope} membatasi jenis aksi. Tidak satu pun dari ketiganya menjawab pasien yang mana, sehingga layanan bisnis
+wajib memeriksa hak atas objek pada setiap permintaan. Token klinik yang hanya diperiksa \textit{scope}-nya terbuka untuk 240 hasil per hari, padahal
+kebutuhannya 6 hasil.
+
+OAuth 2.0 mengatur pemberian akses, sedangkan OpenID Connect menambahkan lapisan identitas. \textit{Client credentials} dipakai aplikasi server yang
+bertindak untuk dirinya, dan \textit{authorization code} dengan PKCE dipakai aplikasi yang mewakili pasien. RFC 9700 memperbarui praktik keamanan
+OAuth berdasarkan ancaman yang berkembang, sedangkan FAPI 2.0 memperketatnya untuk data berisiko tinggi. OAuth 2.1 masih berupa draf. Layar persetujuan
+berbeda dari dasar pemrosesan, karena UU 27/2022 menyediakan enam dasar dan Permenkes 24/2022 membatasi pembukaan rekam medis sesuai kebutuhan.
+
+Sepuluh kategori OWASP API Security 2023 memberi pertanyaan pemeriksaan, bukan vonis dan bukan prioritas. Urutannya sebagian berasal dari konsensus tim,
+sehingga organisasi tetap menilai dampaknya sendiri. \textit{Rate limiting} membatasi laju, kuota membatasi jumlah dalam periode, dan catatan akses
+membuktikan apa yang terjadi. Pola 155 panggilan per malam lolos dari kuota, dan catatan yang hanya disimpan 7 hari menghilangkan jejak 620 rekam. Kontrol
+organisasi yang lebih luas dibahas di IT40813.
+
+Pesan utama bab ini: token yang sah bukan izin atas semua data. Keputusan keamanan API harus mempertahankan hubungan antara masalah layanan, pilihan yang
+dipertimbangkan, dan bukti keputusan. Artefak C2 perlu menyebut pemilik serta pemicu peninjauan. Keputusan yang baik menjelaskan manfaat yang diharapkan
+sekaligus akibat yang harus ditanggung organisasi.
 
 \section{Latihan}
 
+\subsection*{Latihan 1: Menelusuri Otorisasi Objek}
+
+Jelaskan dengan contoh rekam medis mengapa \textit{Broken Object Level Authorization} menempati urutan pertama. Latihan ini membuktikan kemampuan membedakan
+token yang sah dari hak atas objek, sekaligus membaca alasan peringkat OWASP dengan kritis.
+
 \begin{enumerate}
-  \item Jelaskan dengan contoh rekam medis mengapa \textit{Broken Object Level Authorization} menempati urutan pertama.
-  \item Bandingkan pemakaian \textit{API key} dan OAuth 2.0 \textit{client credentials} untuk integrasi dengan laboratorium mitra.
-  \item Kebocoran data Medikara pada 2025 terjadi lewat vendor. Tentukan dua butir OWASP API Security Top 10 yang paling relevan, lalu jelaskan alasannya.
+  \item Tulis satu akses pasien yang sah: klinik, pasien, \textit{scope}, dan hubungan layanannya.
+  \item Ubah satu hal dalam skenario kertas: ID pasien, fasilitas, atau aksi. Skenario tidak dicoba pada sistem nyata.
+  \item Tentukan pemeriksaan server yang diperlukan dan kode status jawabannya.
+  \item Hitung paparan bila pemeriksaan itu hilang, memakai angka organisasi atau angka Medikara.
+  \item Bandingkan hasilnya dengan penilaian OWASP pada butir API1, lalu tulis pada Tabel \ref{tab:ch06-lat1-hasil}.
+\end{enumerate}
+
+Tabel \ref{tab:ch06-lat1-contoh} merupakan contoh alasan, bukan satu-satunya jawaban yang benar.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 1: klinik A berhak atas 6 dari 240 hasil per hari}
+  \label{tab:ch06-lat1-contoh}
+  \small
+  \begin{tabularx}{\textwidth}{QT{2.1cm}T{1.7cm}T{2.2cm}T{1.4cm}}
+    \hline
+    \textbf{Skenario} & \textbf{Token} & \textbf{Hubungan layanan} & \textbf{Keputusan} & \textbf{Jawaban} \\ \hline
+    Klinik A membaca hasil pasien rujukannya & Sah, \texttt{hasil.baca} & Ada & Diizinkan & 200 \\ \hline
+    Klinik A mengganti ID, membaca pasien klinik B & Sah, \texttt{hasil.baca} & Tidak ada & Ditolak, dicatat & 403 \\ \hline
+    Klinik A memakai token kedaluwarsa & Kedaluwarsa & Tidak diperiksa & Ditolak di \textit{API gateway} & 401 \\ \hline
+    Klinik A mencoba mengubah hasil & Sah, \texttt{hasil.baca} & Ada & Aksi di luar \textit{scope} & 403 \\ \hline
+    Pemeriksaan objek hilang & Sah, \texttt{hasil.baca} & Tidak diperiksa & 234 hasil per hari terbuka & 200 \\ \hline
+  \end{tabularx}
+\end{table}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 1}
+  \label{tab:ch06-lat1-hasil}
+  \small
+  \begin{tabularx}{\textwidth}{QT{2.1cm}T{1.7cm}T{2.2cm}T{1.4cm}}
+    \hline
+    \textbf{Skenario} & \textbf{Token} & \textbf{Hubungan layanan} & \textbf{Keputusan} & \textbf{Jawaban} \\ \hline
+    \dots & \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textbf{Pertanyaan analisis.}
+\begin{enumerate}
+  \item Berapa persen hasil harian terbuka pada baris terakhir tabel tim, dan mengapa token yang sah tidak mengurangi angka itu?
+  \item Dari penilaian OWASP, bagian mana yang menjelaskan urutan pertama, dan bagian mana yang berasal dari konsensus tim?
+  \item Bukti apa pada tabel tim yang membedakan dugaan dari temuan?
+\end{enumerate}
+
+\subsection*{Latihan 2: Memilih Kredensial Laboratorium}
+
+Bandingkan pemakaian \textit{API key} dan OAuth 2.0 \textit{client credentials} untuk integrasi dengan laboratorium mitra. Latihan ini membuktikan kemampuan menilai
+kredensial dari akibat kebocoran dan pencabutan, bukan dari nama teknologinya.
+
+\begin{enumerate}
+  \item Tentukan pihak yang diwakili aplikasi.
+  \item Ubah konstanta pada \berkas{sources/chapter06/hitung-paparan-kredensial.py}, jalankan skripnya, lalu salin hasilnya.
+  \item Bandingkan tujuan pengiriman rahasia, rotasi, dan masa berlaku.
+  \item Batasi hak serta tentukan jalur pencabutan satu laboratorium.
+  \item Pilih salah satu, lalu tulis kondisi yang dapat mengubah pilihan itu pada Tabel \ref{tab:ch06-lat2-hasil}.
+\end{enumerate}
+
+Tabel \ref{tab:ch06-lat2-contoh} merupakan contoh alasan, bukan satu-satunya jawaban yang benar.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 2: 3 laboratorium mitra, tarif Rp60.000 per jam}
+  \label{tab:ch06-lat2-contoh}
+  \small
+  \begin{tabularx}{\textwidth}{T{2.7cm}QQ}
+    \hline
+    \textbf{Unsur} & \textbf{\textit{API key}} & \textbf{\textit{Client credentials}} \\ \hline
+    Pihak yang diwakili & Aplikasi laboratorium & Aplikasi laboratorium \\ \hline
+    Tujuan rahasia & Setiap API yang dipanggil & Hanya server otorisasi \\ \hline
+    Masa berlaku & Misalkan 365 hari & Token 15 menit, rahasia klien dirotasi berkala \\ \hline
+    Paparan bila bocor 30 hari & 9.000 panggilan & Token: paling banyak 300 panggilan. Rahasia klien: tetap 9.000 panggilan \\ \hline
+    Cabut satu laboratorium & Rp120.000, atau Rp360.000 bila kunci dipakai bersama & Rp120.000, token terakhir mati paling lama 15 menit \\ \hline
+    Beban awal & Misalkan 2 jam per laboratorium, Rp360.000 & Misalkan 16 jam per laboratorium, Rp2,88 juta, perlu server otorisasi \\ \hline
+    Kesimpulan & Sederhana, tidak otomatis mewakili pengguna & Dipilih untuk data klinis, karena akibat kebocoran lebih kecil \\ \hline
+  \end{tabularx}
+\end{table}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 2}
+  \label{tab:ch06-lat2-hasil}
+  \small
+  \begin{tabularx}{\textwidth}{T{2.7cm}QQ}
+    \hline
+    \textbf{Unsur} & \textbf{\textit{API key}} & \textbf{\textit{Client credentials}} \\ \hline
+    Pihak yang diwakili & \dots & \dots \\ \hline
+    Tujuan rahasia & \dots & \dots \\ \hline
+    Masa berlaku & \dots & \dots \\ \hline
+    Paparan bila bocor & \dots & \dots \\ \hline
+    Cabut satu laboratorium & \dots & \dots \\ \hline
+    Beban awal & \dots & \dots \\ \hline
+    Kesimpulan & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textbf{Pertanyaan analisis.}
+\begin{enumerate}
+  \item Selisih beban awal setara dengan berapa kali pergantian kredensial bersama? Apa yang belum masuk hitungan itu? Kapan kesederhanaan menambah beban pengamanan?
+  \item Mengapa baris paparan rahasia klien sama dengan \textit{API key}, dan apa akibatnya bagi kebijakan rotasi?
+  \item Baris mana yang menjawab cara mencabut satu laboratorium tanpa memutus laboratorium lain?
+\end{enumerate}
+
+\subsection*{Latihan 3: Menganalisis Insiden Vendor}
+
+Kebocoran data Medikara pada 2025 terjadi lewat vendor. Tentukan dua butir OWASP API Security Top 10 yang paling relevan, lalu jelaskan alasannya. Latihan ini membuktikan
+kemampuan memisahkan fakta, dugaan, dan bukti yang belum tersedia, sebelum menyebut penyebab.
+
+\begin{enumerate}
+  \item Baca \berkas{sources/chapter06/kronologi-insiden-medikara.md}, lalu tuliskan fakta insiden yang tersedia.
+  \item Ajukan dua hipotesis kategori OWASP. Tuliskan alasan pemilihan dan satu butir yang ditolak.
+  \item Tulis penjelasan lain yang sama masuk akalnya untuk tiap hipotesis.
+  \item Daftar bukti untuk menerima atau menolak tiap hipotesis.
+  \item Tentukan kontrol sementara yang mengurangi akibat, lalu tulis pada Tabel \ref{tab:ch06-lat3-hasil}.
+\end{enumerate}
+
+Tabel \ref{tab:ch06-lat3-contoh} merupakan contoh alasan, bukan satu-satunya jawaban yang benar. Contoh ini mempertimbangkan API2, tetapi tidak memilihnya karena buktinya
+baru berupa dugaan. Contoh ini menolak API10, karena arah kejadiannya bukan data vendor yang masuk ke Medikara.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 3: dua hipotesis pada kasus insiden vendor (data latihan)}
+  \label{tab:ch06-lat3-contoh}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{T{1.0cm}QQQQ}
+    \hline
+    \textbf{Butir} & \textbf{Fakta pendukung} & \textbf{Penjelasan lain} & \textbf{Bukti yang dicari} & \textbf{Kontrol sementara} \\ \hline
+    API1 & Token sah, 1.240 rekam kunjungan tanpa hubungan layanan & Akun dukungan sengaja diberi hak luas & Aturan hak per objek, uji berizin dengan data sintetis & Batasi \textit{endpoint} kunjungan pada pasien dengan penugasan aktif \\ \hline
+    API9 & Akun dukungan aktif setelah kontrak selesai, inventaris Bab 4 tidak memuat akses itu & Inventaris ada, tetapi tidak dibaca & Daftar akun, kontrak, inventaris aliran data & Cabut akun tanpa penugasan aktif, catat aliran data \\ \hline
+  \end{tabularx}
+\end{table}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 3}
+  \label{tab:ch06-lat3-hasil}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{T{1.0cm}QQQQ}
+    \hline
+    \textbf{Butir} & \textbf{Fakta pendukung} & \textbf{Penjelasan lain} & \textbf{Bukti yang dicari} & \textbf{Kontrol sementara} \\ \hline
+    \dots & \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textbf{Pertanyaan analisis.}
+\begin{enumerate}
+  \item Mengapa penyebab tidak boleh ditebak dari judul insiden? Tunjukkan dari kolom penjelasan lain pada tabel tim.
+  \item Kontrol apa yang mengurangi akibat sebelum penyebab pasti ditemukan? Berapa rekam yang dapat ditelusuri bila catatan rinci disimpan 30 hari, bukan 7 hari?
+  \item Pola 155 panggilan per malam berada di bawah kuota 300 panggilan per hari. Kontrol apa yang akan mendeteksinya lebih cepat, dan data apa yang dibutuhkan kontrol itu?
 \end{enumerate}

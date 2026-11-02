@@ -1,0 +1,34 @@
+\begin{tikzpicture}[
+  kotak/.style={draw, rounded corners, text width=3.1cm, minimum height=1.05cm,
+    align=flush center, font=\scriptsize},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  label/.style={font=\tiny, fill=white, inner sep=1pt}
+]
+  \node[kotak, fill=praditagreen!15, text width=4.2cm] (usulan) at (-1.9,0)
+    {\textbf{Usulan kontrak API-01}\\{\tiny\mdseries 12 per triwulan, atau 48 per tahun}};
+  \node[kotak, fill=blue!8] (lint) at (-1.9,-1.45)
+    {\textbf{Lint otomatis}\\{\tiny\mdseries berjalan pada semua usulan}};
+  \node[kotak, fill=red!22] (gagal) at (2.9,-1.45)
+    {\textbf{Pengecualian}\\{\tiny\mdseries alasan, pemilik, tenggat, penerima risiko}};
+  \node[kotak, fill=blue!8] (t1) at (-1.9,-2.95) {Kontrak berubah?};
+  \node[kotak, fill=blue!8] (t2) at (2.9,-2.95)
+    {Merusak, data spesifik baru, atau mitra jenis baru?};
+  \node[kotak, fill=green!10] (a) at (-4.0,-4.65)
+    {\textbf{Kelas A: 30 usulan}\\{\tiny\mdseries pemilik produk, 1 hari kerja}};
+  \node[kotak, fill=green!10] (b) at (0.0,-4.65)
+    {\textbf{Kelas B: 14 usulan}\\{\tiny\mdseries tinjauan sejawat, 3 hari kerja}};
+  \node[kotak, fill=orange!12] (c) at (4.0,-4.65)
+    {\textbf{Kelas C: 4 usulan}\\{\tiny\mdseries forum bersama, 10 hari kerja}};
+  \node[kotak, fill=green!10, text width=11.1cm] (rilis) at (0,-6.2)
+    {\textbf{Rilis API dan catatan hasil di katalog}\\{\tiny\mdseries pemilik, versi, dan hasil uji tersimpan}};
+  \draw[panah] (usulan) -- (lint);
+  \draw[panah] (lint) -- node[label] {lulus} (t1);
+  \draw[panah] (lint) -- node[above=1pt, font=\tiny, align=center] {gagal, perlu\\keputusan} (gagal);
+  \draw[panah] (t1) -- node[label] {ya} (t2);
+  \draw[panah] (t1.south) -- ++(0,-0.3) -| node[label, pos=0.75] {tidak} (a.north);
+  \draw[panah] (t2.south) -- ++(0,-0.3) -| node[label, pos=0.75] {tidak} (b.north);
+  \draw[panah] (t2.south) -- ++(0,-0.3) -| node[label, pos=0.75] {ya} (c.north);
+  \draw[panah] (a.south) -- (a.south |- rilis.north);
+  \draw[panah] (b.south) -- node[label] {lulus tinjauan} (b.south |- rilis.north);
+  \draw[panah] (c.south) -- (c.south |- rilis.north);
+\end{tikzpicture}

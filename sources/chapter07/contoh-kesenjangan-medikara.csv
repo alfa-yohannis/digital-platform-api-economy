@@ -1,0 +1,10 @@
+# Contoh lembar kesenjangan Medikara Bab 7 (tabel kasus penilaian): data latihan, salin lalu ganti dengan bukti tim; dibaca oleh hitung-kesiapan-interoperabilitas.py.
+id,jalur,baris_inventaris,kewajiban_atau_standar,dasar,kondisi_saat_ini,tingkat,status_bukti,pemilik
+KI-01,Klinis,INT-02,Kiriman ke platform Kementerian Kesehatan lengkap,Permenkes 24/2022 Pasal 21,"5 sambungan berjalan, sekitar 4 persen kunjungan klinik belum terkirim",Sebagian,Terverifikasi,Manajer Rekam Medis
+KI-02,Klinis,INT-02,Status tiap kiriman dapat ditelusuri,"Usulan Bab 5, praktik internal",Kiriman gagal tanpa pemberitahuan,Belum,Terverifikasi,Manajer Rekam Medis
+KI-03,Klinis,INT-02,"Patient, Practitioner, Organization, dan Location cocok",Panduan SATUSEHAT,"Misalkan 2.800 kiriman gagal per bulan karena identitas dan lokasi",Sebagian,Hipotesis,Manajer Rekam Medis
+KI-04,Klinis,INT-02,Kode memakai terminologi yang ditetapkan,Standar terminologi SATUSEHAT,Misalkan 600 kiriman gagal per bulan karena kode lokal,Sebagian,Hipotesis,Manajer Rekam Medis
+KI-05,Klinis,"INT-09, INT-10","18 klinik, 1 laboratorium, dan 12 apotek terhubung",Permenkes 24/2022 Pasal 3 dan Pasal 21,Inventaris belum mencatat jalurnya,Belum,Belum terverifikasi,Belum ada
+KI-06,Administrasi,INT-01,"Kepesertaan, surat eligibilitas, dan klaim berjalan",Peraturan BPJS Kesehatan 7/2018,"5 sambungan berjalan, tiap pembaruan diterapkan lima kali",Terpenuhi,Terverifikasi,Manajer Klaim
+KI-07,Administrasi,INT-01,Persetujuan pembukaan isi rekam medis dicatat saat registrasi,Permenkes 24/2022 Pasal 34 ayat (7),Belum diperiksa,Belum,Belum terverifikasi,Manajer Klaim
+KI-08,Pembayaran,INT-08,Open API Pembayaran berbasis SNAP,PADG 23/15/PADG/2021,Medikara bukan penyedia jasa pembayaran,Tidak berlaku,Terverifikasi,Manajer Keuangan

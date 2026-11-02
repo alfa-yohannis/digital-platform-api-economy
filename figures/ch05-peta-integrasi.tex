@@ -1,0 +1,48 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000},
+  inti/.style={draw, rounded corners, fill=praditagreen!15, text width=1.95cm, minimum height=0.8cm, align=center},
+  pihak/.style={draw, rounded corners, fill=blue!8, text width=2.0cm, minimum height=0.7cm, align=center},
+  label/.style={draw=gray, solid, thin, rounded corners=1pt, fill=white, font=\tiny, align=center, inner sep=1.5pt},
+  masalah/.style={draw, solid, thin, rounded corners=1pt, fill=red!22, font=\tiny, align=center, inner sep=1.5pt},
+  ket/.style={font=\tiny, anchor=west},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  jeda/.style={-{Stealth[length=2mm]}, thick, dashed}
+]
+  % Dua sistem inti Medikara berada di tengah peta.
+  \node[inti] (simrs) at (5.9,0) {SIMRS\\5 rumah sakit};
+  \node[inti] (erp) at (5.9,-1.6) {ERP keuangan};
+
+  % Pihak dan sistem di sekelilingnya, dengan ID yang sama seperti inventaris Bab 4.
+  \node[pihak] (bpjs) at (1.12,1.6) {BPJS Kesehatan};
+  \node[pihak] (sehat) at (5.9,1.6) {SATUSEHAT};
+  \node[pihak] (plus) at (10.68,1.6) {Medikara+};
+  \node[pihak] (lab) at (1.12,0) {3 laboratorium mitra};
+  \node[pihak] (apotek) at (10.68,0) {12 apotek};
+  \node[pihak] (asuransi) at (1.12,-1.6) {9 asuransi swasta};
+  \node[pihak] (usaha) at (10.68,-1.6) {36 perusahaan klien};
+  \node[pihak] (bank) at (5.9,-2.85) {2 bank mitra};
+  \node[pihak] (klinik) at (1.12,-3.65) {18 klinik pratama};
+  \node[pihak] (pusat) at (10.68,-3.65) {Kantor pusat};
+
+  % Garis penuh sinkron, garis putus asinkron.
+  \draw[panah] (simrs) -- node[label, pos=0.58] {INT-01\\panggilan, per kunjungan} (bpjs);
+  \draw[panah] (simrs) -- node[masalah] {\textbf{2} INT-02\\panggilan, per kunjungan} (sehat);
+  \draw[jeda] (simrs) -- node[masalah, pos=0.58] {\textbf{1} INT-03\\basis data, API bawaan\\tiap 5 menit} (plus);
+  \draw[jeda] (simrs) -- node[label] {INT-04: berkas, harian} (erp);
+  \draw[jeda] (simrs.south west) -- node[label, pos=0.6] {INT-05\\portal, mingguan} (asuransi.north east);
+  \draw[jeda] (erp) -- node[label] {INT-05} (asuransi);
+  \draw[jeda] (lab) -- node[masalah] {\textbf{3} INT-06\\surel, per hasil} (simrs);
+  \draw[jeda] (simrs.south east) -- node[label, pos=0.6] {INT-07\\surel, bulanan} (usaha.north west);
+  \draw[jeda] (bank) -- node[label, right=2pt] {INT-08: unduh berkas, harian} (erp);
+  \draw[jeda] (klinik) -- node[label] {INT-09: surel, mingguan} (pusat);
+  \draw[jeda] (simrs) -- node[label] {INT-10\\berkas, belum diketahui} (apotek);
+
+  % Keterangan peta.
+  \draw[panah] (0.0,-4.35) -- (0.8,-4.35);
+  \node[ket] at (0.85,-4.35) {sinkron};
+  \draw[jeda] (1.9,-4.35) -- (2.7,-4.35);
+  \node[ket] at (2.75,-4.35) {asinkron};
+  \node[masalah, anchor=west] at (4.0,-4.35) {titik masalah};
+  \node[ket] at (5.4,-4.35) {1 keterikatan, 2 kegagalan senyap, 3 kerja ulang};
+\end{tikzpicture}

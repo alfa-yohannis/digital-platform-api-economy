@@ -1,0 +1,41 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  tahap/.style={draw, rounded corners, fill=blue!8, text width=1.8cm,
+                minimum height=0.9cm, align=center},
+  tekan/.style={tahap, fill=orange!12},
+  masalah/.style={tahap, fill=red!22},
+  hasil/.style={draw, rounded corners, fill=green!10, text width=11.5cm,
+                minimum height=0.6cm, align=center},
+  judul/.style={font=\scriptsize\bfseries, anchor=west},
+  ket/.style={font=\tiny, align=center, fill=white, inner sep=1.5pt},
+  panah/.style={-{Stealth[length=2mm]}, thick}
+]
+  % Baris atas: proyek berhenti pada serah terima.
+  \node[judul] at (-1.0,1.85) {API sebagai proyek integrasi};
+  \node[tahap] (p1) at (0,1.05) {Permintaan};
+  \node[tahap] (p2) at (2.4,1.05) {Bangun};
+  \node[tahap] (p3) at (4.8,1.05) {Uji terima};
+  \node[tahap] (p4) at (7.2,1.05) {Serah terima};
+  \node[masalah] (p5) at (9.6,1.05)
+    {Proyek ditutup\\{\tiny\mdseries siapa menjawab?}};
+  \draw[panah] (p1) -- (p2);
+  \draw[panah] (p2) -- (p3);
+  \draw[panah] (p3) -- (p4);
+  \draw[panah] (p4) -- (p5);
+
+  % Baris bawah: lima tahap siklus hidup produk API.
+  \node[judul] at (-1.0,-0.2) {API sebagai produk};
+  \node[tahap] (s1) at (0,-1.0) {Buat\\{\tiny\mdseries belum produksi}};
+  \node[tahap] (s2) at (2.4,-1.0) {Terbitkan\\{\tiny\mdseries tersedia bagi pengguna}};
+  \node[tekan] (s3) at (4.8,-1.0) {Wujudkan nilai\\{\tiny\mdseries tujuan tercapai}};
+  \node[tekan] (s4) at (7.2,-1.0) {Pelihara\\{\tiny\mdseries nilai mendatar}};
+  \node[tahap] (s5) at (9.6,-1.0) {Pensiunkan\\{\tiny\mdseries nilai tak lagi sepadan}};
+  \draw[panah] (s1) -- (s2);
+  \draw[panah] (s2) -- (s3);
+  \draw[panah] (s3) -- (s4);
+  \draw[panah] (s4) -- (s5);
+  \draw[panah] (s4.north) -- ++(0,0.3) -| node[ket, pos=0.25, above=1pt] {ukur dan perbaiki} (s3.north);
+
+  \node[hasil] at (4.8,-2.2)
+    {Pemilik produk, anggaran tahunan, dan dukungan berlanjut di seluruh tahap};
+\end{tikzpicture}

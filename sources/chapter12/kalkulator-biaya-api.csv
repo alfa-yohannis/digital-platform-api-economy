@@ -1,0 +1,8 @@
+# Kegunaan: pemisalan biaya tahunan API-01 Bab 12, masukan hitung-monetisasi.py. Cara pakai: salin, ganti nilai dengan angka tim, hapus baris ini saat impor ke spreadsheet.
+komponen,jenis,juta_per_tahun,asal
+Lapisan bersama bagian tetap,tetap,225.6,Pagu Rp300 juta Bab 4 dan Bab 10 dikurangi trafik dan tiket
+Pemilik produk dukungan dan perubahan,tetap,180,Misalkan setara API klaim Bab 4
+Trafik,variabel,60,Bab 10 bagian langganan Rp180 juta yang bergantung pada trafik
+Tiket dukungan,variabel,14.4,Bab 11 pilihan P2 1 tiket per klinik per bulan 30 menit
+Rekonsiliasi tagihan,variabel,28.8,Misalkan 1 jam per klinik per bulan pada tarif Rp60.000
+Kredit SLA,variabel,12,Bab 11 SLA 99.0 persen satu bulan meleset per tahun

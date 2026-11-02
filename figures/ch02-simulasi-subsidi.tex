@@ -1,0 +1,41 @@
+\begin{tikzpicture}[font=\scriptsize]
+  \begin{axis}[
+    width=11cm, height=6cm,
+    xmin=0, xmax=24, ymin=0, ymax=20000,
+    xtick={0,3,6,9,12,15,18,21,24},
+    xlabel={Bulan}, ylabel={Pasien aktif},
+    scaled y ticks=false,
+    yticklabel style={/pgf/number format/.cd, 1000 sep={.}},
+    tick label style={font=\tiny},
+    label style={font=\scriptsize},
+    legend style={font=\tiny, at={(0.02,0.98)}, anchor=north west, draw=gray!50},
+    legend cell align=left,
+    grid=major, grid style={gray!20},
+    every axis plot/.append style={thick, mark=none}
+  ]
+    \addplot[gray!70!black, dashed] coordinates {
+      (0,6000) (1,5952) (2,5780) (3,5531) (4,5236) (5,4918) (6,4680) (7,4413)
+      (8,4214) (9,3984) (10,3813) (11,3612) (12,3395) (13,3233) (14,3051)
+      (15,2916) (16,2760) (17,2644) (18,2507) (19,2359) (20,2248) (21,2124)
+      (22,2032) (23,1925) (24,1846)};
+    \addlegendentry{tanpa subsidi}
+    \addplot[blue!70!black] coordinates {
+      (0,6000) (1,7452) (2,8470) (3,9295) (4,9975) (5,10542) (6,11023)
+      (7,11438) (8,11803) (9,12128) (10,10923) (11,10008) (12,9313) (13,8787)
+      (14,8227) (15,7803) (16,7337) (17,6985) (18,6586) (19,6287) (20,5940)
+      (21,5570) (22,5293) (23,4985) (24,4755)};
+    \addlegendentry{subsidi pasien 9 bulan}
+    \addplot[orange!80!black] coordinates {
+      (0,6000) (1,5952) (2,6015) (3,6161) (4,6370) (5,6626) (6,7712) (7,8785)
+      (8,8499) (9,8106) (10,7651) (11,7168) (12,6803) (13,6401) (14,6098)
+      (15,5754) (16,5496) (17,5196) (18,4876) (19,4636) (20,4370) (21,4170)
+      (22,3942) (23,3771) (24,3571)};
+    \addlegendentry{subsidi dokter 6 bulan}
+    \addplot[praditagreen, very thick] coordinates {
+      (0,6000) (1,5952) (2,6015) (3,6161) (4,6370) (5,6626) (6,7712) (7,8785)
+      (8,9849) (9,10905) (10,11956) (11,12682) (12,13157) (13,13618)
+      (14,14068) (15,14508) (16,14941) (17,15368) (18,15791) (19,16209)
+      (20,16625) (21,17039) (22,17451) (23,17862) (24,18272)};
+    \addlegendentry{subsidi dokter 9 bulan}
+  \end{axis}
+\end{tikzpicture}

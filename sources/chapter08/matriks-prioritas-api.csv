@@ -1,0 +1,10 @@
+# Kegunaan: matriks kandidat API Medikara Bab 8, data latihan untuk hitung-prioritas-portofolio.py. Cara pakai: salin, ganti dengan bukti tim, hapus baris ini saat impor ke spreadsheet.
+id,kandidat,kapabilitas,baris_inventaris,pengguna,pemilik,gerbang,nilai,usaha,risiko,jam_usaha,manfaat_juta_per_tahun,dasar_manfaat,prasyarat,status_bukti,keputusan
+API-01,Jadwal dan Janji Temu,CAP-L03,INT-03,Medikara+ dan 40 klinik mitra,Manajer Layanan Rawat Jalan,dinilai,5,4,3,2400,1440,Langganan klinik Bab 2,API-06,Pemisalan Bab 2 dan Bab 3,Tahun depan
+API-02,Hasil Pemeriksaan,CAP-L06,INT-06 dan baris usulan Bab 5,3 laboratorium dan 40 klinik mitra,Manajer Laboratorium,dinilai,4,4,5,2400,208.8,79.2 kerja ulang ditambah 129.6 telepon,API-06,Wawancara dan pemisalan Bab 5,Tahun depan
+API-03,Klaim Asuransi,CAP-P01,INT-05,9 asuransi,Manajer Klaim,dinilai,3,5,4,4167,56.16,Penolakan format 6 ke 2 persen Bab 4,API-06,Terverifikasi untuk penolakan,Antrean
+API-04,Rekap Perusahaan,Belum ada di peta,INT-07,36 perusahaan klien,Manajer Layanan Perusahaan,dinilai,2,2,3,800,23.04,32 jam per bulan,API-06,Terverifikasi,Antrean
+API-05,Rekap Klinik,CAP-P03,INT-09,18 klinik dan kantor pusat,Manajer Pelaporan,alternatif,,,,,34.56,48 jam per bulan,,Terverifikasi,Rapikan
+API-06,Identitas dan Akses,CAP-P02,Temuan Bab 6,Seluruh API mitra dan privat,Kepala Keamanan Informasi,dinilai,1,3,3,1200,0,Tanpa manfaat langsung,,Pemisalan Bab 6,Tahun depan
+API-07,Mutasi Bank,CAP-P04,INT-08,Tim keuangan,Manajer Keuangan,alternatif,,,,,36,50 jam per bulan,,Terverifikasi,Rapikan dan pakai API bank bila berubah
+API-08,Resep Apotek,CAP-L06,INT-10,12 apotek,Belum ada,tanpa_pemilik,,,,,,Volume belum diketahui,,Belum terverifikasi,Telusuri dulu

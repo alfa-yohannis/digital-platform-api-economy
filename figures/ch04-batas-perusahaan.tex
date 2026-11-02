@@ -1,0 +1,45 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  dalam/.style={draw, rounded corners, fill=praditagreen!15, text width=1.6cm,
+                minimum height=0.8cm, align=center},
+  luar/.style={draw, rounded corners, fill=blue!8, text width=2.05cm,
+               minimum height=0.8cm, align=center},
+  manual/.style={draw, rounded corners, fill=red!22, text width=1.05cm,
+                 minimum height=0.5cm, align=center, font=\tiny, inner sep=1.5pt},
+  gerbang/.style={draw, rounded corners, fill=orange!12, text width=1.05cm,
+                  minimum height=0.5cm, align=center, font=\tiny\bfseries, inner sep=1.5pt},
+  batas/.style={draw=praditagreen, dashed, thick, rounded corners, inner sep=4pt},
+  judul/.style={font=\scriptsize\bfseries, align=center},
+  ket/.style={font=\tiny, align=center},
+  panah/.style={-{Stealth[length=2mm]}, thick}
+]
+  % Panel kiri: tiap mitra melintasi batas dengan caranya sendiri.
+  \node[judul] at (2.8,1.75) {Sebelum: tiap mitra punya cara sendiri};
+  \node[dalam] (a1) at (0.9,1.0) {Layanan klinis};
+  \node[dalam] (a2) at (0.9,0) {Data pasien};
+  \node[dalam] (a3) at (0.9,-1.0) {Tagihan dan rekap};
+  \node[batas, fit=(a1)(a2)(a3)] (ba) {};
+  \node[luar] (l1) at (4.8,1.0) {3 laboratorium\\mitra};
+  \node[luar] (l2) at (4.8,0) {9 asuransi\\swasta};
+  \node[luar] (l3) at (4.8,-1.0) {36 perusahaan\\klien};
+  \draw[panah] (l1.west) -- node[manual] {surel} (l1.west -| ba.east);
+  \draw[panah] (ba.east |- l2.west) -- node[manual] {9 portal} (l2.west);
+  \draw[panah] (ba.east |- l3.west) -- node[manual] {\textit{spreadsheet}} (l3.west);
+  \node[ket] at (2.8,-1.95) {Misalkan 259 jam kerja manual per bulan};
+
+  % Panel kanan: batas tetap ada, tetapi cara melintasinya seragam dan terkelola.
+  \begin{scope}[xshift=6.35cm]
+    \node[judul] at (2.8,1.75) {Sesudah: batas punya gerbang terkelola};
+    \node[dalam] (b1) at (0.9,1.0) {Layanan klinis};
+    \node[dalam] (b2) at (0.9,0) {Data pasien};
+    \node[dalam] (b3) at (0.9,-1.0) {Tagihan dan rekap};
+    \node[batas, fit=(b1)(b2)(b3)] (bb) {};
+    \node[luar] (r1) at (4.8,1.0) {3 laboratorium\\mitra};
+    \node[luar] (r2) at (4.8,0) {9 asuransi\\swasta};
+    \node[luar] (r3) at (4.8,-1.0) {36 perusahaan\\klien};
+    \draw[panah] (r1.west) -- node[gerbang] {API hasil} (r1.west -| bb.east);
+    \draw[panah] (bb.east |- r2.west) -- node[gerbang] {API klaim} (r2.west);
+    \draw[panah] (bb.east |- r3.west) -- node[gerbang] {API rekap} (r3.west);
+    \node[ket] at (2.8,-1.95) {Hak akses tetap diatur, biaya melintasi batas turun};
+  \end{scope}
+\end{tikzpicture}

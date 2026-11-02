@@ -1,0 +1,8 @@
+# Kegunaan: matriks berbobot tiga alternatif pada Bab 10, skor 1 sampai 5 dan bobot berjumlah 100. Cara pakai: salin, sepakati bobot sebelum mengisi skor, lalu jalankan hitung-matriks-platform.py. Hapus baris komentar saat impor ke spreadsheet.
+id,kriteria,bobot,a_cloud_terkelola,b_open_source_sendiri,c_komersial_sendiri,dasar_penilaian,pemilik,bukti
+K10-1,Biaya total,25,4,2,3,Biaya 3 tahun terhadap pagu Rp900 juta,Manajer Keuangan,Asumsi latihan
+K10-2,Kemampuan kebijakan,15,4,4,5,"Token, kuota, rute versi, penerapan bertahap",Tim integrasi,Asumsi latihan
+K10-3,Dukungan,10,5,2,4,Janji layanan penyedia dan jalur eskalasi,Tim integrasi,Asumsi latihan
+K10-4,Lokasi data,20,3,5,5,A belum punya bukti tertulis tentang wilayah konfigurasi dan log,Petugas pelindungan data,Asumsi latihan
+K10-5,Portabilitas,10,2,5,3,Kebijakan yang dapat dibawa keluar dari produk,Tim integrasi,Asumsi latihan
+K10-6,Keterampilan tim,20,4,2,3,Jam operasi terhadap cadangan 1.080 jam dan pengalaman tim,Kepala Keamanan Informasi,Asumsi latihan

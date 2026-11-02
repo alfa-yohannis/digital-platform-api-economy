@@ -1,5 +1,22 @@
 \chapter{Orientasi: Platform, API, dan Capstone}
 
+% Gaya listing Python khusus bab ini, karena preamble modul tidak menyediakannya.
+\lstdefinestyle{ch01python}{
+  language=Python,
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{red},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  frame=lines,
+  backgroundcolor=\color{lightgray!10},
+  breaklines=true,
+  showstringspaces=false,
+  captionpos=b,
+  tabsize=2
+}
+
 \section*{Tujuan Pembelajaran}
 \begin{itemize}
   \item Menjelaskan perbedaan bisnis \textit{pipeline} dan bisnis platform dengan contoh dari sektor yang dikenal.
@@ -9,80 +26,1240 @@
 
 \section{Pendahuluan}
 
-% TODO
-% Cakupan: organisasi bertukar data dengan banyak pihak luar lewat surel, berkas, portal, dan
-% sambungan sistem yang berbeda-beda; akibatnya antrean, kerja ulang, dan biaya integrasi naik.
+Setiap hari sebuah jaringan layanan kesehatan bertukar data dengan banyak pihak
+di luar dirinya. Status kepesertaan pasien diperiksa ke Badan Penyelenggara
+Jaminan Sosial (BPJS) Kesehatan. Data kunjungan dikirim ke SATUSEHAT milik
+Kementerian Kesehatan. Tagihan dikirim ke perusahaan asuransi swasta, hasil
+pemeriksaan khusus datang dari laboratorium mitra, dan rekap pemakaian layanan
+dikirim ke perusahaan yang karyawannya dilayani. Tiap pihak meminta data dengan
+caranya sendiri. Ada yang lewat surel, ada yang lewat unggah berkas di portal,
+dan ada yang lewat sambungan sistem yang dibangun khusus untuk pihak itu.
+
+Keragaman cara itu punya tiga akibat yang dapat dihitung. Pertama, antrean
+memanjang, karena petugas menunggu jawaban dari sistem atau orang di pihak lain.
+Kedua, kerja ulang bertambah, karena data yang sama diketik ulang dari surel ke
+sistem, lalu dari sistem ke \textit{spreadsheet}. Ketiga, biaya integrasi naik,
+karena setiap pihak baru berarti satu sambungan baru yang harus dibangun, diuji,
+dan dirawat. Masalah ini bukan semata-mata masalah teknologi. Masalahnya
+terletak pada cara organisasi bekerja sama dengan pihak luar. Mata kuliah ini
+membahasnya dari dua sisi: platform sebagai model bisnis yang mengatur kerja sama
+itu, dan API sebagai sarana teknis yang menjalankannya.
+
+Bab ini adalah bab orientasi. Isinya peta mata kuliah dan capstone bersama,
+perbedaan bisnis \textit{pipeline} dan bisnis platform, cara kerja API dalam
+bahasa sehari-hari, cara organisasi bertukar data, kosakata bersama untuk tim
+campuran, dan kasus berjalan Medikara Health. Rujukan utamanya adalah Parker dkk.
+\cite{parker2016platform} dan Van Alstyne dkk. \cite{c01-vanalstyne2016pipelines}
+untuk perbedaan \textit{pipeline} dan platform, Hagiu dan Wright
+\cite{hagiu2015multisided} untuk definisi platform multi-sisi, Lauret
+\cite{lauret2025design} untuk cara kerja API, serta spesifikasi HyperText
+Transfer Protocol (HTTP) \cite{rfc9110} dan JSON \cite{c01-rfc8259} yang
+menjadi dasar teknisnya.
+
+\IfFileExists{../figures/ch01-diagram-konsep.png}{%
+
+Gambar \ref{fig:ch01-ilustrasi-bab} merangkum hubungan komponen dan konsep utama bab ini.
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=\textwidth]{../figures/ch01-diagram-konsep.png}
+  \caption{Dari rantai layanan ke interaksi platform}
+  \label{fig:ch01-ilustrasi-bab}
+\end{figure}
+}{}
 
 \section{Peta Mata Kuliah dan Capstone Bersama}
 
-% TODO
-% Cakupan: alur 14 pertemuan dalam empat Bagian; tonggak C1 sampai C4 dan luaran mata kuliah ini
-% di tiap tonggak; pembagian materi dengan IT40513, IT40713, dan IT40813; cara belajar mandiri
-% dengan modul dan slide, serta fungsi pertemuan Sabtu untuk membahas progres.
-% Kasus Medikara: posisi Medikara sebagai kasus cadangan bagi tim tanpa akses organisasi.
+Mahasiswa yang baru bergabung biasanya bertanya dua hal: apa yang dikerjakan
+selama satu semester, dan bagaimana mata kuliah ini terkait dengan tiga mata
+kuliah lain di peminatan yang sama. Seksi ini menjawab keduanya.
+
+Mata kuliah ini berisi 14 pertemuan yang dikelompokkan ke dalam empat Bagian.
+Keempatnya sejajar dengan empat tonggak capstone, seperti terlihat pada Gambar
+\ref{fig:ch01-peta-capstone}. Bagian I (Pertemuan 1 sampai 3) menjawab
+pertanyaan strategi: perlukah organisasi menjadi platform, dan dengan siapa
+organisasi itu bekerja sama. Bagian II (Pertemuan 4 sampai 7) memotret integrasi
+dan API yang berjalan saat ini, lalu hasilnya ditinjau menjelang Ujian Tengah
+Semester (UTS). Bagian III (Pertemuan 8 sampai 11) merancang platform API
+target. Bagian IV (Pertemuan 12 sampai 14) menghubungkan rancangan itu dengan
+nilai bisnis, aturan main, dan peta jalan, lalu hasilnya dipresentasikan
+menjelang Ujian Akhir Semester (UAS).
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch01-peta-capstone.tex}
+  \caption{Empat Bagian mata kuliah sejajar dengan empat tonggak capstone, dan
+           tiap Bagian menyumbang luaran ke satu tonggak}
+  \label{fig:ch01-peta-capstone}
+\end{figure}
+
+Urutan ini disengaja. Strategi dibahas lebih dahulu karena API yang dibuka tanpa
+strategi hanya menambah integrasi baru yang mahal. Kondisi saat ini dipotret
+sebelum kondisi target dirancang, karena rancangan yang tidak berangkat dari
+masalah nyata sulit dipertanggungjawabkan di depan manajemen.
+
+Capstone adalah proyek bersama empat mata kuliah peminatan Digital Enterprise
+Architecture. Tiap tim menyusun satu dokumen berjudul ``Cetak Biru Transformasi
+Digital'' untuk satu organisasi. Tiap mata kuliah menyumbang bagian yang berbeda
+ke dokumen itu, seperti pada Tabel \ref{tab:ch01-pembagian}. Topik yang menjadi
+milik mata kuliah lain hanya disinggung singkat di modul ini, lalu diberi
+keterangan tempat pembahasan rincinya.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Sumbangan keempat mata kuliah ke Cetak Biru Transformasi Digital}
+  \label{tab:ch01-pembagian}
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.0cm}
+                               >{\raggedright\arraybackslash}X
+                               >{\raggedright\arraybackslash}X}
+    \hline
+    \textbf{Mata kuliah} & \textbf{Sumbangan ke cetak biru} & \textbf{Contoh topik yang dibahas rinci di sana} \\
+    \hline
+    IT40513 Enterprise Architecture \& Digital Blueprint & Gambaran utuh organisasi: \textit{capability map}, \textit{value stream}, arsitektur aplikasi, dan peta jalan transformasi & \textit{Capability map} dan \textit{value stream} yang dipakai Bab 8 sebagai bahan portofolio API \\
+    \hline
+    IT40613 Digital Platform \& API Economy & Strategi platform, potret integrasi dan API, rancangan platform API target, serta tata kelola dan peta jalan platform & Mata kuliah ini \\
+    \hline
+    IT40713 Cloud-Native \& Microservices Architecture & Layanan, \textit{container}, dan infrastruktur \textit{cloud} yang menjalankan API & Arsitektur berbasis \textit{event}, \textit{Domain-Driven Design}, dan \textit{service mesh} \\
+    \hline
+    IT40813 IT Governance, Risk \& Compliance & Kerangka risiko, keamanan informasi, dan kepatuhan & Kerangka keamanan informasi organisasi, pelindungan data pribadi secara rinci, dan pelaporan kinerja ke direksi \\
+    \hline
+  \end{tabularx}
+\end{table}
+
+Tim capstone sengaja dibentuk campuran. Anggota berlatar bisnis, manajemen,
+akuntansi, hukum, atau kesehatan paham proses, aturan, dan kepentingan pihak
+luar. Anggota berlatar ilmu komputer, rekayasa perangkat lunak, atau teknologi
+informasi (TI) paham sistem dan cara data berpindah. Kedua jenis pengetahuan itu
+dibutuhkan sekaligus. Strategi platform yang ditulis tanpa memahami sistem akan
+sulit dijalankan, sedangkan rancangan API yang dibuat tanpa memahami proses
+bisnis akan sulit dipakai. Karena itu setiap Aktivitas di modul ini membagi
+peran. Anggota non-teknis memimpin bagian yang menyangkut orang, proses, dan
+aturan. Anggota teknis memimpin bagian yang menyangkut sistem dan data.
+
+Tatap muka hanya berlangsung hari Sabtu, dan waktunya dipakai untuk membahas
+progres capstone, bukan untuk mengulang materi. Karena itu modul dan slide
+disusun agar dapat dipelajari mandiri. Urutan belajar yang disarankan untuk tiap
+pertemuan:
+
+\begin{enumerate}
+  \item Baca Tujuan Pembelajaran dan Pendahuluan untuk mengetahui masalah yang
+        dijawab bab itu.
+  \item Baca seksi materi beserta kotak kasus Medikara Health. Kotak pendalaman
+        teknis boleh dilewati mahasiswa berlatar non-teknis, karena isi utama
+        bab tetap utuh tanpanya.
+  \item Kerjakan Latihan secara pribadi untuk memeriksa pemahaman.
+  \item Kerjakan Aktivitas bersama tim memakai berkas di
+        \berkas{sources/chapterNN/}, lalu bawa hasilnya ke pertemuan Sabtu.
+  \item Pakai slide sebagai ringkasan untuk mengulang, bukan sebagai pengganti
+        modul.
+\end{enumerate}
+
+\begin{kasus}[title={Kasus Medikara Health: Kasus Cadangan bagi Tim Tanpa Akses}]
+Tim yang dapat memakai organisasi nyata, misalnya tempat kerja salah satu
+anggota, dianjurkan memakainya, dengan izin tertulis dan data yang dianonimkan.
+Tidak semua tim punya akses seperti itu. Tim yang tidak punya akses memakai
+Medikara Health, jaringan layanan kesehatan fiktif yang dipakai bersama oleh
+keempat mata kuliah.
+
+Karena kasusnya sama, artefak dari satu mata kuliah langsung dapat dipakai di
+mata kuliah lain. Daftar pertukaran data dari bab ini, misalnya, menjadi bahan
+inventaris integrasi di Bab 4. Di IT40813, daftar yang sama menjadi bahan
+penilaian risiko pihak ketiga. Tim yang memakai organisasi sendiri tetap membaca
+kotak kasus di setiap bab. Medikara berfungsi sebagai pembanding: bila hasil tim
+jauh berbeda dari Medikara, perbedaan itu perlu dijelaskan, bukan disembunyikan.
+\end{kasus}
 
 \section{Bisnis Pipeline dan Bisnis Platform}
 
-% TODO
-% Cakupan: rantai nilai linier yang membuat lalu menjual; platform yang mempertemukan pihak dan
-% memfasilitasi interaksi; contoh lokal (transportasi daring, marketplace, dompet digital,
-% telekonsultasi); tidak semua organisasi perlu menjadi platform.
-% Kasus Medikara: rumah sakit sebagai pipeline dan Medikara+ sebagai calon platform.
+Banyak organisasi kini menyebut dirinya platform. Bank menyebut aplikasi
+selulernya platform, rumah sakit menyebut aplikasi janji temunya platform, dan
+vendor menyebut produknya platform. Bila semuanya disebut platform, istilah itu
+kehilangan arti. Padahal perbedaan antara bisnis \textit{pipeline} dan bisnis
+platform menentukan cara organisasi tumbuh, apa yang dikendalikannya, dan risiko
+apa yang ditanggungnya.
+
+Bisnis \textit{pipeline} menciptakan nilai lewat rangkaian langkah yang linier.
+Organisasi membeli bahan, mengolahnya menjadi produk atau layanan, lalu
+menjualnya kepada pelanggan. Nilai mengalir satu arah dari produsen ke konsumen,
+dan organisasi mengendalikan seluruh rantainya \cite{c01-vanalstyne2016pipelines}.
+Bisnis platform menciptakan nilai dengan cara lain. Platform mempertemukan
+pihak-pihak dari luar organisasi, yaitu produsen dan konsumen, lalu memfasilitasi
+interaksi yang menciptakan nilai di antara mereka \cite{parker2016platform}.
+Hagiu dan Wright menekankan dua syarat. Platform memungkinkan interaksi langsung
+antara dua sisi atau lebih yang berbeda, dan tiap sisi itu bergabung dengan
+platform atas kemauannya sendiri \cite{hagiu2015multisided}.
+
+Van Alstyne dkk. merangkum pergeseran dari \textit{pipeline} ke platform menjadi
+tiga \cite{c01-vanalstyne2016pipelines}. Pertama, dari mengendalikan sumber daya
+sendiri ke mengorkestrasi sumber daya milik pihak lain. Kedua, dari
+mengoptimalkan proses internal ke memfasilitasi interaksi eksternal. Ketiga, dari
+memaksimalkan nilai bagi pelanggan ke memaksimalkan nilai bagi seluruh
+ekosistem. Pergeseran ini punya dua konsekuensi. Pertama, aset utama
+\textit{pipeline} adalah yang dimilikinya, misalnya gedung, stok, dan tenaga
+kerja, sedangkan aset utama platform adalah jaringan pihak yang bergabung beserta
+data interaksinya. Kedua, \textit{pipeline} tumbuh dengan menambah kapasitas
+sendiri, sedangkan platform tumbuh ketika makin banyak pihak bergabung.
+Pertumbuhan jenis kedua ini disebut efek jaringan, dan dibahas rinci di Bab 2.
+
+Analoginya seperti warung makan dan pujasera. Warung memasak sendiri, menetapkan
+menu dan harga sendiri, lalu menanggung bahan dan juru masaknya sendiri.
+Pujasera tidak memasak. Pengelolanya menyediakan tempat, meja, kasir bersama,
+kebersihan, dan aturan, lalu penjual dan pembeli bertemu di sana. Pujasera ramai
+bila penjualnya beragam, dan penjual mau masuk bila pembelinya ramai.
+Gambar \ref{fig:ch01-pipeline-platform} memperlihatkan kedua pola itu.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch01-pipeline-platform.tex}
+  \caption{\textit{Pipeline} mengalirkan nilai satu arah di dalam satu
+           organisasi, sedangkan platform mempertemukan pihak luar dan mengatur
+           interaksi di antara mereka}
+  \label{fig:ch01-pipeline-platform}
+\end{figure}
+
+Dua contoh kasus berikut memakai angka pengandaian:
+
+\begin{enumerate}
+  \item Misalkan sebuah rumah sakit swasta mempekerjakan 120 dokter, menetapkan
+        tarif sendiri, dan melayani 900 pasien per hari. Rumah sakit itu bisnis
+        \textit{pipeline}. Rumah sakit menyiapkan dokter, ruang, obat, dan alat,
+        lalu menjual layanan kepada pasien. Melayani lebih banyak pasien berarti
+        menambah dokter, ruang, atau jam layanan miliknya sendiri.
+  \item Misalkan sebuah aplikasi telekonsultasi mempertemukan 3.000 dokter yang
+        berpraktik mandiri dengan pasien di seluruh Indonesia. Aplikasi itu tidak
+        mempekerjakan dokternya. Yang dikerjakannya adalah memverifikasi izin
+        praktik, mencocokkan pasien dengan dokter, menyediakan ruang konsultasi
+        daring, dan menarik biaya untuk tiap konsultasi. Melayani lebih banyak
+        pasien tidak menuntut aplikasi itu merekrut dokter. Yang dibutuhkan
+        adalah lebih banyak dokter mandiri yang mau bergabung.
+\end{enumerate}
+
+Pola yang sama terlihat pada platform digital yang dipakai sehari-hari di
+Indonesia. Tabel \ref{tab:ch01-contoh-platform} merangkum empat jenisnya.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Empat jenis platform digital sehari-hari beserta sisi yang
+           dipertemukannya}
+  \label{tab:ch01-contoh-platform}
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.3cm}
+                               >{\raggedright\arraybackslash}p{2.4cm}
+                               >{\raggedright\arraybackslash}p{2.3cm}
+                               >{\raggedright\arraybackslash}X}
+    \hline
+    \textbf{Jenis platform} & \textbf{Sisi yang dipertemukan} & \textbf{Interaksi inti} & \textbf{Yang diatur platform} \\
+    \hline
+    Transportasi daring & Pengemudi dan penumpang & Perjalanan atau pengantaran & Pencocokan, tarif, pembayaran, dan penilaian \\
+    \hline
+    \textit{Marketplace} & Penjual dan pembeli & Jual beli barang & Etalase, pembayaran, ulasan, dan penyelesaian sengketa \\
+    \hline
+    Dompet digital & Pengguna dan pedagang & Pembayaran & Saldo, kode pembayaran, dan penyelesaian dana ke pedagang \\
+    \hline
+    Telekonsultasi & Dokter dan pasien & Konsultasi kesehatan & Verifikasi dokter, jadwal, catatan konsultasi, dan resep \\
+    \hline
+  \end{tabularx}
+\end{table}
+
+Dua hal pada platform sering tertukar. Pembagiannya begini. Aplikasi digital
+adalah saluran, yaitu cara pelanggan berhubungan dengan organisasi. Platform
+adalah model bisnis, yaitu cara nilai diciptakan. Aplikasi perbankan seluler
+mendigitalkan layanan bank, tetapi produk dan layanannya tetap dibuat bank itu
+sendiri, sehingga polanya tetap \textit{pipeline}. Sebaliknya, platform bisa saja
+tampil sederhana, asalkan sebagian besar nilainya diciptakan pihak luar yang
+bergabung. Pertanyaan pemeriksanya satu: siapa yang menciptakan sebagian besar
+nilai yang dinikmati pengguna, organisasi itu sendiri atau pihak luar yang
+difasilitasinya?
+
+Pertanyaan kemudian muncul: apakah setiap organisasi sebaiknya menjadi platform?
+Jawabannya tidak. Cusumano dkk. menunjukkan bahwa banyak perusahaan yang berhasil
+justru memadukan keduanya. Sebagian bisnisnya \textit{pipeline}, sebagian lagi
+platform \cite{cusumano2019business}. Rumah sakit adalah contoh yang jelas.
+Layanan klinis inti, yaitu pemeriksaan, tindakan, dan perawatan, tetap dikerjakan
+dokter dan perawat yang bekerja untuk rumah sakit, dan mutunya menjadi tanggung
+jawab rumah sakit itu. Yang dapat dibuka sebagai platform adalah lapisan di
+sekitarnya: janji temu, rujukan, hasil laboratorium, pembayaran, dan layanan bagi
+perusahaan klien.
+
+Keputusan untuk membuka diri juga punya dasar empiris. Benzell dkk. meneliti
+perusahaan publik yang membuka API kepada pihak luar \cite{benzell2024apis}.
+Perusahaan yang mengadopsi API publik tumbuh tambahan 38,7 persen dibandingkan
+perusahaan serupa yang tidak mengadopsinya. API yang hanya dipakai untuk
+efisiensi internal tidak menunjukkan efek pertumbuhan yang berarti. Penelitian
+yang sama juga mencatat sisi lainnya: adopsi API eksternal menaikkan risiko
+kebocoran data. Keterbukaan bernilai karena mengundang pihak luar, dan karena
+alasan yang sama keterbukaan menambah risiko. Kedua sisi ini muncul berulang kali
+sepanjang semester.
+
+\begin{kasus}[title={Kasus Medikara Health: Rumah Sakit sebagai Pipeline, Medikara+ sebagai Calon Platform}]
+Lima rumah sakit dan 18 klinik pratama Medikara adalah bisnis \textit{pipeline}.
+Medikara mempekerjakan dokter, menetapkan tarif, membeli obat dan alat, lalu
+menjual layanan untuk sekitar 1,2 juta kunjungan pasien per tahun. Aplikasi
+Medikara+ saat ini juga masih \textit{pipeline}, hanya dalam bentuk digital.
+Misalkan aplikasi itu memuat jadwal sekitar 640 dokter, dan seluruhnya berpraktik
+di fasilitas Medikara sendiri. Pasien memesan janji temu atau telekonsultasi,
+tetapi seluruh layanannya tetap dibuat Medikara.
+
+Strategi ``Satu Pasien, Satu Rekam Medis'' membuka kemungkinan lain. Bila klinik
+mitra, laboratorium, apotek daring, dan asuransi dapat bergabung, Medikara+
+menjadi tempat bertemunya pasien dengan penyedia yang bukan milik Medikara. Pada
+saat itu Medikara+ mulai menjadi platform, dan pertanyaan manajemennya berubah.
+Pertanyaannya bukan lagi berapa dokter yang perlu direkrut, melainkan aturan apa
+yang membuat klinik mitra mau bergabung dan pasien tetap percaya. Bab 2 membahas
+sisi pasar dan efek jaringannya. Bab 3 membahas pilihan antara membangun platform
+sendiri, bergabung ke platform lain, atau bermitra.
+\end{kasus}
+
+Pertanyaan berikutnya: bagaimana pihak-pihak yang bergabung itu terhubung secara
+teknis? Jawabannya API, dan seksi berikut menjelaskannya tanpa menuntut
+kemampuan memprogram.
 
 \section{API dalam Bahasa Sehari-hari}
 
-% TODO
-% Cakupan: analogi loket layanan antarsistem; request, response, dan endpoint; JSON sebagai format
-% data yang dapat dibaca manusia; kode status HTTP (HyperText Transfer Protocol) secara singkat.
-% Kasus Medikara: aplikasi Medikara+ meminta jadwal dokter ke SIMRS.
-% Pendalaman teknis: memanggil satu API publik tanpa akun dengan Postman atau curl, lalu membaca
-% kode status dan isi JSON.
+Pasien membuka Medikara+ dan menekan tombol jadwal dokter. Dalam satu atau dua
+detik, daftar dokter Rumah Sakit Medikara Bekasi untuk hari Senin muncul, lengkap
+dengan sisa kuotanya. Jadwal itu tidak disimpan di ponsel pasien, dan tidak
+diketik ulang oleh petugas ke aplikasi. Jadwal itu tersimpan di Sistem Informasi
+Manajemen Rumah Sakit (SIMRS) Bekasi. Pertanyaan kemudian muncul: bagaimana
+aplikasi di ponsel mendapat data dari sistem di rumah sakit?
+
+Jawabannya API. API adalah cara yang disepakati bagi satu sistem untuk meminta
+data atau layanan dari sistem lain \cite{lauret2025design}. Sistem peminta tidak
+perlu tahu cara kerja di dalam sistem penyedia. Yang perlu diketahuinya hanya tiga
+hal: apa yang boleh diminta, bagaimana menulis permintaannya, dan seperti apa
+bentuk jawabannya. Kesepakatan tentang ketiga hal itu disebut kontrak API, dan
+cara menyusunnya dibahas di Bab 9.
+
+Analoginya seperti loket pengambilan hasil laboratorium. Pasien menyerahkan
+formulir berisi nomor pendaftaran di jendela loket. Petugas mencari hasilnya di
+ruang arsip, lalu menyerahkan amplop hasil, atau menjawab bahwa hasilnya belum
+selesai, atau bahwa nomornya tidak dikenal. Pasien tidak pernah masuk ke ruang
+arsip, dan tidak perlu tahu cara arsip itu disusun. Yang perlu diketahui pasien
+hanya letak loketnya, isi formulirnya, dan arti tiap jawaban petugas.
+
+Analogi itu memetakan tiga istilah yang dipakai sepanjang semester. Formulir yang
+diserahkan disebut \textit{request}, yaitu permintaan dari sistem peminta. Amplop
+atau jawaban petugas disebut \textit{response}, yaitu jawaban dari sistem
+penyedia. Jendela loket tempat satu jenis formulir diserahkan disebut
+\textit{endpoint}, yaitu alamat tertentu pada API untuk satu jenis permintaan.
+Satu API biasanya punya banyak \textit{endpoint}, sama seperti satu kantor punya
+loket pendaftaran, loket pembayaran, dan loket pengambilan hasil.
+
+Sebagian besar API di web memakai HTTP, protokol yang juga dipakai browser untuk
+membuka halaman web \cite{rfc9110}. \textit{Request} HTTP berisi empat bagian.
+Metode menyatakan maksudnya, misalnya \texttt{GET} untuk mengambil data dan
+\texttt{POST} untuk mengirim data baru. Alamat menyatakan \textit{endpoint}
+beserta parameternya. Header memuat keterangan tambahan, misalnya identitas
+peminta. Isi memuat data yang dikirim, bila ada. \textit{Response} HTTP berisi
+kode status, header, dan isi yang biasanya berupa JSON. Gambar
+\ref{fig:ch01-request-response} memperlihatkan urutan yang terjadi saat pasien
+menekan tombol jadwal dokter.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch01-request-response.tex}
+  \caption{Medikara+ meminta jadwal dokter lewat API, lalu menerima jawaban
+           berupa kode status dan data JSON}
+  \label{fig:ch01-request-response}
+\end{figure}
+
+Urutannya empat langkah. Aplikasi mengirim \textit{request} \texttt{GET} ke
+\textit{endpoint} \texttt{/jadwal-dokter}, lengkap dengan rumah sakit dan tanggal
+yang diminta. API mengambil jadwal dari SIMRS Bekasi, lalu SIMRS mengembalikan
+hasilnya. API menyusun hasil itu menjadi \textit{response} berkode 200 dengan isi
+JSON, dan aplikasi menampilkannya di layar pasien. Pembagian kerja ini punya dua
+konsekuensi. Pertama, vendor aplikasi tidak perlu tahu struktur basis data SIMRS.
+Bila SIMRS Bekasi diganti, aplikasi tetap bekerja selama \textit{endpoint} dan
+bentuk jawabannya tidak berubah. Kedua, rumah sakit menentukan apa yang boleh
+diminta. \textit{Endpoint} jadwal dokter hanya memberi jadwal, bukan rekam medis
+pasien.
+
+\subsection*{JSON sebagai format jawaban}
+
+Jawaban pada Gambar \ref{fig:ch01-request-response} ditulis dalam JSON. JSON
+adalah format teks untuk data terstruktur yang tersusun dari pasangan kunci dan
+nilai \cite{c01-rfc8259}. Formatnya dapat dibaca mesin, tetapi juga cukup jelas
+dibaca manusia. Itulah sebabnya JSON menjadi format yang paling sering dipakai
+API di web. Tabel \ref{tab:ch01-json} menguraikan bagian-bagiannya dengan contoh
+dari gambar tersebut.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Enam bagian JSON beserta artinya bagi pembaca non-teknis}
+  \label{tab:ch01-json}
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.2cm}
+                               >{\raggedright\arraybackslash}p{4.0cm}
+                               >{\raggedright\arraybackslash}X}
+    \hline
+    \textbf{Bagian} & \textbf{Contoh} & \textbf{Artinya bagi pembaca} \\
+    \hline
+    Objek & \texttt{\{ ... \}} & Satu kesatuan data, seperti satu lembar formulir \\
+    \hline
+    Kunci dan nilai & \texttt{"poli": "Anak"} & Nama kolom dan isinya, dipisahkan titik dua \\
+    \hline
+    Teks & \texttt{"dr. Rina"} & Isi berupa tulisan, diapit tanda petik \\
+    \hline
+    Angka & \texttt{6} & Isi yang dapat dihitung, ditulis tanpa tanda petik \\
+    \hline
+    Daftar & \texttt{[ \{...\}, \{...\} ]} & Beberapa isi sejenis, seperti baris-baris pada tabel \\
+    \hline
+    Nilai khusus & \texttt{true}, \texttt{false}, \texttt{null} & Ya, tidak, dan kosong \\
+    \hline
+  \end{tabularx}
+\end{table}
+
+Satu hal kecil dari tabel itu sering menimbulkan masalah integrasi. Angka
+\texttt{6} dan teks \texttt{"6"} terlihat sama bagi manusia, tetapi berbeda bagi
+mesin. Sistem penerima dapat langsung menjumlahkan \texttt{6}, sedangkan
+\texttt{"6"} harus diubah dahulu menjadi angka. Kesepakatan tentang jenis data
+setiap kunci adalah bagian dari kontrak API.
+
+\subsection*{Kode status HTTP}
+
+Kode status adalah tiga digit di awal \textit{response} yang memberi tahu hasil
+\textit{request} sebelum isinya dibaca. Digit pertama menyatakan golongannya
+\cite{rfc9110}. Golongan 2xx berarti berhasil, golongan 4xx berarti ada yang
+salah pada \textit{request} dari peminta, dan golongan 5xx berarti ada masalah
+pada sistem penyedia. Pembagian ini berguna bagi anggota non-teknis, karena
+langsung menunjukkan pihak yang perlu bertindak. Tabel
+\ref{tab:ch01-kode-status} memuat kode yang paling sering ditemui.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Kode status HTTP yang paling sering ditemui, dengan contoh dari
+           \textit{endpoint} jadwal dokter Medikara+}
+  \label{tab:ch01-kode-status}
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.9cm}
+                               >{\raggedright\arraybackslash}p{2.25cm}
+                               >{\raggedright\arraybackslash}X
+                               >{\raggedright\arraybackslash}p{2.2cm}}
+    \hline
+    \textbf{Kode} & \textbf{Nama} & \textbf{Contoh pada jadwal dokter} & \textbf{Yang bertindak} \\
+    \hline
+    200 & OK & Jadwal ditemukan dan dikirim & Tidak ada \\
+    \hline
+    400 & Bad Request & Tanggal ditulis ``2 Nov'', padahal kontrak meminta \texttt{2026-11-02} & Vendor aplikasi \\
+    \hline
+    401 & Unauthorized & Aplikasi tidak membawa identitas yang sah, misalnya \textit{token} yang sudah kedaluwarsa & Vendor aplikasi \\
+    \hline
+    403 & Forbidden & Aplikasi dikenali, tetapi meminta data yang bukan haknya, misalnya rekam medis & Vendor aplikasi \\
+    \hline
+    404 & Not Found & Rumah sakit yang diminta tidak ada & Vendor aplikasi \\
+    \hline
+    500 & Internal Server Error & SIMRS mengalami galat saat menyusun jadwal & Tim SIMRS \\
+    \hline
+    503 & Service Unavailable & SIMRS sedang dalam pemeliharaan malam & Tim SIMRS \\
+    \hline
+  \end{tabularx}
+\end{table}
+
+Nama kode 401 sering menyesatkan. Namanya \textit{Unauthorized}, tetapi artinya
+peminta belum terbukti identitasnya. Peminta yang identitasnya sudah terbukti
+tetapi tidak berhak menerima kode 403. Perbedaan antara membuktikan identitas dan
+memeriksa hak akses dibahas di Bab 6.
+
+\subsection*{API bukan akses ke basis data}
+
+Dua hal pada API sering tertukar. Pembagiannya begini. Vendor yang diberi akun
+basis data dapat membaca seluruh tabel, termasuk tabel yang tidak dibutuhkannya.
+Vendor yang diberi API hanya menerima data yang disepakati di kontrak. Perbedaan
+ini punya dua konsekuensi. Pertama, akses langsung lebih cepat dibangun, tetapi
+setiap perubahan struktur tabel langsung memutus aplikasi vendor. Kedua, akses
+langsung jauh lebih sulit diawasi. Yang tercatat hanya bahwa vendor membaca
+tabel, bukan data pasien mana yang dibaca dan untuk keperluan apa.
+
+\begin{kasus}[title={Kasus Medikara Health: Medikara+ Meminta Jadwal Dokter ke SIMRS}]
+Medikara+ dibuat vendor dan harus menampilkan jadwal dari lima SIMRS yang
+versinya berbeda. Saat ini vendor tidak memakai satu API bersama. Untuk dua rumah
+sakit, vendor memanggil API bawaan SIMRS. Untuk tiga rumah sakit lainnya, vendor
+diberi akun yang membaca langsung basis data SIMRS setiap lima menit.
+
+Misalkan sepanjang 2025 terjadi tujuh kali pembaruan SIMRS di tiga rumah sakit
+itu. Setiap kali pembaruan terjadi, jadwal rumah sakit tersebut di Medikara+
+kosong selama satu sampai dua hari. Pasien yang tidak menemukan jadwal datang
+langsung ke loket pendaftaran, sehingga antrean bertambah.
+
+Seandainya kelima rumah sakit menyediakan \textit{endpoint} jadwal dokter dengan
+kontrak yang sama, seperti pada Gambar \ref{fig:ch01-request-response},
+pembaruan SIMRS tidak lagi memutus aplikasi selama bentuk jawabannya dijaga.
+Akun basis data yang dapat membaca seluruh tabel juga tidak dibutuhkan lagi. Hal
+terakhir ini terkait langsung dengan temuan audit internal Medikara tentang
+kontrol akses yang lemah.
+\end{kasus}
+
+\begin{pendalaman}
+Pendalaman ini memanggil satu API publik yang terbuka tanpa akun, yaitu data
+gempa terbaru dari Badan Meteorologi, Klimatologi, dan Geofisika (BMKG)
+\cite{c01-bmkg-gempa}. Pemakaian data ini wajib mencantumkan BMKG sebagai
+sumbernya. Panggilan cukup dilakukan beberapa kali secara manual, bukan dalam
+putaran yang cepat, agar tidak membebani server milik pihak lain.
+
+Cara tercepat adalah \texttt{curl} di terminal, seperti pada Listing
+\ref{lst:ch01-curl}. Opsi \texttt{-i} ikut menampilkan header \textit{response}.
+Baris pertama keluarannya berisi versi HTTP dan kode status, sedangkan isi JSON
+berada di bawah header. Di Postman, alamat yang sama ditempel ke kolom alamat
+dengan metode \texttt{GET}, lalu kode statusnya terbaca di atas panel
+\textit{response}.
+
+\begin{lstlisting}[language=bash, caption={Memanggil API gempa terbaru BMKG dengan curl, padanannya dalam Python tersedia di \berkas{sources/chapter01/panggil-api-publik.py}}, label={lst:ch01-curl}]
+curl -i https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json
+curl -i https://data.bmkg.go.id/DataMKG/TEWS/autogempaa.json
+\end{lstlisting}
+
+Perintah kedua sengaja salah ketik. Server menjawab dengan kode 404, karena
+berkas yang diminta tidak ada. Listing \ref{lst:ch01-json-bmkg} memperlihatkan
+potongan JSON yang kembali dari perintah pertama pada 30 Oktober 2026. Beberapa
+kunci tidak ditampilkan agar ringkas.
+
+\begin{lstlisting}[language=json, caption={Potongan isi response API gempa terbaru BMKG, 30 Oktober 2026, dibaca dengan \berkas{sources/chapter01/panggil-api-publik.py}}, label={lst:ch01-json-bmkg}]
+{
+  "Infogempa": {
+    "gempa": {
+      "Tanggal": "30 Okt 2026",
+      "Jam": "03:32:13 WIB",
+      "Magnitude": "5.3",
+      "Kedalaman": "10 km",
+      "Wilayah": "139 km BaratLaut TUAL-MALUKU",
+      "Potensi": "Tidak berpotensi tsunami"
+    }
+  }
+}
+\end{lstlisting}
+
+Dua hal layak diperhatikan. Pertama, nilai \texttt{Magnitude} ditulis sebagai
+teks \texttt{"5.3"}, bukan sebagai angka. Peminta yang ingin mengurutkan gempa
+menurut kekuatannya harus mengubahnya dahulu menjadi angka, dengan titik sebagai
+pemisah desimal. Kedua, strukturnya bertingkat: objek \texttt{gempa} berada di
+dalam objek \texttt{Infogempa}. Skrip Python pada Listing
+\ref{lst:ch01-kirim-request} mengirim \textit{request}, lalu mengembalikan kode
+status, jenis isi, dan isinya.
+
+\begin{lstlisting}[style=ch01python, caption={Mengirim request dan membaca kode status, tersedia di \berkas{sources/chapter01/panggil-api-publik.py}}, label={lst:ch01-kirim-request}]
+def kirim_request(alamat):
+  """Mengirim satu request GET, lalu mengembalikan kode, jenis isi, dan isi.
+
+  Kode 4xx dan 5xx dikembalikan sebagai hasil biasa, bukan sebagai galat,
+  karena justru kode itulah yang ingin dibaca pada pendalaman ini.
+  """
+  header = {"Accept": "application/json", "User-Agent": IDENTITAS_PEMINTA}
+  request = urllib.request.Request(alamat, headers=header)
+  try:
+    response = urllib.request.urlopen(request, timeout=BATAS_TUNGGU_DETIK)
+  except urllib.error.HTTPError as galat_http:
+    jenis_isi = galat_http.headers.get("Content-Type")
+    return galat_http.code, jenis_isi, galat_http.read()
+  with response:
+    jenis_isi = response.headers.get("Content-Type")
+    return response.status, jenis_isi, response.read()
+\end{lstlisting}
+
+Fungsi itu sengaja menangkap \texttt{HTTPError}. Pustaka standar Python
+memperlakukan kode 4xx dan 5xx sebagai galat yang menghentikan program, padahal
+pada pendalaman ini kode itulah yang ingin dibaca. Skrip lengkapnya dijalankan
+dengan \texttt{python panggil-api-publik.py}, atau dengan
+\texttt{python panggil-api-publik.py autogempaa.json} untuk melihat kode 404.
+\end{pendalaman}
 
 \section{Cara Organisasi Bertukar Data}
 
-% TODO
-% Cakupan: pertukaran manual lewat surel dan telepon; unggah berkas CSV atau spreadsheet; portal
-% web; API; kelebihan dan risiko tiap cara; gejala awal integrasi point-to-point.
-% Kasus Medikara: laporan manajemen berbasis spreadsheet, integrasi point-to-point ke BPJS
-% Kesehatan dan SATUSEHAT.
+API bukan satu-satunya cara organisasi bertukar data, dan sering kali bukan cara
+yang paling banyak dipakai. Pertanyaan kemudian muncul: bila API sudah tersedia,
+mengapa surel dan berkas masih dipakai?
+
+Jawabannya terletak pada biaya dan kesiapan kedua pihak. Secara umum ada empat
+cara, tersusun dari yang paling mudah dimulai sampai yang paling otomatis. Tabel
+\ref{tab:ch01-cara-pertukaran} merangkum contoh, kelebihan, dan risikonya.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Empat cara organisasi bertukar data dengan pihak luar}
+  \label{tab:ch01-cara-pertukaran}
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{1.6cm}
+                               >{\raggedright\arraybackslash}X
+                               >{\raggedright\arraybackslash}X
+                               >{\raggedright\arraybackslash}X}
+    \hline
+    \textbf{Cara} & \textbf{Contoh} & \textbf{Kelebihan} & \textbf{Risiko} \\
+    \hline
+    Manual & Surel, telepon, atau pesan singkat berisi data & Tanpa biaya awal, mudah dipahami semua pihak & Lambat, mudah salah ketik, data pribadi beredar di kotak surat \\
+    \hline
+    Unggah berkas & Berkas \textit{spreadsheet} atau CSV (\textit{Comma-Separated Values}) yang dikirim berkala & Sekali kirim berisi banyak baris, alatnya sudah dikenal & Format berubah tanpa pemberitahuan, kesalahan baru diketahui setelah berkas diproses \\
+    \hline
+    Portal web & Petugas mengetik atau mengunggah data di situs milik mitra & Mitra mengendalikan format dan pemeriksaan isian & Petugas mengetik ulang data yang sudah ada di sistem sendiri \\
+    \hline
+    API & Sistem memanggil sistem lain secara langsung & Cepat, otomatis, kesalahan langsung terlihat lewat kode status & Biaya awal lebih tinggi, kedua pihak butuh kemampuan teknis, akses yang terlalu luas berbahaya \\
+    \hline
+  \end{tabularx}
+\end{table}
+
+Tidak ada cara yang selalu paling tepat. Unggah berkas bulanan masuk akal untuk
+rekap yang jarang berubah dan dibaca manusia. API masuk akal ketika data
+dibutuhkan saat itu juga, misalnya status kepesertaan pasien yang sedang mengantre
+di loket. Kesalahan yang sering terjadi adalah memilih cara karena kebiasaan,
+bukan karena kebutuhan datanya.
+
+Laporan industri memperlihatkan arah perubahannya. Survei Postman 2025 terhadap
+lebih dari 5.700 pengembang, arsitek, dan eksekutif mencatat 82 persen organisasi
+responden sudah menerapkan pendekatan \textit{API-first} pada tingkat tertentu,
+tetapi hanya 25 persen yang sepenuhnya \textit{API-first} \cite{postman2025}.
+Laporan yang sama mencatat 65 persen organisasi responden memperoleh pendapatan
+dari API-nya. Angka itu perlu dibaca hati-hati. Respondennya adalah orang yang
+dekat dengan dunia API, sehingga angkanya lebih tinggi daripada gambaran
+organisasi pada umumnya, termasuk rumah sakit. Pendekatan \textit{API-first}
+dibahas di Bab 4.
+
+\subsection*{Gejala awal integrasi point-to-point}
+
+Masalah muncul ketika sambungan bertambah tanpa rencana. Integrasi
+\textit{point-to-point} adalah cara menyambung setiap pasangan sistem secara
+langsung, dengan cara yang dibuat khusus untuk pasangan itu. Pada awalnya cara
+ini paling murah: dua sistem, satu sambungan, satu vendor. Masalahnya muncul
+ketika jumlah sistem bertambah. Bila setiap sistem perlu terhubung dengan semua
+sistem lain, jumlah sambungannya $n(n-1)/2$ untuk $n$ sistem. Enam sistem
+membutuhkan 15 sambungan, sepuluh sistem 45 sambungan, dan dua puluh sistem 190
+sambungan.
+
+Analoginya seperti panitia acara berisi enam orang yang selalu berkoordinasi
+lewat pesan pribadi, tanpa grup bersama. Agar semua tahu, setiap kabar harus
+diteruskan ke lima orang lain. Ada 15 pasangan percakapan yang harus dijaga, dan
+cukup satu orang lupa meneruskan agar sebagian panitia tertinggal informasi.
+Grup bersama tidak menghapus kerja koordinasi, tetapi membuat setiap orang cukup
+menjaga satu sambungan.
+
+Empat gejala awal menandakan integrasi \textit{point-to-point} mulai mahal:
+
+\begin{enumerate}
+  \item Tidak ada orang yang memegang daftar lengkap sambungan, sehingga setiap
+        perubahan diawali dengan menebak sistem mana yang terdampak.
+  \item Perubahan kecil di satu sistem memutus sambungan di tempat lain, dan
+        kerusakannya baru diketahui dari keluhan pengguna.
+  \item Setiap mitra baru membutuhkan proyek integrasi baru, lengkap dengan
+        anggaran dan vendor baru.
+  \item Data yang sama tersimpan di beberapa sistem dengan isi yang berbeda,
+        sehingga laporan dari dua bagian tidak pernah cocok.
+\end{enumerate}
+
+Gambar \ref{fig:ch01-point-to-point} memperlihatkan bentuknya pada lima SIMRS
+Medikara. Di sisi kiri, setiap SIMRS disambung sendiri-sendiri ke BPJS Kesehatan,
+SATUSEHAT, Medikara+, dan sistem \textit{Enterprise Resource Planning} (ERP)
+keuangan, sehingga ada 20 sambungan. Di sisi kanan, setiap sistem cukup
+tersambung ke satu lapisan bersama, sehingga sambungannya tinggal 9.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch01-point-to-point.tex}
+  \caption{Lima SIMRS dan empat tujuan membutuhkan 20 sambungan
+           \textit{point-to-point}, tetapi hanya 9 sambungan lewat satu lapisan
+           API bersama}
+  \label{fig:ch01-point-to-point}
+\end{figure}
+
+Lapisan API bersama di sisi kanan gambar adalah gambaran awal kondisi target,
+bukan rancangan. Lapisan itu tidak menghapus kerja integrasi. Lapisan itu
+memindahkan kerja ke satu tempat yang dapat dikelola, diamankan, dan diawasi.
+Rancangannya dibahas di Bab 8 sampai Bab 10.
+
+\begin{kasus}[title={Kasus Medikara Health: Laporan Spreadsheet dan Sambungan Point-to-Point}]
+Dua contoh pertukaran data di Medikara memperlihatkan gejala di atas dengan
+angka.
+
+\begin{enumerate}
+  \item Laporan manajemen. Setiap minggu, 18 klinik pratama mengirim rekap
+        kunjungan dalam bentuk \textit{spreadsheet} lewat surel ke kantor pusat.
+        Dalam setahun ada 936 berkas. Dua staf kantor pusat menghabiskan sekitar
+        tiga hari kerja setiap bulan untuk menyatukan berkas itu, menyeragamkan
+        kolom, dan menanyakan angka yang janggal. Laporan bulanan untuk direksi
+        baru selesai sekitar tanggal 12 bulan berikutnya.
+  \item Integrasi ke BPJS Kesehatan dan SATUSEHAT. Setiap rumah sakit membangun
+        sambungannya sendiri lewat vendor SIMRS masing-masing, sehingga ada 10
+        integrasi terpisah untuk dua pihak yang sama. Misalkan biaya perawatan
+        rata-rata Rp45 juta per integrasi per tahun. Medikara membayar sekitar
+        Rp450 juta per tahun hanya untuk merawat sepuluh sambungan itu, belum
+        termasuk biaya setiap kali BPJS Kesehatan atau SATUSEHAT memperbarui
+        spesifikasinya.
+\end{enumerate}
+
+Sambungan kedua tidak dapat dihindari. Peraturan Menteri Kesehatan (Permenkes)
+24/2022 mewajibkan fasilitas pelayanan kesehatan menyelenggarakan rekam medis
+elektronik paling lambat 31 Desember 2023 (Pasal 45) \cite{permenkes24-2022}.
+SATUSEHAT menerima datanya dalam format Health Level Seven Fast Healthcare
+Interoperability Resources (HL7 FHIR) R4 \cite{satusehat, fhir-r4}. Yang dapat
+dipilih Medikara bukan apakah tersambung, melainkan cara menyambungnya. Standar
+sektoral ini dibahas di Bab 7.
+\end{kasus}
 
 \section{Kosakata Bersama untuk Tim Campuran}
 
-% TODO
-% Cakupan: istilah inti platform (sisi pasar, efek jaringan, ekosistem, mitra); istilah inti API
-% (kontrak, gateway, token, versi); cara anggota teknis menjelaskan istilah ke anggota non-teknis
-% dan sebaliknya; rujukan ke Daftar Singkatan.
+Rapat tim campuran sering macet bukan karena perbedaan pendapat, melainkan karena
+perbedaan arti. Anggota berlatar hukum menyebut klinik yang bekerja sama sebagai
+mitra, sedangkan anggota berlatar teknis menyebut sistem klinik itu
+\textit{client}. Seorang manajer berkata integrasinya sudah ada, padahal yang
+dimaksud adalah berkas \textit{spreadsheet} yang dikirim lewat surel setiap
+Jumat. Kedua pihak merasa sepakat, lalu kecewa ketika hasilnya berbeda.
+
+Karena itu tim perlu kosakata bersama sejak minggu pertama. Tabel
+\ref{tab:ch01-kosakata} memuat istilah inti yang dipakai sepanjang semester,
+dikelompokkan menjadi istilah platform dan istilah API. Setiap istilah diberi arti
+singkat, contoh dari Medikara, dan bab yang membahasnya secara rinci.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Kosakata inti platform dan API untuk tim campuran}
+  \label{tab:ch01-kosakata}
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.1cm}
+                               >{\raggedright\arraybackslash}X
+                               >{\raggedright\arraybackslash}X
+                               >{\centering\arraybackslash}p{0.7cm}}
+    \hline
+    \textbf{Istilah} & \textbf{Arti singkat} & \textbf{Contoh di Medikara} & \textbf{Bab} \\
+    \hline
+    \multicolumn{4}{l}{\textbf{Istilah platform}} \\
+    \hline
+    Sisi pasar & Kelompok pihak yang dipertemukan platform & Pasien dan klinik mitra pada Medikara+ & 2 \\
+    \hline
+    Interaksi inti & Pertukaran nilai utama yang difasilitasi platform & Pemesanan janji temu & 2 \\
+    \hline
+    Efek jaringan & Nilai platform naik atau turun karena jumlah pihak yang bergabung & Makin banyak klinik mitra, makin menarik bagi pasien & 2 \\
+    \hline
+    Ekosistem & Kumpulan pihak yang saling melengkapi di sekitar platform & Rumah sakit, laboratorium, apotek, dan asuransi & 3 \\
+    \hline
+    Mitra & Pihak luar yang ikut menciptakan atau menyalurkan nilai, bukan sekadar membeli & Laboratorium mitra dan asuransi & 3 \\
+    \hline
+    \multicolumn{4}{l}{\textbf{Istilah API}} \\
+    \hline
+    Kontrak API & Kesepakatan tertulis tentang apa yang boleh diminta dan bentuk jawabannya & Aturan \textit{endpoint} jadwal dokter & 9 \\
+    \hline
+    \textit{API gateway} & Pintu masuk bersama yang memeriksa dan meneruskan setiap \textit{request} & Satu pintu bagi lima SIMRS & 10 \\
+    \hline
+    \textit{Token} & Tanda pengenal digital yang dibawa \textit{request} untuk membuktikan identitas dan hak akses & Tanda pengenal aplikasi Medikara+ & 6 \\
+    \hline
+    Versi & Penanda perubahan kontrak, agar pengguna lama tidak terputus & Jadwal dokter versi 1 dan versi 2 & 10 \\
+    \hline
+  \end{tabularx}
+\end{table}
+
+Dua hal sering tertukar di rapat tim, yaitu API dan integrasi. Pembagiannya
+begini. Integrasi adalah tujuannya, yaitu dua sistem atau lebih bekerja dengan
+data yang sama. API adalah salah satu caranya. Berkas \textit{spreadsheet}
+mingguan juga integrasi, hanya saja integrasi yang lambat dan manual. Karena itu
+pernyataan ``sudah terintegrasi'' selalu perlu diikuti tiga pertanyaan: lewat cara
+apa, seberapa sering, dan siapa pemiliknya.
+
+Kosakata bersama tidak cukup berupa tabel. Cara menjelaskannya juga perlu
+disepakati. Dua kebiasaan berikut membantu tim campuran:
+
+\begin{enumerate}
+  \item Anggota teknis menjelaskan istilah dengan urutan masalah, analogi, lalu
+        istilah. Contohnya: ``Aplikasi pasien tidak boleh membaca seluruh basis
+        data rumah sakit. Aplikasi itu cukup datang ke satu loket yang hanya
+        melayani jadwal. Loket itu disebut \textit{endpoint}, dan seluruh
+        aturannya disebut kontrak API.''
+  \item Anggota non-teknis menjelaskan kebutuhan bisnis dengan aturan, angka, dan
+        pelaku. Contohnya: ``Asuransi meminta tagihan paling lambat tujuh hari
+        setelah pasien pulang, untuk sekitar 2.400 klaim per bulan, dan yang
+        memeriksa adalah petugas verifikasi asuransi.'' Kalimat seperti ini
+        langsung dapat diterjemahkan menjadi kebutuhan sistem.
+\end{enumerate}
+
+Setiap singkatan yang dipakai di modul ini, misalnya SIMRS, FHIR, dan HTTP,
+tercantum di tabel Daftar Singkatan pada \berkas{README.md} di akar repositori.
+Tim dianjurkan menyusun glosarium sendiri dengan pola yang sama, lalu
+memperbaruinya setiap kali istilah baru muncul.
 
 \section{Kasus Berjalan Medikara Health}
 
-% TODO
-% Cakupan: profil organisasi fiktif PT Medikara Nusa Sehat; kondisi saat ini; strategi 2026 sampai
-% 2030 "Satu Pasien, Satu Rekam Medis"; pemicu perubahan; etika memakai data organisasi nyata
-% (izin dan anonimisasi).
-% Kasus Medikara: seluruh ringkasan kasus, ditegaskan sebagai organisasi fiktif.
+Kasus yang sama dipakai di seluruh bab dan di keempat mata kuliah. Seksi ini
+merangkum fakta dasarnya agar setiap bab dapat merujuknya tanpa mengulang.
+Medikara Health adalah organisasi fiktif. Nama, angka, dan kejadiannya dikarang
+untuk keperluan belajar, dan tidak menggambarkan rumah sakit mana pun. Tabel
+\ref{tab:ch01-profil-medikara} memuat fakta dasar yang tidak berubah di bab mana
+pun.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Fakta dasar kasus Medikara Health yang dipakai keempat mata kuliah}
+  \label{tab:ch01-profil-medikara}
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.6cm}
+                               >{\raggedright\arraybackslash}X}
+    \hline
+    \textbf{Aspek} & \textbf{Fakta dasar} \\
+    \hline
+    Nama & PT Medikara Nusa Sehat (``Medikara Health''), jaringan layanan kesehatan swasta \\
+    \hline
+    Fasilitas & 5 rumah sakit (Jakarta, Bekasi, Depok, Bogor, Bandung), 18 klinik pratama, 1 laboratorium rujukan, dan 12 apotek \\
+    \hline
+    Skala & Sekitar 4.800 karyawan dan sekitar 1,2 juta kunjungan pasien per tahun \\
+    \hline
+    Sistem saat ini & SIMRS monolitik \textit{on-premise} di tiap rumah sakit dengan versi berbeda karena hasil akuisisi; ERP keuangan terpusat; aplikasi pasien Medikara+ untuk janji temu dan telekonsultasi buatan vendor \\
+    \hline
+    Integrasi dan data & Integrasi \textit{point-to-point} ke BPJS Kesehatan dan SATUSEHAT yang berbasis HL7 FHIR; data pasien tersebar; banyak laporan manajemen masih disusun dengan \textit{spreadsheet} \\
+    \hline
+    Strategi 2026 sampai 2030 & ``Satu Pasien, Satu Rekam Medis'': layanan terintegrasi lintas fasilitas; ekosistem mitra (klinik mitra, asuransi, laboratorium, apotek daring, dan layanan kesehatan karyawan perusahaan); modernisasi ke \textit{cloud}; kepatuhan pada Undang-Undang Pelindungan Data Pribadi (UU PDP) dan aturan rekam medis elektronik \\
+    \hline
+    Pemicu perubahan & Kebocoran data pasien skala kecil lewat vendor pada 2025; temuan audit internal tentang kontrol akses yang lemah; antrean layanan yang panjang; biaya integrasi yang tinggi \\
+    \hline
+  \end{tabularx}
+\end{table}
+
+Gambar \ref{fig:ch01-medikara-pihak-luar} memperlihatkan pihak luar utama
+Medikara beserta cara pertukaran datanya saat ini. Gambar ini sekaligus menjadi
+contoh bentuk luaran Aktivitas bab ini. Kotak bergaris putus-putus menandai mitra
+yang baru direncanakan dalam strategi, sedangkan kotak merah menandai sambungan
+yang menjadi temuan audit.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch01-medikara-pihak-luar.tex}
+  \caption{Pihak luar utama Medikara Health dan cara pertukaran datanya saat ini}
+  \label{fig:ch01-medikara-pihak-luar}
+\end{figure}
+
+\begin{kasus}[title={Kasus Medikara Health: Ringkasan untuk Seluruh Semester}]
+PT Medikara Nusa Sehat adalah organisasi fiktif. Medikara tumbuh lewat akuisisi,
+sehingga kelima rumah sakitnya membawa SIMRS sendiri-sendiri dengan versi yang
+berbeda. Keuangan sudah terpusat di satu ERP, tetapi data pasien masih tersebar
+di lima SIMRS dan di aplikasi Medikara+ buatan vendor. Sambungan ke BPJS
+Kesehatan dan SATUSEHAT dibangun terpisah di tiap rumah sakit.
+
+Empat pemicu mendorong perubahan. Pada 2025 terjadi kebocoran data pasien skala
+kecil lewat vendor. Audit internal menemukan kontrol akses yang lemah. Antrean
+layanan panjang, dan biaya integrasi tinggi. Strategi ``Satu Pasien, Satu Rekam
+Medis'' untuk 2026 sampai 2030 menjawab keempatnya dengan layanan terintegrasi
+lintas fasilitas, ekosistem mitra, modernisasi ke \textit{cloud}, dan kepatuhan
+pada UU PDP serta aturan rekam medis elektronik.
+
+Di mata kuliah ini, Bagian I memakai strategi tersebut untuk menguji apakah
+Medikara layak menjadi pengatur ekosistem kesehatan. Bagian II memakai integrasi
+\textit{point-to-point}, aplikasi Medikara+, dan kebocoran lewat vendor sebagai
+bahan potret kondisi saat ini. Bagian III memakai janji temu, hasil laboratorium,
+dan layanan kesehatan karyawan perusahaan sebagai calon API prioritas. Bagian IV
+memakai rencana ekosistem mitra untuk membahas harga, tata kelola mitra,
+persaingan usaha, dan agen AI (\textit{Artificial Intelligence}) dari perusahaan
+klien. Detail tambahan di bab lain boleh dikarang asalkan tidak bertentangan
+dengan fakta dasar, dan skenario pengandaian selalu ditandai dengan kata
+``Misalkan''.
+\end{kasus}
+
+\subsection*{Etika memakai data organisasi nyata}
+
+Tim yang memakai organisasi nyata memegang dua kewajiban. Pertama, izin. Izin
+tertulis diminta dari pihak yang berwenang sebelum wawancara pertama, dan isinya
+menyebut data apa yang boleh dipakai serta untuk keperluan apa. Kedua,
+anonimisasi. Data pribadi pasien atau karyawan tidak boleh dipakai sama sekali,
+termasuk sebagai contoh. UU PDP menggolongkan data dan informasi kesehatan
+sebagai data pribadi yang bersifat spesifik (Pasal 4 ayat 2)
+\cite{uu27-2022-pdp}, sehingga pemrosesannya menuntut pelindungan yang lebih
+ketat. Untuk capstone, yang dibutuhkan hanya angka agregat dan gambaran proses:
+berapa klaim per bulan, lewat cara apa, dan masalah apa yang muncul. Nama pasien,
+nomor rekam medis, dan nomor kepesertaan tidak dibutuhkan.
+
+Empat kebiasaan anonimisasi dipakai sepanjang semester:
+
+\begin{enumerate}
+  \item Nama organisasi diganti nama samaran, misalnya ``Rumah Sakit A''.
+  \item Nama orang diganti jabatan, misalnya ``kepala unit klaim''.
+  \item Angka yang dapat mengenali organisasi dibulatkan atau ditulis sebagai
+        rentang, misalnya ``2.000 sampai 3.000 klaim per bulan''.
+  \item Dokumen asli tidak diunggah ke folder tim. Yang diunggah hanya catatan
+        hasil penelusuran.
+\end{enumerate}
 
 \section{Aktivitas: Membentuk Tim dan Memetakan Pertukaran Data}
 
-% TODO
-% Tujuan aktivitas: tim terbentuk, organisasi capstone terpilih, dan pertukaran data dengan pihak
-% luar terdaftar sebagai bahan awal C1.
-% Peran dalam tim: anggota berlatar bisnis, hukum, atau kesehatan memimpin wawancara singkat dan
-% penelusuran dokumen tentang pihak luar; anggota berlatar teknis mencatat cara pertukaran data
-% (surel, berkas, portal, API).
-% Langkah: bentuk tim campuran; pilih organisasi atau Medikara; isi profil organisasi satu halaman;
-% daftar pihak luar; catat data yang dipertukarkan, cara, frekuensi, dan masalah yang dirasakan.
-% Luaran dan tonggak capstone: profil organisasi dan daftar pertukaran data, masuk ke C1.
-% Berkas sources yang direncanakan: sources/chapter01/profil-organisasi.md,
-% sources/chapter01/daftar-pertukaran-data.md, sources/chapter01/panduan-wawancara-singkat.md
+\subsection*{Tujuan}
+
+Aktivitas ini menghasilkan tiga hal: tim campuran yang sudah terbentuk,
+organisasi capstone yang sudah dipilih, dan daftar pertukaran data dengan pihak
+luar. Daftar itu menjadi bahan awal tonggak C1, lalu dipakai lagi sebagai bahan
+inventaris integrasi di Bab 4.
+
+\subsection*{Pembagian peran}
+
+Tim terdiri atas tiga sampai lima orang, dengan sedikitnya satu anggota berlatar
+non-teknis dan satu anggota berlatar teknis. Tabel \ref{tab:ch01-peran} memuat
+pembagian perannya. Pada tim kecil, satu orang boleh memegang dua peran.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Pembagian peran dalam Aktivitas Bab 1}
+  \label{tab:ch01-peran}
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.6cm}
+                               >{\raggedright\arraybackslash}p{3.0cm}
+                               >{\raggedright\arraybackslash}X}
+    \hline
+    \textbf{Peran} & \textbf{Dipegang oleh} & \textbf{Tugas pada Aktivitas ini} \\
+    \hline
+    Koordinator & Siapa saja & Mengatur jadwal, mengurus izin organisasi, dan menyatukan luaran \\
+    \hline
+    Pemimpin wawancara & Anggota berlatar bisnis, hukum, atau kesehatan & Mewawancarai dua sampai tiga pemilik proses tentang pihak luar yang berhubungan dengan unitnya \\
+    \hline
+    Penelusur dokumen & Anggota berlatar bisnis, hukum, atau kesehatan & Membaca perjanjian kerja sama, ketentuan dari mitra, dan laporan yang dikirim ke pihak luar \\
+    \hline
+    Pencatat cara pertukaran & Anggota berlatar teknis & Mencatat cara tiap pertukaran terjadi (surel, berkas, portal, atau API), frekuensinya, dan sistem yang terlibat \\
+    \hline
+  \end{tabularx}
+\end{table}
+
+\subsection*{Langkah kerja}
+
+\begin{enumerate}
+  \item Bentuk tim campuran, lalu catat latar belakang setiap anggota dan peran
+        yang dipegangnya.
+  \item Pilih organisasi capstone. Bila memakai organisasi nyata, minta izin
+        tertulis dari pihak yang berwenang sebelum wawancara pertama. Bila tidak
+        ada akses, pakai Medikara Health.
+  \item Isi profil organisasi satu halaman dengan
+        \berkas{sources/chapter01/profil-organisasi.md}: layanan utama, pengguna,
+        struktur, sistem utama, dan tiga masalah utama beserta angkanya.
+  \item Lakukan wawancara singkat dan penelusuran dokumen dengan
+        \berkas{sources/chapter01/panduan-wawancara-singkat.md}. Targetnya enam
+        sampai sepuluh pihak luar. Tim Medikara memakai fakta kasus pada seksi
+        sebelumnya sebagai pengganti wawancara.
+  \item Untuk tiap pihak luar, catat data yang dipertukarkan, cara, frekuensi,
+        perkiraan volume, dan masalah yang dirasakan di
+        \berkas{sources/chapter01/daftar-pertukaran-data.md}. Tabel
+        \ref{tab:ch01-contoh-pertukaran} memperlihatkan contoh yang sudah
+        terisi untuk Medikara.
+  \item Tandai tiga pertukaran yang paling bermasalah, lalu tulis satu kalimat
+        alasan untuk masing-masing, disertai angka bila ada.
+  \item Periksa anonimisasi dengan daftar periksa di akhir lembar kerja, lalu
+        simpan seluruh luaran di folder tim sebelum pertemuan Sabtu.
+\end{enumerate}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh daftar pertukaran data Medikara Health yang sudah terisi,
+           tersedia di \berkas{sources/chapter01/contoh-pertukaran-data-medikara.csv}}
+  \label{tab:ch01-contoh-pertukaran}
+  {\small
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.1cm}
+                               >{\raggedright\arraybackslash}X
+                               >{\raggedright\arraybackslash}X
+                               >{\raggedright\arraybackslash}X}
+    \hline
+    \textbf{Pihak luar} & \textbf{Data yang dipertukarkan} & \textbf{Cara dan frekuensi} & \textbf{Masalah yang dirasakan} \\
+    \hline
+    BPJS Kesehatan & Status kepesertaan, surat eligibilitas peserta, dan klaim layanan & API di tiap rumah sakit, per kunjungan, sekitar 55.000 kunjungan per bulan & Lima sambungan berbeda, setiap pembaruan spesifikasi diterapkan lima kali \\
+    \hline
+    SATUSEHAT & Kunjungan, diagnosis, dan tindakan dalam format HL7 FHIR & API di tiap rumah sakit, per kunjungan, sekitar 100.000 kunjungan per bulan & Sebagian kiriman gagal tanpa pemberitahuan, sekitar 4 persen kunjungan klinik belum terkirim \\
+    \hline
+    Asuransi swasta (9 perusahaan) & Tagihan dan dokumen klaim & Unggah berkas di portal tiap asuransi, mingguan, sekitar 7.800 klaim per bulan & Sembilan format berbeda, sekitar 6 persen klaim ditolak karena format \\
+    \hline
+    Laboratorium mitra (3) & Permintaan dan hasil pemeriksaan khusus & Surel berisi hasil pindaian, per pemeriksaan, sekitar 1.100 pemeriksaan per bulan & Hasil diketik ulang ke SIMRS, rawan salah ketik \\
+    \hline
+    Perusahaan klien (36) & Daftar karyawan peserta dan rekap pemakaian layanan & Surel dan \textit{spreadsheet}, bulanan, 36 rekap per bulan & Rekap disusun manual selama empat hari kerja, data karyawan beredar di surel \\
+    \hline
+    Vendor Medikara+ & Jadwal dokter dan janji temu & Akses langsung ke basis data SIMRS di 3 rumah sakit, setiap lima menit, dan API bawaan SIMRS di 2 rumah sakit, sekitar 28.000 janji temu per bulan & Akses vendor lebih luas dari kebutuhannya, termasuk temuan audit \\
+    \hline
+    Bank mitra (2) & Mutasi pembayaran pasien & Unduh berkas dari portal bank, harian & Rekonsiliasi manual sekitar dua jam per hari \\
+    \hline
+  \end{tabularx}}
+\end{table}
+
+\subsection*{Luaran dan kaitan dengan capstone}
+
+Luarannya dua: profil organisasi satu halaman dan daftar pertukaran data dengan
+pihak luar. Keduanya masuk ke tonggak C1 Konteks dan Strategi. Di Bab 2, daftar
+pihak luar menjadi bahan untuk menentukan sisi pasar. Di Bab 3, daftar itu
+menjadi bahan peta ekosistem. Di Bab 4, kolom cara dan frekuensinya menjadi awal
+inventaris integrasi untuk tonggak C2.
+
+\subsection*{Kriteria penilaian}
+
+\begin{itemize}
+  \item Kelengkapan (30 persen): enam pihak luar atau lebih, dan setiap baris
+        terisi lengkap.
+  \item Ketepatan (25 persen): cara dan frekuensi sesuai bukti wawancara atau
+        dokumen, bukan dugaan.
+  \item Kejelasan masalah (25 persen): masalah ditulis dengan akibat yang dapat
+        dihitung, misalnya jam kerja, jumlah klaim yang ditolak, atau lama
+        keterlambatan.
+  \item Etika (20 persen): izin tercatat, data dianonimkan, dan tidak ada data
+        pribadi pasien atau karyawan.
+\end{itemize}
+
+\subsection*{Berkas pendukung}
+
+Seluruh berkas tersedia di \berkas{sources/chapter01/}:
+\berkas{profil-organisasi.md} untuk profil satu halaman,
+\berkas{panduan-wawancara-singkat.md} untuk wawancara dan penelusuran dokumen,
+\berkas{daftar-pertukaran-data.md} untuk lembar kerja beserta daftar periksanya,
+dan \berkas{contoh-pertukaran-data-medikara.csv} untuk contoh yang sudah terisi.
+
+\begin{pendalaman}
+Anggota berlatar teknis dapat memeriksa apakah setiap pihak luar dalam daftar
+menyediakan dokumentasi API yang terbuka untuk publik. Hasilnya dicatat di kolom
+catatan pada lembar kerja, karena pihak yang sudah punya API terdokumentasi lebih
+mudah disambungkan pada rancangan target. Untuk berlatih membaca
+\textit{request} dan \textit{response}, jalankan
+\berkas{sources/chapter01/panggil-api-publik.py} seperti pada pendalaman di seksi
+API, lalu catat kode status dari panggilan yang benar dan dari panggilan yang
+sengaja salah ketik.
+\end{pendalaman}
 
 \section{Ringkasan}
 
-% TODO
+Organisasi bertukar data dengan banyak pihak luar lewat cara yang berbeda-beda:
+surel, unggah berkas, portal, dan API. Keragaman itu menimbulkan antrean, kerja
+ulang, dan biaya integrasi yang terus naik. Mata kuliah ini membahas masalah
+tersebut dari dua sisi, yaitu platform sebagai model bisnis dan API sebagai
+sarana teknisnya. Empat Bagian mata kuliah sejajar dengan empat tonggak capstone,
+dan setiap pertemuan menyumbang satu artefak ke Cetak Biru Transformasi Digital
+milik tim.
+
+Bisnis \textit{pipeline} menciptakan nilai lewat rantai yang dikendalikan
+organisasi sendiri, sedangkan bisnis platform menciptakan nilai dengan
+mempertemukan pihak luar dan mengatur interaksi di antara mereka. Aplikasi digital
+belum tentu platform, karena yang menentukan adalah siapa yang menciptakan
+sebagian besar nilai. Tidak semua organisasi perlu menjadi platform. Rumah sakit
+tetap menjalankan layanan klinisnya sebagai \textit{pipeline}, dan yang dapat
+dibuka sebagai platform adalah lapisan di sekitarnya.
+
+API adalah cara yang disepakati bagi satu sistem untuk meminta data atau layanan
+dari sistem lain. Sistem peminta mengirim \textit{request} ke sebuah
+\textit{endpoint}, lalu sistem penyedia menjawab dengan \textit{response} berisi
+kode status dan data, biasanya dalam JSON. Golongan kode status langsung
+menunjukkan pihak yang perlu bertindak: 4xx untuk peminta dan 5xx untuk penyedia.
+API juga berbeda dari akses langsung ke basis data, karena API hanya memberikan
+data yang disepakati di kontrak.
+
+Integrasi \textit{point-to-point} murah di awal, tetapi jumlah sambungannya
+tumbuh jauh lebih cepat daripada jumlah sistemnya. Pada Medikara, lima SIMRS dan
+empat tujuan sudah membutuhkan 20 sambungan, dan sepuluh sambungan ke BPJS
+Kesehatan serta SATUSEHAT saja memakan sekitar Rp450 juta per tahun. Tim campuran
+memerlukan kosakata bersama untuk membicarakan masalah ini tanpa salah paham,
+termasuk membedakan integrasi sebagai tujuan dan API sebagai salah satu caranya.
+
+Langkah pertama capstone adalah mengenali dengan siapa organisasi bertukar data,
+lewat cara apa, dan masalah apa yang muncul. Daftar pertukaran data yang
+dihasilkan Aktivitas bab ini menjadi bahan bagi seluruh Bagian berikutnya, dari
+sisi pasar di Bab 2 sampai inventaris integrasi di Bab 4. Platform dan API tidak
+dimulai dari teknologi, melainkan dari peta hubungan organisasi dengan pihak
+luarnya.
 
 \section{Latihan}
 
+Ketiga latihan dikerjakan secara pribadi. Berkas yang dirujuk tersedia di
+\berkas{sources/chapter01/}. Hasil tiap mahasiswa boleh berbeda, karena yang
+dinilai adalah penalaran dan perbandingannya.
+
+\subsection*{Latihan 1: Pipeline atau Platform}
+
+Latihan ini membuktikan bahwa pola \textit{pipeline} atau platform ditentukan
+oleh siapa yang menciptakan nilai, bukan oleh ada atau tidaknya aplikasi.
+
 \begin{enumerate}
-  \item Pilih satu layanan digital yang sering dipakai. Tentukan apakah layanan itu berpola \textit{pipeline} atau platform, lalu beri dua alasan.
-  \item Jelaskan kepada rekan non-teknis apa yang terjadi ketika aplikasi pasien menampilkan jadwal dokter, dengan memakai istilah \textit{request}, \textit{response}, dan API.
-  \item Bandingkan pengiriman data klaim asuransi lewat unggah berkas dan lewat API. Sebutkan satu kelebihan dan satu risiko masing-masing.
+  \item Pilih satu layanan digital yang sering dipakai, lalu tulis nama dan
+        kegunaannya dalam satu kalimat.
+  \item Jawab empat pertanyaan pemeriksa pada Tabel \ref{tab:ch01-lat1-hasil}:
+        siapa yang menciptakan nilai inti, apakah penyedia dipekerjakan atau
+        dimiliki organisasi, berapa sisi dari luar yang bergabung, dan apa yang
+        dikendalikan organisasi. Tabel \ref{tab:ch01-lat1-contoh}
+        memperlihatkan contoh yang sudah terisi.
+  \item Tentukan kesimpulannya: \textit{pipeline}, platform, atau gabungan
+        keduanya.
+  \item Tulis dua alasan, masing-masing merujuk satu baris tabel.
+  \item Jawab tiga pertanyaan berikut. Pertama, baris mana yang paling
+        menentukan kesimpulan, dan mengapa? Kedua, bagaimana kesimpulan berubah
+        bila layanan itu mulai menjual produk buatannya sendiri di samping produk
+        mitra? Ketiga, apa yang harus berubah pada Medikara+ agar baris jumlah
+        sisi pada Tabel \ref{tab:ch01-lat1-contoh} ikut berubah?
 \end{enumerate}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 1 yang sudah terisi}
+  \label{tab:ch01-lat1-contoh}
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.0cm}
+                               >{\raggedright\arraybackslash}X
+                               >{\raggedright\arraybackslash}X}
+    \hline
+    \textbf{Pertanyaan pemeriksa} & \textbf{Medikara+ saat ini} & \textbf{Aplikasi telekonsultasi terbuka (pengandaian)} \\
+    \hline
+    Siapa yang menciptakan nilai inti? & Dokter yang bekerja di fasilitas Medikara & Sekitar 3.000 dokter mandiri yang bergabung \\
+    \hline
+    Apakah penyedia dipekerjakan atau dimiliki organisasi? & Ya, seluruh sekitar 640 dokter berpraktik di fasilitas Medikara & Tidak, dokter bergabung dan dapat keluar kapan saja \\
+    \hline
+    Berapa sisi dari luar yang bergabung? & Satu, yaitu pasien & Dua, yaitu dokter dan pasien \\
+    \hline
+    Apa yang dikendalikan organisasi? & Tarif, jadwal, mutu layanan, dan seluruh rantai layanan & Aturan bergabung, verifikasi dokter, pencocokan, dan pembayaran \\
+    \hline
+    Kesimpulan & \textit{Pipeline} dalam bentuk digital & Platform \\
+    \hline
+    Dua alasan & Nilai dibuat sendiri; melayani lebih banyak pasien berarti menambah dokter sendiri & Nilai dibuat pihak luar; pertumbuhan datang dari dokter yang bergabung \\
+    \hline
+  \end{tabularx}
+\end{table}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar isian Latihan 1}
+  \label{tab:ch01-lat1-hasil}
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.0cm}
+                               >{\raggedright\arraybackslash}X
+                               >{\raggedright\arraybackslash}X}
+    \hline
+    \textbf{Pertanyaan pemeriksa} & \textbf{Layanan pilihan: \dots} & \textbf{Bukti atau sumber} \\
+    \hline
+    Siapa yang menciptakan nilai inti? & \dots & \dots \\
+    \hline
+    Apakah penyedia dipekerjakan atau dimiliki organisasi? & \dots & \dots \\
+    \hline
+    Berapa sisi dari luar yang bergabung? & \dots & \dots \\
+    \hline
+    Apa yang dikendalikan organisasi? & \dots & \dots \\
+    \hline
+    Kesimpulan & \dots & \dots \\
+    \hline
+    Dua alasan & \dots & \dots \\
+    \hline
+  \end{tabularx}
+\end{table}
+
+\subsection*{Latihan 2: Menjelaskan Jadwal Dokter kepada Rekan Non-Teknis}
+
+Latihan ini membuktikan bahwa cara kerja API dapat dijelaskan dengan bahasa
+sehari-hari tanpa kehilangan ketepatannya.
+
+\begin{enumerate}
+  \item Tulis ulang urutan pada Gambar \ref{fig:ch01-request-response} dengan
+        kata-kata sendiri, dari pasien menekan tombol sampai jadwal tampil di
+        layar.
+  \item Isi kolom ``Yang terjadi'' dan ``Istilah'' pada Tabel
+        \ref{tab:ch01-lat2-hasil} untuk tiap langkah. Tabel
+        \ref{tab:ch01-lat2-contoh} memperlihatkan contoh yang sudah terisi.
+  \item Isi kolom ``Kalimat untuk rekan non-teknis'' tanpa memakai singkatan.
+  \item Bacakan penjelasan itu kepada satu rekan berlatar non-teknis, lalu catat
+        kata yang membuatnya bertanya.
+  \item Jawab tiga pertanyaan berikut. Pertama, pada langkah mana kegagalan
+        paling mungkin terjadi bila SIMRS Bekasi sedang diperbarui, dan kode
+        status apa yang kemungkinan kembali menurut Tabel
+        \ref{tab:ch01-kode-status}? Kedua, mengapa \texttt{sisa\_kuota} lebih
+        berguna dikirim sebagai angka daripada sebagai teks? Ketiga, kata mana
+        yang paling sering membuat rekan bertanya, dan analogi apa yang menolong?
+\end{enumerate}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 2 yang sudah terisi}
+  \label{tab:ch01-lat2-contoh}
+  \begin{tabularx}{\textwidth}{>{\centering\arraybackslash}p{1.45cm}
+                               >{\raggedright\arraybackslash}X
+                               >{\raggedright\arraybackslash}p{2.2cm}
+                               >{\raggedright\arraybackslash}X}
+    \hline
+    \textbf{Langkah} & \textbf{Yang terjadi} & \textbf{Istilah} & \textbf{Kalimat untuk rekan non-teknis} \\
+    \hline
+    1 & Pasien memilih Rumah Sakit Medikara Bekasi dan tanggal 2 November 2026 & Masukan pengguna & Pasien mengisi formulir di layar \\
+    \hline
+    2 & Aplikasi mengirim \texttt{GET /jadwal-dokter} beserta rumah sakit dan tanggal & \textit{Request}, \textit{endpoint} & Aplikasi menyerahkan formulir ke loket jadwal \\
+    \hline
+    3 & API mengambil jadwal dari SIMRS Bekasi & API & Petugas loket mengambil data dari arsip rumah sakit \\
+    \hline
+    4 & API menjawab dengan kode 200 dan data JSON & \textit{Response}, kode status, JSON & Petugas mengembalikan lembar jawaban berisi daftar dokter \\
+    \hline
+    5 & Aplikasi menampilkan dokter beserta sisa kuotanya & Tanpa istilah teknis & Pasien membaca daftar, lalu memilih dokter \\
+    \hline
+  \end{tabularx}
+\end{table}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar isian Latihan 2}
+  \label{tab:ch01-lat2-hasil}
+  \begin{tabularx}{\textwidth}{>{\centering\arraybackslash}p{1.45cm}
+                               >{\raggedright\arraybackslash}X
+                               >{\raggedright\arraybackslash}p{2.2cm}
+                               >{\raggedright\arraybackslash}X}
+    \hline
+    \textbf{Langkah} & \textbf{Yang terjadi} & \textbf{Istilah} & \textbf{Kalimat untuk rekan non-teknis} \\
+    \hline
+    1 & \dots & \dots & \dots \\
+    \hline
+    2 & \dots & \dots & \dots \\
+    \hline
+    3 & \dots & \dots & \dots \\
+    \hline
+    4 & \dots & \dots & \dots \\
+    \hline
+    5 & \dots & \dots & \dots \\
+    \hline
+  \end{tabularx}
+\end{table}
+
+\subsection*{Latihan 3: Klaim Asuransi lewat Unggah Berkas dan lewat API}
+
+Latihan ini membuktikan bahwa pilihan cara bertukar data adalah
+\textit{tradeoff} yang dapat dihitung, bukan soal selera teknologi.
+
+\begin{enumerate}
+  \item Baca baris asuransi swasta pada
+        \berkas{sources/chapter01/contoh-pertukaran-data-medikara.csv} untuk
+        mengetahui volume dan masalahnya. Misalkan asuransi terbesar menerima
+        2.400 klaim per bulan dari Medikara, dan sekitar 6 persen di antaranya
+        ditolak karena format.
+  \item Uraikan alur klaim dari tagihan selesai sampai klaim diterima asuransi,
+        untuk unggah berkas mingguan dan untuk API per klaim.
+  \item Isi Tabel \ref{tab:ch01-lat3-hasil}. Pakai angka dari organisasi sendiri
+        bila ada. Bila tidak ada, pakai angka Medikara. Tabel
+        \ref{tab:ch01-lat3-contoh} memperlihatkan contoh yang sudah terisi.
+  \item Tulis satu kelebihan dan satu risiko untuk masing-masing cara, lalu
+        tentukan cara yang dipilih beserta syaratnya.
+  \item Jawab tiga pertanyaan berikut. Pertama, bila memperbaiki satu klaim yang
+        ditolak butuh 15 menit, berapa jam kerja per bulan yang habis untuk 144
+        klaim, dan bagian mana dari angka itu yang berubah bila memakai API?
+        Kedua, pada kondisi apa unggah berkas tetap lebih masuk akal? Ketiga,
+        risiko mana yang lebih berat bagi pasien, dan mengapa?
+\end{enumerate}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 3 yang sudah terisi, untuk 2.400 klaim per bulan}
+  \label{tab:ch01-lat3-contoh}
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.6cm}
+                               >{\raggedright\arraybackslash}X
+                               >{\raggedright\arraybackslash}X}
+    \hline
+    \textbf{Aspek} & \textbf{Unggah berkas mingguan} & \textbf{API per klaim} \\
+    \hline
+    Volume & 2.400 klaim per bulan dalam empat berkas & 2.400 \textit{request} per bulan, satu untuk tiap klaim \\
+    \hline
+    Waktu sampai klaim diterima & Sampai tujuh hari, menunggu jadwal unggah berikutnya & Beberapa detik setelah tagihan selesai \\
+    \hline
+    Klaim ditolak karena format & Sekitar 144 klaim, diketahui setelah berkas diproses & Ditolak saat itu juga dengan kode 400 dan pesan yang menyebut kolom yang salah \\
+    \hline
+    Kerja manual & Menyusun berkas, lalu memperbaiki 144 klaim secara berkelompok & Menangani klaim yang ditolak satu per satu saat itu juga \\
+    \hline
+    Biaya awal & Rendah, cukup \textit{spreadsheet} dan akun portal & Tinggi, butuh pengembangan dan pengujian di kedua pihak \\
+    \hline
+    Satu kelebihan & Mudah dimulai dan dipahami semua pihak & Kesalahan langsung terlihat dan diperbaiki \\
+    \hline
+    Satu risiko & Berkas berisi data ribuan pasien dapat terkirim ke tujuan yang salah & Akses yang terlalu luas, atau gangguan sistem asuransi menghentikan pengiriman \\
+    \hline
+  \end{tabularx}
+\end{table}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar isian Latihan 3}
+  \label{tab:ch01-lat3-hasil}
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.6cm}
+                               >{\raggedright\arraybackslash}X
+                               >{\raggedright\arraybackslash}X}
+    \hline
+    \textbf{Aspek} & \textbf{Unggah berkas} & \textbf{API} \\
+    \hline
+    Volume & \dots & \dots \\
+    \hline
+    Waktu sampai klaim diterima & \dots & \dots \\
+    \hline
+    Klaim ditolak karena format & \dots & \dots \\
+    \hline
+    Kerja manual & \dots & \dots \\
+    \hline
+    Biaya awal & \dots & \dots \\
+    \hline
+    Satu kelebihan & \dots & \dots \\
+    \hline
+    Satu risiko & \dots & \dots \\
+    \hline
+  \end{tabularx}
+\end{table}

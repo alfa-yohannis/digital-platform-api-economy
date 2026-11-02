@@ -1,0 +1,38 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000},
+  bagian/.style={draw, rounded corners, fill=blue!8, text width=3.1cm, minimum height=0.72cm, align=left},
+  induk/.style={bagian, fill=praditagreen!15},
+  tekan/.style={bagian, fill=orange!12},
+  hasil/.style={bagian, fill=green!10},
+  tanya/.style={text width=5.9cm, align=left},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  garis/.style={thin, gray}
+]
+  % Kolom kiri urutan berkas, kolom kanan pertanyaan pembaca non-teknis.
+  \node[font=\footnotesize\bfseries] at (1.75,0.65) {Bagian berkas};
+  \node[font=\footnotesize\bfseries, tanya] at (7.9,0.65) {Pertanyaan yang dijawab};
+
+  \node[bagian] (info) at (1.75,0) {\texttt{openapi}, \texttt{info}};
+  \node[tanya] (t1) at (7.9,0) {Versi berapa, kemampuan apa, siapa penanggung jawabnya?};
+  \node[bagian] (servers) at (1.75,-0.92) {\texttt{servers}};
+  \node[tanya] (t2) at (7.9,-0.92) {Di alamat mana API dipanggil?};
+  \node[induk] (paths) at (1.75,-1.84) {\texttt{paths} dan operasi};
+  \node[tanya] (t3) at (7.9,-1.84) {Apa yang boleh dilakukan konsumen?};
+  \node[bagian, text width=2.6cm] (param) at (2.0,-2.76) {\texttt{parameters}, \texttt{requestBody}};
+  \node[tanya] (t4) at (7.9,-2.76) {Apa yang harus dikirim?};
+  \node[tekan, text width=2.6cm] (resp) at (2.0,-3.68) {\texttt{responses}};
+  \node[tanya] (t5) at (7.9,-3.68) {Apa arti berhasil, apa arti gagal, dan apa langkah berikutnya?};
+  \node[bagian, text width=2.6cm] (sec) at (2.0,-4.6) {\texttt{security}};
+  \node[tanya] (t6) at (7.9,-4.6) {Hak apa yang dibutuhkan? Pemeriksaannya tetap di server.};
+  \node[hasil] (comp) at (1.75,-5.52) {\texttt{components}};
+  \node[tanya] (t7) at (7.9,-5.52) {Bentuk data dan pesan galat apa yang dipakai berulang?};
+
+  \foreach \kiri/\kanan in {info/t1, servers/t2, paths/t3, param/t4, resp/t5, sec/t6, comp/t7} {
+    \draw[garis] (\kiri.east) -- (\kanan.west);
+  }
+  \draw[panah] (0.1,-2.2) |- (param.west);
+  \draw[panah] (0.1,-2.2) |- (resp.west);
+  \draw[panah] (0.1,-2.2) |- (sec.west);
+  \draw[panah, dashed] (comp.north east) to[out=70, in=-20] node[font=\tiny, right=1pt, pos=0.5] {\texttt{\$ref}} (resp.south east);
+\end{tikzpicture}

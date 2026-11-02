@@ -1,0 +1,26 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  induk/.style={draw, rounded corners, fill=praditagreen!15, text width=3.0cm,
+                minimum height=0.95cm, align=center, font=\scriptsize\bfseries},
+  baris/.style={draw, rounded corners, fill=blue!8, text width=1.2cm,
+                minimum height=1.5cm, align=center, font=\scriptsize\bfseries},
+  isi/.style={draw, rounded corners, fill=blue!8, text width=3.0cm,
+              minimum height=1.5cm, align=center},
+  tekan/.style={isi, fill=orange!12},
+  larang/.style={isi, fill=red!22, font=\scriptsize\bfseries}
+]
+  % Kolom menyatakan siapa pemanggilnya, baris menyatakan kepekaan datanya.
+  \node[induk] at (2.5,0) {API privat\\{\tiny\mdseries pemanggil di dalam organisasi}};
+  \node[induk] at (5.95,0) {API mitra\\{\tiny\mdseries pihak yang disepakati}};
+  \node[induk] at (9.4,0) {API publik\\{\tiny\mdseries pihak yang belum dikenal}};
+
+  \node[baris] at (0,-1.4) {Data kurang peka};
+  \node[isi] at (2.5,-1.4) {Katalog poli untuk aplikasi internal};
+  \node[isi] at (5.95,-1.4) {Slot jadwal untuk klinik mitra, 300 panggilan per hari};
+  \node[isi] at (9.4,-1.4) {Pencarian jadwal, tanpa akun, 1.000 panggilan per hari};
+
+  \node[baris] at (0,-3.05) {Data peka};
+  \node[tekan] at (2.5,-3.05) {Rekam medis antar-SIMRS, tetap dengan otorisasi dan jejak akses};
+  \node[tekan] at (5.95,-3.05) {Hasil pemeriksaan pasien yang dilayani, jejak akses, tinjau tiap 90 hari};
+  \node[larang] at (9.4,-3.05) {Tidak dibuka};
+\end{tikzpicture}

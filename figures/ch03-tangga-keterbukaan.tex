@@ -1,0 +1,37 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  anak/.style={draw, rounded corners, text width=2.6cm, minimum height=2.45cm,
+               align=left, font=\tiny, anchor=south west},
+  judul/.style={font=\scriptsize\bfseries},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  ket/.style={font=\tiny, align=center, fill=white, inner sep=1.5pt}
+]
+  \node[anak, fill=blue!8] (publik) at (0,0)
+    {{\scriptsize\bfseries Tingkat 0}\\
+     {\scriptsize\bfseries Publik}\\[2pt]
+     Dibuka: katalog layanan, jadwal praktik\\[2pt]
+     Syarat: tanpa akun\\[2pt]
+     Batas: 1.000 panggilan per hari};
+  \node[anak, fill=blue!8] (daftar) at (3.0,0.8)
+    {{\scriptsize\bfseries Tingkat 1}\\
+     {\scriptsize\bfseries Terdaftar}\\[2pt]
+     Dibuka: \textit{sandbox}, 20 pasien sintetis\\[2pt]
+     Syarat: akun, setuju syarat penggunaan\\[2pt]
+     Batas: 100 panggilan per hari};
+  \node[anak, fill=orange!12] (verifikasi) at (6.0,1.6)
+    {{\scriptsize\bfseries Tingkat 2}\\
+     {\scriptsize\bfseries Terverifikasi}\\[2pt]
+     Dibuka: pemesanan janji temu\\[2pt]
+     Syarat: izin usaha, kontrak, lulus 6 skenario gagal\\[2pt]
+     Batas: 300 panggilan per hari};
+  \node[anak, fill=orange!12] (wenang) at (9.0,2.4)
+    {{\scriptsize\bfseries Tingkat 3}\\
+     {\scriptsize\bfseries Berwenang}\\[2pt]
+     Dibuka: hasil pemeriksaan pasien yang dilayani\\[2pt]
+     Syarat: hubungan layanan aktif, jejak akses\\[2pt]
+     Batas: tinjau tiap 90 hari};
+
+  \draw[panah] (0,-0.35) -- node[ket, below=1pt]
+    {akibat tindakan makin besar, syarat makin ketat, kuota dihitung dari kebutuhan}
+    (12.0,-0.35);
+\end{tikzpicture}

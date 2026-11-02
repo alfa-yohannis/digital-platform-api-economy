@@ -1,0 +1,36 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000},
+  fase/.style={draw, rounded corners, fill=blue!8, text width=2.0cm, minimum height=1.55cm, align=center},
+  tekan/.style={fase, fill=orange!12},
+  akhir/.style={fase, fill=green!10},
+  angka/.style={draw, rounded corners, fill=praditagreen!15, text width=2.0cm, minimum height=0.6cm, align=center},
+  ket/.style={font=\tiny, align=center},
+  panah/.style={-{Stealth[length=2mm]}, thick}
+]
+  \draw[panah] (-1.2,1.25) -- (10.95,1.25);
+  \foreach \posisi/\bulan in {0/Bulan 0, 2.4/Bulan 3, 4.8/Bulan 4, 7.2/Bulan 5, 9.6/Bulan 6} {
+    \draw[thick] (\posisi,1.15) -- (\posisi,1.35);
+    \node[ket, above] at (\posisi,1.35) {\textbf{\bulan}};
+  }
+
+  \node[fase] (f0) at (0,0.2) {\textbf{Terbit dan beri tahu}\\{\tiny\mdseries versi 2 di \textit{sandbox}, surat ke 41 konsumen}};
+  \node[fase] (f1) at (2.4,0.2) {\textbf{Uji dan pindah}\\{\tiny\mdseries mulai dari 5 klinik uji, lalu klinik lain}};
+  \node[fase] (f2) at (4.8,0.2) {\textbf{Medikara+ pindah}\\{\tiny\mdseries rilis vendor selesai sesudah 4 bulan}};
+  \node[tekan] (f3) at (7.2,0.2) {\textbf{Tinjau kesiapan}\\{\tiny\mdseries sisa pemakai dihubungi, pengecualian diputuskan}};
+  \node[akhir] (f4) at (9.6,0.2) {\textbf{\textit{Sunset}}\\{\tiny\mdseries versi 1 dijawab 410, keputusan diarsipkan}};
+
+  \draw[panah] (f0) -- (f1);
+  \draw[panah] (f1) -- (f2);
+  \draw[panah] (f2) -- (f3);
+  \draw[panah] (f3) -- (f4);
+
+  \node[angka] at (0,-1.1) {41 pemakai};
+  \node[angka] at (2.4,-1.1) {16 pemakai};
+  \node[angka] at (4.8,-1.1) {12 pemakai};
+  \node[angka] at (7.2,-1.1) {3 pemakai};
+  \node[angka] at (9.6,-1.1) {0 pemakai};
+
+  \node[draw, rounded corners, fill=orange!12, minimum height=0.55cm, minimum width=11.85cm, align=center]
+    at (4.8,-1.9) {Versi 1 dan versi 2 berjalan berdampingan: 6 bulan $\times$ Rp3,75 juta = Rp22,5 juta};
+\end{tikzpicture}

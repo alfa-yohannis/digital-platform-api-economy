@@ -1,4 +1,11 @@
+% !TeX root = digital-platform-api-economy.tex
+% !TeX encoding = UTF-8
 \chapter{API sebagai Produk dan Ekonomi API}
+\label{ch:ch04}
+
+% Kolom rata kiri untuk tabel bab ini: J selebar sisa tabel, K selebar yang ditentukan.
+\newcolumntype{J}{>{\raggedright\arraybackslash}X}
+\newcolumntype{K}[1]{>{\raggedright\arraybackslash}p{#1}}
 
 \section*{Tujuan Pembelajaran}
 \begin{itemize}
@@ -9,79 +16,1050 @@
 
 \section{Pendahuluan}
 
-% TODO
-% Cakupan: biaya integrasi Medikara tinggi karena tiap integrasi dibangun sebagai proyek sekali
-% jadi oleh vendor berbeda, dan tidak ada yang tahu pasti berapa banyak integrasi yang berjalan.
+Bab 3 ditutup dengan tiga sambungan terlemah di ekosistem Medikara Health. Sebanyak 1.100 pemeriksaan
+khusus per bulan dari 3 laboratorium mitra dikirim lewat surel berisi hasil pindaian, lalu diketik
+ulang ke Sistem Informasi Manajemen Rumah Sakit (SIMRS). Sebanyak 7.800 klaim per bulan diunggah ke
+portal 9 asuransi dengan 9 format, dan 468 klaim ditolak karena format. Sebanyak 36 rekap bulanan bagi
+perusahaan klien disusun manual selama empat hari kerja. Ketiganya menjadi calon pertama
+\textit{Application Programming Interface} (API) mitra. Pertanyaan kemudian muncul: bila ketiganya
+dikerjakan seperti biasa, apa yang terjadi setelah proyeknya selesai?
 
-\section{Ekonomi API}
+Permintaan integrasi di Medikara selama ini sering selesai sebagai pekerjaan vendor yang terpisah.
+Setelah proyek ditutup, tidak jelas siapa menjawab pertanyaan mitra dan siapa membayar perubahan. Bab
+ini memperlakukan API sebagai kemampuan layanan yang dipelihara, sehingga biaya, pengguna, dan mutu
+tetap terlihat setelah peluncuran. Bahasannya meliputi nilai ekonomi API, API sebagai produk, audiens
+API, biaya tersembunyi integrasi \textit{point-to-point}, model bisnis berbasis API, dan cara
+menyusun inventaris. Angka tambahan yang diawali kata ``Misalkan'' adalah asumsi latihan. Kesimpulan
+untuk organisasi nyata harus diuji dengan wawancara, dokumen, dan pengukuran yang berizin. Hasil bab
+ini menjadi bagian tonggak C2 dalam cetak biru transformasi digital.
 
-% TODO
-% Cakupan: arti ekonomi API; temuan Benzell, Hersh, dan Van Alstyne bahwa API membalik batas
-% perusahaan dan berkaitan dengan pertumbuhan; temuan Postman 2025 State of the API (adopsi
-% API-first, pendapatan dari API); posisi Indonesia melalui SNAP dan SATUSEHAT secara singkat.
+Rujukan utama bab ini dipakai untuk membedakan konsep dan membangun alasan keputusan, bukan untuk
+menggantikan penilaian konteks organisasi. Konsep API sebagai produk dan tiga audiens API diambil dari
+Medjaoui dkk. \cite{medjaoui2021continuous}. Bukti dampak ekonominya diambil dari Benzell dkk.
+\cite{benzell2024apis}. Gambaran adopsi di industri diambil dari laporan Postman \cite{postman2025}.
+
+\IfFileExists{../figures/ch04-diagram-konsep.png}{%
+
+Gambar \ref{fig:ch04-ilustrasi-bab} merangkum hubungan komponen dan konsep utama bab ini.
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=\textwidth]{../figures/ch04-diagram-konsep.png}
+  \caption{API sebagai produk yang terus dipelihara}
+  \label{fig:ch04-ilustrasi-bab}
+\end{figure}
+}{}
+
+\section{Ekonomi API dan Batas Perusahaan}
+
+Membuka kemampuan lewat API menambah biaya dan risiko. Pertanyaannya, mengapa organisasi tetap
+melakukannya? Jawabannya ada pada biaya melintasi batas perusahaan.
+
+Ekonomi API adalah pertukaran nilai yang terjadi ketika kemampuan bisnis dapat dipakai pihak lain
+melalui antarmuka yang terkelola. Nilainya dapat berupa pendapatan, biaya koordinasi yang turun, dan
+layanan baru. Medjaoui dkk. menggambarkan API sebagai sarana bagi perusahaan untuk membuka bisnisnya
+kepada pihak ketiga dan tumbuh melampaui batas kemampuannya sendiri \cite{medjaoui2021continuous}.
+Batas itu punya penjelasan klasik. Coase berpendapat perusahaan cenderung membesar sampai biaya
+mengatur satu transaksi tambahan di dalam perusahaan sama dengan biaya menjalankannya lewat pasar
+\cite{c04-coase1937firm}. API mengubah sisi kedua persamaan itu. Bila bertukar data dengan pihak luar
+menjadi murah dan dapat diandalkan, pekerjaan yang dulu harus dikerjakan di dalam menjadi layak
+dikerjakan bersama pihak luar. Kaitan antara Coase dan API ini adalah penalaran bab ini, bukan temuan
+Coase.
+
+Parker, Van Alstyne, dan Jiang menyebut arah ekstremnya sebagai pembalikan perusahaan. Dalam model
+mereka, jumlah pengembang yang terus bertambah membuat perusahaan memilih berinovasi lewat kontrak
+terbuka dengan pihak luar daripada integrasi vertikal yang tertutup, sehingga pusat penciptaan nilai
+berpindah dari dalam ke luar \cite{parker2017ecosystems}. Rumah sakit tidak akan sepenuhnya terbalik,
+karena Bab 1 sudah menegaskan layanan klinis inti tetap dikerjakan di dalam. Yang dapat bergeser
+adalah lapisan di sekitarnya.
+
+Analoginya warung makan. Pada awalnya warung membuat sendiri sambal, kerupuk, dan es batu, karena
+memesan dari luar merepotkan dan barangnya sering terlambat. Begitu pemasok mengantar tepat waktu
+dengan harga yang pasti, warung melepas sebagian pekerjaan itu dan memusatkan tenaga pada masakan
+utamanya. Warungnya tidak berubah menjadi pemasok. Yang berubah adalah batas pekerjaannya.
+
+Dua contoh penerapan pada Medikara:
+\begin{enumerate}
+  \item Misalkan mengetik ulang dan memeriksa satu hasil dari laboratorium mitra butuh 6 menit. Dengan
+        1.100 pemeriksaan per bulan, biayanya 110 jam kerja per bulan atau 1.320 jam per tahun.
+        Misalkan tarif kerja Rp60.000 per jam, sehingga biaya melintasi batas ini Rp79,2 juta per
+        tahun. Angka itu tidak pernah muncul di kontrak dengan laboratorium, tetapi dibayar setiap
+        bulan.
+  \item Misalkan akses status klaim mengurangi 400 telepon per bulan. Dengan 6 menit per telepon, waktu
+        kerja yang dapat dialihkan mencapai 40 jam per bulan, atau Rp28,8 juta per tahun. Tidak ada
+        uang masuk dari API itu. Nilainya berupa biaya koordinasi yang turun.
+\end{enumerate}
+
+Gambar \ref{fig:ch04-batas-perusahaan} memperlihatkan pergeseran itu. Batas Medikara tetap ada, dan
+data pasien tetap di bawah kendalinya. Yang berubah adalah cara melintasinya.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch04-batas-perusahaan.tex}
+  \caption{API tidak menghapus batas perusahaan, tetapi menurunkan biaya melintasinya}
+  \label{fig:ch04-batas-perusahaan}
+\end{figure}
+
+Dua hal pada ekonomi API sering tertukar, yaitu volume dan nilai. Pembagiannya begini. Volume adalah
+banyaknya panggilan. Nilai adalah hasil yang diterima pengguna. Sebanyak 28.000 janji temu per bulan
+dengan tiga panggilan per pemesanan menghasilkan 84.000 panggilan. Misalkan panggilan naik menjadi
+168.000 per bulan, sedangkan janji temu tetap 28.000. Panggilan per janji temu naik dari tiga menjadi
+enam. Kenaikan itu lebih mungkin berasal dari pengulangan akibat \textit{error} daripada dari
+pertumbuhan nilai, dan penyebabnya harus diperiksa.
+
+\subsection*{Membaca temuan riset dan laporan industri}
+
+Bukti empiris datang dari Benzell, Hersh, dan Van Alstyne \cite{benzell2024apis}. Perusahaan
+tercatat di bursa yang mengadopsi API publik tumbuh tambahan 38,7 persen selama 16 tahun dibandingkan
+perusahaan serupa yang tidak mengadopsinya. Penggunaan API murni untuk produktivitas internal tidak
+menunjukkan efek yang signifikan. Perusahaan yang menarik lebih banyak pelengkap pihak ketiga tumbuh
+lebih cepat. Analisis variabel instrumental mereka mendukung peran sebab akibat API terhadap nilai
+pasar. Penelitian yang sama mencatat sisi buruknya, yaitu risiko kebocoran data yang naik. Keterangan
+pendanaan artikel itu menyebut dukungan sebagian dari Mulesoft dan Apigee, dua perusahaan di bidang
+alat API.
+
+Laporan industri memberi gambaran yang berbeda sifatnya. Tabel \ref{tab:ch04-laporan} menyandingkan
+ketiga sumber dengan hal yang perlu diingat saat membacanya.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Riset dan laporan industri tentang API beserta batas pembacaannya}
+  \label{tab:ch04-laporan}
+  \small
+  \begin{tabularx}{\textwidth}{K{2.0cm}JJ}
+    \hline
+    \textbf{Sumber} & \textbf{Temuan} & \textbf{Batas pembacaan} \\ \hline
+    Benzell dkk.\ 2024 \cite{benzell2024apis} & Tambahan 38,7 persen selama 16 tahun bagi pengadopsi API publik; API internal tidak berefek signifikan; risiko kebocoran naik & Sampel perusahaan tercatat di bursa; didanai sebagian oleh dua perusahaan alat API \\ \hline
+    Postman 2025 \cite{postman2025} & 82 persen \textit{API-first} pada tingkat tertentu, 25 persen sepenuhnya; 65 persen memperoleh pendapatan dari API; 93 persen tim menghadapi hambatan kolaborasi & Lebih dari 5.700 responden, 73 persen dari rekayasa perangkat lunak; penerbit menjual alat API \\ \hline
+    MuleSoft 2025 \cite{c04-mulesoft2025} & Rata-rata 897 aplikasi, 29 persen terintegrasi; 40 persen menyebut porsi pendapatan yang signifikan dari API & Lebih dari 1.050 pemimpin teknologi informasi; penerbit menjual platform integrasi \\ \hline
+  \end{tabularx}
+\end{table}
+
+Empat pertanyaan dipakai setiap kali membaca angka seperti itu:
+\begin{enumerate}
+  \item Siapa penerbitnya, dan apa kepentingannya atas hasil itu?
+  \item Siapa respondennya, dan apakah mereka mewakili organisasi seperti Medikara?
+  \item Apa persis yang diukur? Postman mencatat 65 persen, MuleSoft mencatat 40 persen. Keduanya tidak
+        harus bertentangan. Postman mencatat organisasi yang memperoleh pendapatan dari API, sedangkan
+        MuleSoft mencatat responden yang menyebut porsi pendapatan yang signifikan.
+  \item Apakah hasilnya dapat dipindahkan? Temuan Benzell dkk. berasal dari perusahaan tercatat di bursa,
+        bukan dari jaringan rumah sakit swasta.
+\end{enumerate}
+
+Hasil Benzell dkk. juga tidak berarti API internal tidak berguna. Artinya, API internal tidak boleh
+dibenarkan dengan janji pertumbuhan perusahaan. API internal Medikara dibenarkan oleh hitungan biaya
+dan risikonya sendiri, seperti contoh 110 jam per bulan tadi.
 
 \section{API sebagai Produk}
 
-% TODO
-% Cakupan: pengguna API, nilai yang ditawarkan, pemilik produk, dan peta jalan; perbedaan dengan
-% API sebagai proyek; pendekatan API-first; API sebagai produk internal maupun eksternal.
-% Kasus Medikara: API jadwal dokter yang dibuat ulang oleh tiap vendor.
+Dua vendor dapat menyerahkan kode yang sama. Bedanya baru terlihat enam bulan kemudian, ketika mitra
+pertama bertanya dan aturan asuransi pertama berubah. Pertanyaannya, apa yang membuat API tetap
+berguna setelah serah terima?
+
+Medjaoui dkk. memakai frasa API sebagai produk untuk sudut pandang bahwa API layak mendapat riset
+pengguna, prototipe, dan pengujian, serta pemantauan dan pemeliharaan jangka panjang, sama seperti
+produk lain \cite{medjaoui2021continuous}. Ada tiga kewajibannya: mengenal audiens, memahami dan
+menyelesaikan masalah terpenting mereka, serta memperhatikan masukan mereka. Proyek integrasi berbeda.
+Proyek dibatasi ruang lingkup dan tanggal selesai. Proyek tetap diperlukan untuk membangun produk,
+tetapi tanggung jawab produk berlanjut setelah serah terima.
+
+Sebuah produk API punya enam unsur yang saling terkait. Pengguna membawa masalah dan tugas. Produk API
+adalah kontrak atas satu kemampuan. Sistem penyedia menyimpan aturan dan data di baliknya. Hasil
+bisnisnya berupa layanan yang lebih baik atau efisiensi. Bukti manfaat itu sampai kepada pemilik
+produk, yang menetapkan prioritas dan anggaran. Operasi dan dukungan menjaga mutu sepanjang siklus.
+
+Analoginya restoran. Kontraktor membangun dapur, dibayar, lalu pulang. Pemilik restoran masih harus
+mengganti menu, menjaga mutu, menjawab keluhan, dan melihat piring mana yang kembali dalam keadaan
+penuh. Dapur yang rapi tidak menjamin pelanggan datang lagi.
+
+Dua contoh berangka memperlihatkan akibatnya:
+\begin{enumerate}
+  \item Misalkan API klaim dibangun dengan biaya Rp250 juta. Sembilan asuransi masing-masing mengubah
+        aturan dua kali setahun, sehingga ada 18 perubahan per tahun. Sebagai proyek, setiap perubahan
+        menjadi permintaan baru ke vendor seharga Rp8 juta, atau Rp144 juta per tahun tanpa anggaran
+        yang disiapkan. Sebagai produk, organisasi menyediakan Rp180 juta per tahun untuk pemilik
+        produk, dukungan, dan perubahan. Dalam tiga tahun, proyek menelan Rp682 juta dan produk Rp790
+        juta. Di atas kertas, produk lebih mahal Rp108 juta.
+  \item Selisih itu dibandingkan dengan hasil yang dipantau. Misalkan pemilik produk menurunkan
+        penolakan karena format dari 6 persen menjadi 2 persen. Klaim yang ditolak turun dari 468
+        menjadi 156 per bulan. Misalkan memperbaiki satu klaim butuh 15 menit. Penghematannya 78 jam
+        per bulan, atau Rp56,16 juta per tahun, atau Rp168,48 juta dalam tiga tahun. Angka itu melampaui
+        Rp108 juta. Pada pola proyek, penurunan tersebut tidak punya penanggung jawab.
+\end{enumerate}
+
+Tabel \ref{tab:ch04-produk-proyek} merangkum ciri yang membedakan keduanya.
+
+\begin{table}[!htb]
+  \centering
+  \caption{API sebagai proyek dan API sebagai produk berbeda pada apa yang terjadi setelah serah terima}
+  \label{tab:ch04-produk-proyek}
+  \small
+  \begin{tabularx}{\textwidth}{K{2.4cm}JJ}
+    \hline
+    \textbf{Ciri} & \textbf{API sebagai proyek} & \textbf{API sebagai produk} \\ \hline
+    Ukuran berhasil & Diserahkan tepat waktu dan sesuai lingkup & Masalah pengguna berkurang, terbaca dari data \\ \hline
+    Akhir pekerjaan & Tanggal selesai di kontrak & Berlanjut sampai API dipensiunkan \\ \hline
+    Pemilik & Manajer proyek, sampai serah terima & Pemilik produk, menetapkan prioritas dan anggaran \\ \hline
+    Anggaran & Sekali bayar, perubahan menjadi permintaan baru & Tahunan, perubahan sudah direncanakan \\ \hline
+    Pengguna & Disebut di dokumen kebutuhan & Dikenal, diwawancarai, dan dipantau pemakaiannya \\ \hline
+    Dukungan & Garansi vendor dalam jangka waktu tertentu & Dokumentasi dan jalur bantuan yang terus dirawat \\ \hline
+  \end{tabularx}
+\end{table}
+
+Siklus hidup memperjelas bedanya. Medjaoui dkk. membagi siklus produk API menjadi lima tahap
+\cite{medjaoui2021continuous}. Pada tahap buat (\textit{create}), API belum berjalan di lingkungan
+produksi. Pada tahap terbitkan (\textit{publish}), API sudah tersedia bagi pengguna. Pada tahap
+wujudkan nilai (\textit{realize}), API dipakai dengan cara yang mencapai tujuannya. Pada tahap pelihara
+(\textit{maintain}), API masih dipakai, tetapi nilainya mendatar atau menurun. Tahap terakhir adalah
+pensiun (\textit{retire}), ketika nilainya tidak lagi sepadan dengan biaya pemeliharaan dan keputusan
+mengakhiri API sudah diambil. Gambar \ref{fig:ch04-proyek-produk} menyandingkan siklus itu dengan alur
+proyek.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch04-proyek-produk.tex}
+  \caption{Proyek berhenti pada serah terima, sedangkan produk melanjutkan pengukuran dan perbaikan}
+  \label{fig:ch04-proyek-produk}
+\end{figure}
+
+\subsection*{Pengguna, nilai, dan pemilik}
+
+Tiga pertanyaan menguji apakah sebuah API sudah dikelola sebagai produk.
+
+Pertanyaan pertama: siapa penggunanya, dan tugas apa yang sedang ia selesaikan? Medjaoui dkk. mengutip
+teori \textit{Jobs to Be Done} dari Clayton Christensen: orang ``menyewa'' produk untuk membuat kemajuan
+dalam keadaan tertentu \cite{medjaoui2021continuous}. Pada API klaim, tugas petugas klaim bukan
+``memanggil API''. Tugasnya memastikan klaim diterima pada pengiriman pertama.
+
+Pertanyaan kedua: nilai apa yang dapat diukur? Ukuran seperti jumlah \textit{endpoint} menghitung hasil
+kerja tim, bukan manfaat. Ukuran yang berguna menghitung hasil bagi pengguna, misalnya janji temu yang
+selesai, klaim yang diterima, dan waktu sampai hasil terbaca dokter. Bagi calon mitra, Medjaoui dkk.
+menyebut waktu sampai panggilan pertama yang berhasil (\textit{time to first Hello World}) sebagai
+ukuran hambatan masuk \cite{medjaoui2021continuous}.
+
+Pertanyaan ketiga: siapa pemiliknya setelah vendor pergi? Pemilik produk memutuskan prioritas,
+menanggung anggaran, dan menerima akibat keputusannya. Misalkan API janji temu dipakai lima klinik.
+Pemilik produk mengelola prioritas perubahan dan mengukur janji yang selesai, bukan jumlah
+\textit{endpoint}. Jabatan itu tidak harus baru. Pada Medikara, manajer layanan rawat jalan dapat
+memegangnya, karena ia yang merasakan akibat antrean.
+
+Apakah API internal juga perlu diperlakukan sebagai produk? Medjaoui dkk. menjawab ya, walaupun tidak
+dengan besar investasi yang sama. Sebagian besar pengguna API memang rekan kerja di perusahaan yang
+sama. Yang berubah adalah kedalaman pengelolaannya, bukan tiga pertanyaan di atas.
+
+\begin{kasus}[title={Kasus Medikara Health: Tiga Sambungan Terlemah sebagai Calon Produk}]
+Tim memakai tiga pertanyaan tadi pada tiga sambungan dari Bab 3. Hasilnya pada Tabel
+\ref{tab:ch04-tiga-sambungan}. Misalkan memperbaiki satu klaim butuh 15 menit dan satu staf menyusun
+rekap selama empat hari kerja, atau 32 jam.
+
+\begin{center}
+  % Minipage menjaga judul dan isi tabel tetap satu halaman di dalam kotak yang dapat terpotong.
+  \begin{minipage}{\linewidth}
+    \captionsetup{type=table}
+    \caption{Tiga sambungan terlemah dibaca sebagai calon produk API mitra}
+    \label{tab:ch04-tiga-sambungan}
+    \footnotesize
+    \begin{tabularx}{\linewidth}{K{1.7cm}JK{1.3cm}JK{1.6cm}}
+      \hline
+      \textbf{Sambungan} & \textbf{Pengguna dan tugas} & \textbf{Beban manual} & \textbf{Ukuran nilai} & \textbf{Pemilik} \\ \hline
+      Hasil pemeriksaan & Petugas laboratorium dan dokter: hasil benar sampai ke rekam medis & 110 jam per bulan & Waktu sampai hasil terbaca, jumlah koreksi & Manajer Laboratorium \\ \hline
+      Klaim asuransi & Petugas klaim: klaim diterima pada pengiriman pertama & 117 jam per bulan & Persen klaim ditolak karena format & Manajer Klaim \\ \hline
+      Rekap perusahaan & Bagian kepegawaian klien: tahu pemakaian tanpa melihat data perorangan & 32 jam per bulan & Hari sampai rekap diterima, rekap di surel & Manajer Layanan Perusahaan \\ \hline
+    \end{tabularx}
+  \end{minipage}
+\end{center}
+
+Bebannya 259 jam per bulan, atau 3.108 jam per tahun. Dengan tarif Rp60.000 per jam, biayanya Rp186,48
+juta per tahun. Urutannya mengikuti Bab 3, yaitu akibat bagi pengguna, bukan kemudahan teknis. Hasil
+pemeriksaan didahulukan karena salah ketik langsung mengenai pasien. Klaim menyusul karena bebannya
+paling besar. Rekap ditaruh terakhir sebagai API, tetapi data karyawan di surel dihentikan lebih dulu
+lewat cara yang lebih sederhana: rekap agregat tanpa data perorangan.
+
+Keputusan ini punya dua konsekuensi. Pertama, tiga manajer menerima tanggung jawab baru, sehingga
+Medikara perlu menyediakan waktu dan anggaran tahunan bagi mereka. Kedua, ketiga API ini tidak dijual.
+Ukuran keberhasilannya berupa beban dan akibat yang turun, bukan pendapatan.
+\end{kasus}
+
+\subsection*{Pendekatan API-first}
+
+Bab 1 mencatat bahwa pendekatan \textit{API-first} dibahas di bab ini. \textit{API-first} berarti kontrak
+API dipikirkan sejak awal perancangan kemampuan, bukan ditambahkan setelah aplikasinya jadi. Laporan
+Postman menggambarkannya sebagai cara memperlakukan API sebagai produk, bukan proyek \cite{postman2025}.
+Laporan itu mencatat 82 persen organisasi responden menerapkannya pada tingkat tertentu, tetapi hanya
+25 persen yang sepenuhnya. Jarak itu lebih menarik daripada angka 82 persennya. Banyak organisasi
+menyatakan arah yang sama, dan lebih sedikit yang sudah menjalankannya.
+
+Analoginya denah rumah. Pemilik dan arsitek menyepakati letak pintu sebelum tukang mengecor. Memindahkan
+pintu di denah butuh penghapus. Memindahkannya setelah tembok berdiri butuh palu dan biaya baru.
+
+Dua contoh penerapan pada Medikara:
+\begin{enumerate}
+  \item Misalkan nama kolom pada kontrak hasil pemeriksaan keliru. Bila ditemukan saat kontrak ditinjau,
+        perbaikannya 2 jam kerja. Bila ditemukan setelah 40 klinik mitra terhubung, tiap klinik butuh
+        sekitar 4 jam, sehingga totalnya 160 jam ditambah masa transisi.
+  \item Misalkan tim Medikara+ menunggu tim SIMRS selesai selama 10 minggu, lalu bekerja 6 minggu. Jika
+        berurutan, totalnya 16 minggu. Bila kontrak disepakati dalam 2 minggu pertama, kedua tim bekerja
+        bersamaan dengan jawaban simulasi, sehingga totalnya 12 minggu. Hemat 4 minggu, dengan syarat
+        kontrak tidak banyak berubah di tengah jalan.
+\end{enumerate}
+
+Dua hal pada pendekatan ini sering tertukar, yaitu \textit{API-first} dan API untuk segalanya.
+Pembagiannya begini. \textit{API-first} mengatur urutan berpikir ketika sebuah kemampuan memang akan
+dipakai sistem lain. Pendekatan ini tidak mewajibkan semua pertukaran memakai API. Bab 1 sudah
+menyatakan unggah berkas bulanan masuk akal untuk rekap yang jarang berubah dan dibaca manusia.
 
 \section{Audiens API: Privat, Mitra, dan Publik}
 
-% TODO
-% Cakupan: klasifikasi API privat, mitra, dan publik; konsekuensi pada keamanan, dokumentasi,
-% kontrak, dan dukungan; perpindahan API dari privat ke mitra.
-% Kasus Medikara: API pendaftaran pasien, API hasil laboratorium, dan API katalog layanan.
+Satu API klaim, satu API jadwal, dan satu API hasil pemeriksaan tidak melayani orang yang sama. Pertanyaan
+kemudian muncul: untuk siapa API ini dibuat, dan apa yang berubah bila audiensnya berubah?
+
+API privat melayani kebutuhan internal, API mitra melayani pihak yang disepakati, dan API publik
+dirancang bagi audiens luas. Medjaoui dkk. memakai tiga audiens yang sama, yaitu pengembang
+internal, mitra bisnis, dan pengembang pihak ketiga yang bahkan tidak dikenal, masing-masing dengan masalah dan cara berpikirnya
+sendiri \cite{medjaoui2021continuous}. Zimmermann dkk. memakai pembagian yang mirip dari sisi
+visibilitas: \textit{public API} untuk klien yang jumlahnya tidak terbatas atau tidak diketahui,
+\textit{community API} untuk kelompok tertutup yang terdiri dari beberapa badan hukum, dan
+\textit{solution-internal API} untuk komponen di dalam satu aplikasi \cite{zimmermann2022patterns}.
+Pembagian kedua itu lebih sempit di sisi internal. Bab ini memakai istilah privat, mitra, dan publik.
+
+Analoginya loket rumah sakit. Informasi jam buka ditempel di pintu bagi siapa saja. Daftar pasien yang
+dirujuk diberikan kepada klinik perujuk sesuai perjanjian. Catatan kerja antarbagian hanya beredar di
+dalam, dan tidak semua pegawai boleh membacanya.
+
+Dua contoh penerapan pada Medikara:
+\begin{enumerate}
+  \item Pencarian jadwal dokter ditawarkan luas dengan informasi minimum. Tangga keterbukaan Bab 3
+        menaruhnya pada Tingkat 0: tanpa akun, dengan batas 1.000 panggilan per hari, dan tanpa data
+        pasien. Pendaftaran pasien oleh klinik memerlukan identitas mitra dan pembatasan hak, dengan
+        kuota 300 panggilan per hari per klinik. Untuk 40 klinik mitra, kapasitasnya paling banyak
+        12.000 panggilan per hari.
+  \item API privat antarsistem lima rumah sakit tetap memerlukan otorisasi. Lokasi internal tidak
+        menjamin setiap pemanggil berhak membaca rekam medis. Bab 3 memisalkan vendor dapat membaca 140
+        tabel SIMRS, padahal kebutuhannya 2 tabel. Sisanya, 138 tabel, adalah risiko yang tidak memberi
+        manfaat apa pun, walaupun vendor itu bekerja untuk Medikara.
+\end{enumerate}
+
+Tabel \ref{tab:ch04-audiens} merangkum hal yang berubah menurut audiens.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Tiga audiens API menuntut hubungan, dukungan, dan cara perubahan yang berbeda}
+  \label{tab:ch04-audiens}
+  \small
+  \begin{tabularx}{\textwidth}{K{2.45cm}JJJ}
+    \hline
+    \textbf{Aspek} & \textbf{Privat} & \textbf{Mitra} & \textbf{Publik} \\ \hline
+    Pemanggil & Tim dan aplikasi organisasi sendiri & Pihak yang sudah disepakati & Pihak yang belum tentu dikenal \\ \hline
+    Dasar hubungan & Aturan internal & Perjanjian dan hak akses & Syarat penggunaan \\ \hline
+    Pemberitahuan perubahan & Rapat antartim, cepat & Masa transisi yang disepakati & Panjang, karena pemanggil tidak dapat dihubungi satu per satu \\ \hline
+    Ukuran nilai & Biaya dan waktu kerja & Layanan bersama yang selesai & Jangkauan dan pemakaian \\ \hline
+    Tangga Bab 3 & Di luar tangga & Tingkat 1 sampai 3 & Tingkat 0 \\ \hline
+    Contoh Medikara & Jadwal dokter bagi aplikasi Medikara+ & Klaim, hasil pemeriksaan, rekap & Pencarian jadwal \\ \hline
+  \end{tabularx}
+\end{table}
+
+Dua hal pada audiens sering tertukar, yaitu audiens dan kepekaan data. Pembagiannya begini. Audiens
+menjawab siapa yang memanggil. Kepekaan menjawab seberapa besar akibatnya bila data itu keluar. Satu
+kemampuan dapat memiliki tampilan publik yang terbatas dan tampilan mitra yang lebih kaya. Gambar
+\ref{fig:ch04-audiens-sensitivitas} memisahkan kedua sumbu itu. Hanya satu sel yang tertutup sama
+sekali, yaitu data peka bagi pihak yang belum dikenal. Data kesehatan termasuk data pribadi yang
+bersifat spesifik menurut Undang-Undang Pelindungan Data Pribadi (UU PDP) \cite{uu27-2022-pdp}, sehingga
+sel kiri bawah dan tengah bawah tetap menuntut dasar pemrosesan dan jejak akses.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch04-audiens-sensitivitas.tex}
+  \caption{Audiens dan kepekaan data adalah dua sumbu yang berbeda. Merah menandai kombinasi yang tidak
+           dibuka, oranye menandai data yang menuntut kontrol tambahan}
+  \label{fig:ch04-audiens-sensitivitas}
+\end{figure}
+
+Publik juga tidak berarti bebas biaya atau tanpa autentikasi. Zimmermann dkk. mencatat bahwa API baru
+benar-benar terbuka bila tidak memakai kunci API atau autentikasi lain
+\cite{zimmermann2022patterns}. API Stripe, misalnya, ditawarkan secara luas, tetapi pemakaiannya dibayar
+per transaksi \cite{stripe-pricing}. Medikara memilih tanpa akun pada Tingkat 0
+karena isinya hanya jadwal. Keputusan itu berlaku untuk isi tersebut, bukan untuk semua API publik.
+
+Satu hal lagi perlu dicatat pada inventaris: arah. Badan Penyelenggara Jaminan Sosial (BPJS) Kesehatan dan
+SATUSEHAT memiliki API yang dipanggil Medikara. Medikara tidak menentukan audiensnya, karena keduanya
+adalah pihak wajib. Audiens selalu dibaca dari sisi pemilik API. Medikara dapat
+menjadi penyedia pada satu baris inventaris dan menjadi pemanggil pada baris berikutnya.
+
+\begin{kasus}[title={Kasus Medikara Health: Satu Kemampuan Jadwal, Tiga Tampilan}]
+Jadwal dokter adalah kemampuan yang sama bagi tiga audiens. Misalkan aplikasi Medikara+ memakai tampilan
+privat: slot, pasien yang sudah memesan, dan status kedatangan. Klinik mitra memakai tampilan mitra: slot
+kosong dan pemesanan atas nama pasien yang dilayaninya. Pengunjung situs memakai tampilan publik: nama
+dokter, poli, dan tanggal praktik dari 1.400 slot per hari, tanpa satu pun data pasien.
+
+Keputusan ini punya dua konsekuensi. Pertama, satu perubahan pada sistem jadwal harus diuji pada tiga
+tampilan, sehingga pemilik produknya tetap satu orang. Kedua, Medikara+ tidak lagi membaca basis data
+SIMRS secara langsung, dan vendornya menjadi pemanggil API privat. Akses 140 tabel turun menjadi
+kemampuan yang memang dibutuhkan, tetapi vendor Medikara+ harus mengubah aplikasinya, dan biaya perubahan
+itu perlu dirundingkan.
+\end{kasus}
 
 \section{Integrasi Point-to-Point dan Utang Integrasi}
 
-% TODO
-% Cakupan: pertumbuhan jumlah sambungan point-to-point seiring bertambahnya sistem; biaya
-% tersembunyi berupa pemeliharaan, ketergantungan vendor, dan kegagalan berantai; konsep utang
-% integrasi.
-% Kasus Medikara: integrasi tiap rumah sakit ke BPJS Kesehatan dan SATUSEHAT yang dibangun terpisah.
+Bab 1 sudah memperkenalkan integrasi \textit{point-to-point} dan rumus $n(n-1)/2$. Pertanyaan berikutnya
+lebih praktis: berapa biaya sambungan yang berjalan, dan bagian mana yang tidak terlihat di anggaran?
+
+Integrasi \textit{point-to-point} menghubungkan sistem secara langsung, dengan cara yang dibuat khusus
+untuk pasangan itu. Masalahnya muncul ketika setiap hubungan mempunyai format, kredensial, dan prosedur
+perubahan yang berbeda. Rumus $n(n-1)/2$ memberi batas atas pasangan, bukan jumlah sambungan yang
+berjalan. Sembilan sistem punya batas 36 pasangan. Gambar lima SIMRS dan empat tujuan pada Bab 1 hanya
+memuat 20 sambungan, karena sesama SIMRS dan sesama tujuan tidak tersambung. Anggaran dihitung dari sambungan yang
+benar-benar berjalan, yaitu 20, bukan dari batas 36.
+
+Analoginya colokan listrik tambahan di kantor lama. Satu colokan tambahan menyelesaikan masalah hari itu.
+Sepuluh tahun kemudian, tidak ada yang berani mencabut satu kabel, karena tidak ada kabel yang diberi
+penanda dan satu-satunya teknisi yang hafal sudah pindah. Listriknya masih menyala, tetapi setiap
+perbaikan menjadi mahal.
+
+Dua contoh penerapan pada Medikara:
+\begin{enumerate}
+  \item Bab 1 memisalkan perawatan Rp45 juta per integrasi per tahun, sehingga 10 sambungan ke BPJS
+        Kesehatan dan SATUSEHAT menelan Rp450 juta. Misalkan biaya yang sama berlaku untuk sambungan ke
+        Medikara+ dan sistem \textit{Enterprise Resource Planning} (ERP) keuangan. Sebanyak 20 sambungan
+        menelan Rp900 juta per tahun. Menambah satu tujuan berarti 5 sambungan baru, atau Rp225 juta per
+        tahun.
+  \item Bab 1 menyebut biaya itu belum termasuk pembaruan spesifikasi. Misalkan BPJS Kesehatan dan
+        SATUSEHAT masing-masing memperbarui spesifikasi dua kali setahun, dan satu penerapan berbiaya Rp12
+        juta. Empat pembaruan yang diterapkan di lima tempat menjadi 20 pekerjaan, atau Rp240 juta per
+        tahun. Lewat satu titik, jumlahnya 4 pekerjaan, atau Rp48 juta.
+\end{enumerate}
+
+Apakah lapisan bersama selalu lebih murah? Tidak. Misalkan lapisan bersama berbiaya Rp300 juta per tahun,
+dan tiap sambungan ke lapisan tetap berbiaya Rp45 juta. Tabel \ref{tab:ch04-titik-impas} memperlihatkan
+bahwa sambungan langsung lebih murah untuk satu atau dua tujuan. Lapisan bersama menjadi lebih murah
+mulai tiga tujuan. Asumsi Rp45 juta itu sengaja tidak diturunkan, sehingga perbandingannya tidak memihak
+lapisan bersama. Lapisan itu tetap gambaran awal, karena rancangannya baru dibahas di Bab 8 sampai Bab 10.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Sambungan dan biaya tahunan untuk lima SIMRS menurut jumlah tujuan. Lapisan bersama berbiaya
+           Rp300 juta per tahun, dan satu sambungan Rp45 juta per tahun}
+  \label{tab:ch04-titik-impas}
+  \small
+  \begin{tabularx}{\textwidth}{K{1.8cm}JJJJ}
+    \hline
+    \textbf{Jumlah tujuan} & \textbf{Sambungan langsung} & \textbf{Biaya langsung} & \textbf{Sambungan lewat lapisan} & \textbf{Biaya lewat lapisan} \\ \hline
+    1 & 5 & Rp225 juta & 6 & Rp570 juta \\ \hline
+    2 & 10 & Rp450 juta & 7 & Rp615 juta \\ \hline
+    3 & 15 & Rp675 juta & 8 & Rp660 juta \\ \hline
+    4 & 20 & Rp900 juta & 9 & Rp705 juta \\ \hline
+    6 & 30 & Rp1,35 miliar & 11 & Rp795 juta \\ \hline
+    8 & 40 & Rp1,8 miliar & 13 & Rp885 juta \\ \hline
+  \end{tabularx}
+\end{table}
+
+Laporan MuleSoft memperlihatkan persoalan ini tidak khas Medikara. Responden mencatat rata-rata 897
+aplikasi, dan hanya 29 persen yang terintegrasi \cite{c04-mulesoft2025}. Angka itu berasal dari penjual
+platform integrasi, sehingga dipakai sebagai gambaran, bukan patokan.
+
+\subsection*{Utang integrasi}
+
+Metafora utang teknis, yang berasal dari Ward Cunningham, menggambarkan jalan pintas yang mempercepat
+pekerjaan hari ini dan membebani pekerjaan berikutnya \cite{c04-kruchten2012debt}. Bab ini memakai istilah
+utang integrasi untuk bentuk khususnya pada sambungan antarsistem. Istilah ini adalah pengertian kerja bab
+ini, bukan istilah baku. Utang integrasi mencakup perubahan yang ditunda, kerja manual yang dibiarkan, dan
+pengetahuan yang hanya dimiliki satu vendor. Seperti utang biasa, ada pokok dan bunga. Pokoknya biaya
+merapikan sambungan. Bunganya biaya yang terus dibayar selama sambungan belum dirapikan.
+
+Gambar \ref{fig:ch04-utang-integrasi} memisahkan biaya yang tercatat dari biaya yang tersembunyi. Biaya
+tersembunyi yang sudah dapat dihitung berjumlah sekitar Rp497 juta per tahun, atau 55 persen di atas
+anggaran yang tercatat. Kerja manual 357 jam per bulan pada gambar itu berasal dari 259 jam tiga sambungan
+terlemah, 50 jam rekonsiliasi bank (dua jam per hari selama 25 hari kerja), dan 48 jam penyatuan rekap klinik
+(dua staf, tiga hari kerja, delapan jam per hari).
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch04-utang-integrasi.tex}
+  \caption{Biaya integrasi Medikara yang tercatat dan yang tersembunyi per tahun. Merah sudah dihitung
+           dengan asumsi latihan, abu-abu belum dinilai}
+  \label{fig:ch04-utang-integrasi}
+\end{figure}
+
+Tabel \ref{tab:ch04-biaya-tersembunyi} memuat cara mengukur tiap biaya tersembunyi, sehingga tim tidak
+berhenti pada perkiraan.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Biaya tersembunyi integrasi dan cara mengukurnya}
+  \label{tab:ch04-biaya-tersembunyi}
+  \small
+  \begin{tabularx}{\textwidth}{K{2.6cm}JJ}
+    \hline
+    \textbf{Biaya} & \textbf{Contoh Medikara} & \textbf{Cara mengukur} \\ \hline
+    Perubahan & Satu pembaruan diterapkan lima kali & Faktur vendor dan jumlah permintaan perubahan \\ \hline
+    Kerja manual & Hasil pemeriksaan diketik ulang & Catatan waktu dua minggu, lalu dikali volume \\ \hline
+    Kegagalan & 4 persen kunjungan klinik belum terkirim ke SATUSEHAT & Catatan kiriman dan waktu perbaikan \\ \hline
+    Pengetahuan & Hanya vendor yang tahu cara kerja sambungan & Jumlah sambungan tanpa dokumen, uji baca oleh pihak lain \\ \hline
+    Akses berlebih & 138 tabel di luar kebutuhan & Perbandingan hak akses dengan kebutuhan \\ \hline
+  \end{tabularx}
+\end{table}
+
+\begin{kasus}[title={Kasus Medikara Health: Pokok dan Bunga Tiga Sambungan}]
+Direksi bertanya: bila Medikara punya utang integrasi, apakah semuanya harus dilunasi sekarang? Tim
+menghitung pokok dan bunga untuk tiga sambungan terlemah pada Tabel \ref{tab:ch04-pokok-bunga}. Misalkan
+pembangunan tiap API berbiaya seperti pada kolom pokok. Bunga dihitung dari jam manual setahun dengan tarif
+Rp60.000 per jam. Waktu balik modal dihitung kasar: pokok dibagi bunga. Hitungan ini batas terbaik, karena
+menganggap seluruh kerja manual hilang dan belum memasukkan biaya operasi.
+
+\begin{center}
+  \begin{minipage}{\linewidth}
+    \captionsetup{type=table}
+    \caption{Pokok dan bunga tiga sambungan terlemah, dengan akibat yang tidak tercakup hitungan}
+    \label{tab:ch04-pokok-bunga}
+    \footnotesize
+    \begin{tabularx}{\linewidth}{K{1.7cm}K{1.35cm}K{1.75cm}K{1.35cm}J}
+      \hline
+      \textbf{Sambungan} & \textbf{Pokok} & \textbf{Bunga per tahun} & \textbf{Balik modal} & \textbf{Akibat di luar hitungan} \\ \hline
+      Hasil pemeriksaan & Rp200 juta & Rp79,2 juta & 2,5 tahun & Salah ketik hasil, pasien menunggu \\ \hline
+      Klaim asuransi & Rp250 juta & Rp84,24 juta & 3,0 tahun & Pembayaran klaim tertahan \\ \hline
+      Rekap perusahaan & Rp150 juta & Rp23,04 juta & 6,5 tahun & Data karyawan beredar di surel \\ \hline
+    \end{tabularx}
+  \end{minipage}
+\end{center}
+
+Pokoknya Rp600 juta, dan bunganya Rp186,48 juta per tahun. Tabel itu memberi dua pelajaran. Pertama, jam
+kerja saja tidak cukup untuk membenarkan API rekap, karena balik modalnya 6,5 tahun. Alasan menanganinya
+adalah data karyawan, dan alasan itu dapat dijawab lebih murah dengan rekap agregat. Kedua, kolom terakhir
+menentukan urutan. Hasil pemeriksaan didahulukan walaupun bunganya bukan yang terbesar, karena akibatnya
+mengenai pasien.
+\end{kasus}
+
+\lstdefinestyle{ch04python}{language=Python, basicstyle=\ttfamily\scriptsize, keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape, stringstyle=\color{red}, showstringspaces=false, breaklines=true,
+  frame=lines, numbers=left, numberstyle=\tiny\color{gray}, backgroundcolor=\color{lightgray!10}, tabsize=2,
+  captionpos=b, xleftmargin=8pt}
+
+\begin{pendalaman}[title={Pendalaman Teknis (opsional): Menghitung Titik Impas}]
+Listing \ref{lst:ch04-biaya-sambungan} menghitung kedua cara tersambung pada Tabel \ref{tab:ch04-titik-impas}.
+Tim mengganti konstanta di awal berkas dengan angka organisasinya.
+
+\begin{lstlisting}[style=ch04python, caption={Biaya dua cara tersambung, tersedia di \berkas{sources/chapter04/hitung-beban-integrasi.py}}, label={lst:ch04-biaya-sambungan}]
+def hitung_biaya_langsung(jumlah_sumber, jumlah_tujuan):
+  """Tiap sumber disambung ke tiap tujuan, sehingga biaya tumbuh berlipat."""
+  sambungan = jumlah_sumber * jumlah_tujuan
+  return sambungan, sambungan * BIAYA_PER_SAMBUNGAN_JUTA
+
+
+def hitung_biaya_lapisan(jumlah_sumber, jumlah_tujuan):
+  """Tiap sistem cukup satu sambungan, tetapi lapisannya juga punya biaya."""
+  sambungan = jumlah_sumber + jumlah_tujuan
+  biaya = sambungan * BIAYA_PER_SAMBUNGAN_JUTA + BIAYA_LAPISAN_BERSAMA_JUTA
+  return sambungan, biaya
+\end{lstlisting}
+
+Listing \ref{lst:ch04-jalan-biaya} memperlihatkan cara menjalankannya beserta keluarannya.
+
+\begin{lstlisting}[language=bash, xleftmargin=8pt, caption={Menjalankan perhitungan, memakai \berkas{sources/chapter04/hitung-beban-integrasi.py}}, label={lst:ch04-jalan-biaya}]
+python sources/chapter04/hitung-beban-integrasi.py
+1 tujuan: langsung 5 (Rp225 juta), lapisan 6 (Rp570 juta)
+2 tujuan: langsung 10 (Rp450 juta), lapisan 7 (Rp615 juta)
+3 tujuan: langsung 15 (Rp675 juta), lapisan 8 (Rp660 juta)
+4 tujuan: langsung 20 (Rp900 juta), lapisan 9 (Rp705 juta)
+6 tujuan: langsung 30 (Rp1350 juta), lapisan 11 (Rp795 juta)
+8 tujuan: langsung 40 (Rp1800 juta), lapisan 13 (Rp885 juta)
+Batas pasangan 9 sistem: 36
+Lapisan lebih murah mulai 3 tujuan
+\end{lstlisting}
+\end{pendalaman}
 
 \section{Model Bisnis Berbasis API}
 
-% TODO
-% Cakupan: contoh perusahaan yang produk utamanya API di sektor pembayaran dan komunikasi; contoh
-% layanan pembayaran berbasis SNAP di Indonesia; contoh di sektor kesehatan seperti layanan
-% laboratorium; monetisasi dibahas rinci di Bab 12.
+Setelah biaya terlihat, pertanyaan berikutnya muncul: siapa yang membayar API, dan apakah API harus dijual?
+
+Model bisnis API menjelaskan siapa menerima nilai, siapa menanggung biaya, dan lewat apa organisasi
+menangkap nilainya. API dapat mendukung transaksi, memperluas saluran, menjual kemampuan, atau memperkaya
+layanan utama. Pilihan model mengikuti siapa menerima nilai dan siapa menanggung biaya. Medjaoui dkk. mencatat
+pilihan utamanya sebagai pengorbanan antara pendapatan langsung dan perolehan pengguna
+\cite{medjaoui2021continuous}. Bila pengguna memperbesar nilai ekosistem, organisasi dapat menyederhanakan
+harga demi adopsi.
+
+Analoginya layanan pengiriman barang. Ongkirnya dapat dibayar pembeli, dibayar penjual, atau disubsidi
+dalam harga barang. Paketnya sama, jaraknya sama, tetapi siapa yang merasa diuntungkan berbeda. Toko lalu
+memilih cara yang membuat pembeli tetap datang.
+
+Dua hal pada model bisnis sering tertukar, yaitu API yang menjadi produk dan API yang mendukung produk.
+Pembagiannya begini. Medjaoui dkk. menempatkan Stripe dan Twilio pada kelompok pertama, karena kemampuan
+yang dijual berdiri sendiri, misalnya pembayaran dan pesan singkat. Salesforce dan YouTube ada pada
+kelompok kedua, karena API-nya ada untuk mendukung platform yang sudah ada. API kelompok kedua sering gratis,
+karena pemakaiannya menaikkan nilai bisnis utamanya \cite{medjaoui2021continuous}. Keduanya tetap
+dikelola sebagai produk. Yang berbeda adalah cara menangkap nilainya.
+
+Dua contoh penerapan pada Medikara:
+\begin{enumerate}
+  \item Pada skema Bab 2, klinik mitra membayar langganan Rp3 juta per bulan. Misalkan API penjadwalan tidak
+        dikenai biaya per panggilan karena sudah termasuk langganan. Pada kuota 300 panggilan per hari
+        selama 25 hari kerja, atau 7.500 panggilan per bulan, langganan itu setara Rp400 per panggilan.
+        Pada kebutuhan 180 panggilan per hari, setaranya sekitar Rp667. Tarif per panggilan justru menghukum klinik saat sistem
+        mengulang panggilan akibat \textit{error}, sehingga langganan lebih cocok.
+  \item Misalkan API klaim menurunkan penolakan karena format, dengan penghematan Rp56,16 juta per tahun.
+        Medikara dapat mempertahankan API itu sebagai investasi operasional tanpa menjualnya ke luar.
+        Membebankan tarif kepada asuransi malah dapat menahan adopsi, padahal Medikara yang paling
+        diuntungkan. Kemampuan ini berbeda dari verifikasi penjaminan pada Bab 2, yang berbayar
+        Rp10.000 per verifikasi, karena manfaat verifikasi penjaminan diterima asuransi.
+\end{enumerate}
+
+Tabel \ref{tab:ch04-model-bisnis} merangkum pilihan yang tersedia. Rincian monetisasi dan pohon metrik dibahas
+di Bab 12.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Pilihan model bisnis berbasis API dan contohnya}
+  \label{tab:ch04-model-bisnis}
+  \small
+  \begin{tabularx}{\textwidth}{K{2.3cm}K{2.0cm}JJ}
+    \hline
+    \textbf{Model} & \textbf{Pembayar} & \textbf{Contoh} & \textbf{Dasar penilaian} \\ \hline
+    Bayar per transaksi & Pemakai API & Stripe: 2,9 persen ditambah 30 sen dolar. Medikara+: Rp10.000 per verifikasi penjaminan, atau Rp960 juta per tahun dari asuransi & Pendapatan bersih per transaksi yang berhasil \\ \hline
+    Langganan & Mitra & 40 klinik $\times$ Rp3 juta $\times$ 12 bulan = Rp1,44 miliar per tahun & Klinik aktif yang bertahan \\ \hline
+    Bagian dari paket & Pembeli paket & Paket 200 karyawan Rp100 juta, Medikara menyimpan Rp10 juta & Nilai layanan selesai \\ \hline
+    Investasi operasional & Organisasi sendiri & API klaim yang tidak dijual & Biaya kerja ulang yang turun \\ \hline
+    Kewajiban & Organisasi sendiri & 10 sambungan BPJS Kesehatan dan SATUSEHAT, Rp450 juta per tahun & Kepatuhan dan kiriman yang berhasil \\ \hline
+  \end{tabularx}
+\end{table}
+
+\subsection*{Sektor pembayaran}
+
+Sektor pembayaran memberi contoh yang jelas dari API yang dijual sebagai produk. Stripe menarik 2,9 persen
+ditambah 30 sen dolar per transaksi kartu yang berhasil pada tarif standar Amerika Serikat, tanpa biaya
+pendaftaran dan biaya bulanan \cite{stripe-pricing}. Transaksi 100 dolar dikenai 3,20 dolar. Penjual
+hanya membayar bila transaksinya berhasil, sehingga harga mengikuti nilai yang diterima.
+
+Di Indonesia, Bank Indonesia menetapkan Standar Nasional Open API Pembayaran (SNAP) untuk industri
+pembayaran. Standar ini wajib diterapkan bertahap pada setiap \textit{open API} pembayaran. Cakupannya
+standar teknis dan keamanan, standar data, spesifikasi teknis, dan pedoman tata kelola, dengan tujuan
+memperkuat konektivitas dan interoperabilitas. Pengelolaannya berpindah ke Asosiasi Sistem Pembayaran
+Indonesia (ASPI) sejak 1 September 2023 \cite{snap-bi}. Standar seperti ini menyeragamkan cara
+tersambung, sehingga biaya satu sambungan baru menjadi lebih mudah diperkirakan. Bagi Medikara, sambungan ke dua
+bank mitra, yang kini menuntut rekonsiliasi manual dua jam per hari, menjadi calon pertama untuk diperiksa.
+
+\subsection*{Sektor kesehatan}
+
+Sektor kesehatan berbeda karena data pasien. Data kesehatan bukan komoditas bebas jual. Setiap pemanfaatan
+tetap memerlukan tujuan, dasar pemrosesan, kewenangan akses, dan batas penggunaan yang sesuai
+\cite{uu27-2022-pdp}. Karena itu Medikara menjual layanan di sekitar data, bukan datanya.
+
+Dua rujukan luar negeri memberi gambaran arah sektor ini. Proyek \textit{Substitutable Medical Applications
+and Reusable Technologies} (SMART) bertujuan agar aplikasi medis ditulis sekali dan berjalan tanpa perubahan
+pada berbagai sistem teknologi informasi kesehatan. Proyek ini kemudian memakai standar Health Level Seven
+Fast Healthcare Interoperability Resources (HL7 FHIR), yang juga dipakai SATUSEHAT \cite{c04-mandel2016smart, satusehat}. Aturan sertifikasi
+Amerika Serikat pada \textit{Code of Federal Regulations} (CFR) memperlihatkan bahwa regulator dapat ikut
+menentukan siapa membayar. Pengembang API bersertifikat boleh menarik biaya dari penyedia informasi
+kesehatan untuk pengembangan, penyebaran, pemutakhiran, dan biaya tambahan menjalankan API. Dari pengguna API,
+biaya hanya boleh ditarik untuk layanan bernilai tambah yang tidak diperlukan untuk membangun perangkat
+lunak siap pakai. Biaya lain dilarang \cite{c04-cfr170-404}. Aturan itu tidak berlaku di Indonesia. Gunanya
+sebagai pembanding ketika Medikara menyusun harga mitranya.
+
+Kesimpulan bagi Medikara: API mitranya termasuk API yang mendukung produk, bukan API yang dijual sendiri.
+Keputusan ini punya dua konsekuensi. Pertama, keberhasilan API dinilai dari layanan yang selesai dan
+biaya yang turun, bukan dari pendapatan per panggilan. Kedua, pendapatan Rp2,4 miliar per tahun pada Bab 2
+datang dari langganan klinik dan verifikasi asuransi, sehingga API yang gagal melayani klinik mengancam
+pendapatan walaupun API itu tidak punya harga.
 
 \section{Menyusun Inventaris Integrasi dan API}
 
-% TODO
-% Cakupan: kolom inventaris (sistem asal, sistem tujuan, data, pemilik, cara pertukaran, audiens,
-% frekuensi, masalah); sumber informasi berupa wawancara, dokumentasi, konfigurasi, dan kontrak
-% vendor; cara memeriksa kelengkapan inventaris.
-% Kasus Medikara: contoh baris inventaris untuk SIMRS, ERP, Medikara+, BPJS Kesehatan, dan
-% SATUSEHAT.
-% Pendalaman teknis: menelusuri katalog API pada SNAP Developer Site milik ASPI dan membandingkan
-% cara katalog mendeskripsikan produk API.
+Semua keputusan tadi membutuhkan satu daftar. Laporan Postman mencatat 34 persen responden tidak dapat
+menemukan API yang sudah ada, dan 55 persen kesulitan dengan dokumentasi yang tidak konsisten
+\cite{postman2025}. Open Worldwide Application Security Project (OWASP) juga memasukkan pengelolaan inventaris
+yang buruk ke dalam sepuluh risiko keamanan API 2023 \cite{owasp-api2023}. Pertanyaannya, bagaimana menyusun
+daftar yang jujur?
+
+Inventaris menghubungkan sistem asal dan tujuan, data, cara pertukaran, audiens, pemilik, serta dampak
+kegagalan. Inventaris mencatat semua integrasi, bukan hanya API, karena surel dan unggah berkas juga integrasi.
+Bukti dapat berupa dokumen antarmuka, konfigurasi, kontrak vendor, wawancara, dan catatan insiden. Baris yang
+belum diketahui tetap dicatat sebagai ketidakpastian. Inventaris yang jujur lebih berguna daripada daftar
+lengkap yang dibangun dari perkiraan.
+
+Analoginya daftar aset rumah untuk keperluan asuransi. Daftar itu memuat lokasi, pemilik, dan kondisi, bukan
+hanya nama barang. Barang yang belum jelas surat-suratnya tetap ditulis dengan keterangan ``belum diperiksa''.
+Melewatkannya justru membuat kerugian tidak dapat diklaim.
+
+Dua contoh penerapan pada Medikara:
+\begin{enumerate}
+  \item Misalkan hubungan laboratorium ke SIMRS hanya diketahui dari wawancara. Status bukti ditandai
+        ``wawancara'' sampai dokumen atau catatan sistem diperiksa. Angka 1.100 pemeriksaan per bulan tetap
+        ditulis, disertai tanda asal angka itu.
+  \item Misalkan resep dari SIMRS ke 12 apotek berjalan lewat ekspor berkas, dan tidak ada yang mengaku
+        sebagai pemilik. Ada 12 sambungan tanpa pemilik. Temuan itu menjadi risiko operasional walaupun
+        antarmukanya belum pernah gagal.
+\end{enumerate}
+
+Tabel \ref{tab:ch04-kolom-inventaris} memuat kolomnya. Lima baris pertama tabel memuat enam kolom wajib
+menurut Aktivitas bab ini. Baris berikutnya membuat inventaris dapat dipakai untuk keputusan.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Kolom inventaris integrasi dan API, tersedia sebagai templat di
+           \berkas{sources/chapter04/inventaris-integrasi.csv}}
+  \label{tab:ch04-kolom-inventaris}
+  \small
+  \begin{tabularx}{\textwidth}{K{2.8cm}JK{3.0cm}}
+    \hline
+    \textbf{Kolom} & \textbf{Pertanyaan} & \textbf{Sumber utama} \\ \hline
+    Sistem asal, sistem tujuan & Dari mana ke mana? & Wawancara, dokumentasi \\ \hline
+    Data & Apa yang berpindah, dan seberapa peka? & Wawancara, kontrak \\ \hline
+    Pemilik & Siapa memutuskan, siapa dihubungi saat rusak? & Wawancara \\ \hline
+    Cara pertukaran & Surel, portal, berkas, basis data, atau API? & Konfigurasi \\ \hline
+    Audiens & Privat, mitra, publik, atau belum ada API? & Kontrak vendor \\ \hline
+    Frekuensi, volume, jumlah sambungan & Seberapa sering, seberapa banyak, berapa pihak? & Catatan sistem \\ \hline
+    Peran organisasi & Penyedia atau pemanggil? & Dokumentasi \\ \hline
+    Biaya, jam manual & Berapa beban tahunan? & Faktur, catatan waktu \\ \hline
+    Status bukti & Terverifikasi, wawancara, atau belum terverifikasi? & Penyusun inventaris \\ \hline
+    Masalah, keputusan awal & Apa akibatnya, dan apa langkah berikutnya? & Tim \\ \hline
+  \end{tabularx}
+\end{table}
+
+Tidak semua baris perlu menjadi API. Gambar \ref{fig:ch04-keputusan} memperlihatkan tiga pertanyaan untuk
+setiap baris. Bukti yang belum cukup berarti baris itu ditelusuri dulu. Tanpa biaya atau risiko yang terukur,
+baris itu dibiarkan dan dipantau. Bila kemampuannya milik pihak lain, atau tidak dipakai banyak pihak, sambungan
+cukup dirapikan. Hanya bila banyak pihak memakai kemampuan yang sama dan organisasi pemiliknya, baris itu menjadi
+calon produk API.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch04-peta-keputusan.tex}
+  \caption{Peta keputusan untuk setiap baris inventaris, dengan ID contoh dari inventaris Medikara}
+  \label{fig:ch04-keputusan}
+\end{figure}
+
+Tabel \ref{tab:ch04-contoh-inventaris} memperlihatkan hasil penerapannya pada Medikara. Kolom lengkapnya
+tersedia di \berkas{sources/chapter04/contoh-inventaris-medikara.csv}.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh inventaris integrasi dan API Medikara. Satu baris dapat mewakili banyak sambungan}
+  \label{tab:ch04-contoh-inventaris}
+  \scriptsize
+  \begin{tabularx}{\textwidth}{K{0.85cm}JK{1.9cm}K{1.45cm}K{1.5cm}K{1.6cm}}
+    \hline
+    \textbf{ID} & \textbf{Asal, tujuan, data} & \textbf{Cara} & \textbf{Sambungan} & \textbf{Audiens} & \textbf{Pemilik} \\ \hline
+    INT-01 & SIMRS ke BPJS Kesehatan: kepesertaan, klaim & API, 55.000 per bulan & 5 & Mitra, pihak wajib & Manajer Klaim \\ \hline
+    INT-02 & SIMRS ke SATUSEHAT: kunjungan, diagnosis & API, 100.000 per bulan & 5 & Mitra, pihak wajib & Manajer Rekam Medis \\ \hline
+    INT-03 & SIMRS ke Medikara+: jadwal, janji temu & Basis data di 3 rumah sakit, tiap 5 menit; API bawaan di 2 & 5 & Belum API, calon privat & Manajer Layanan Rawat Jalan \\ \hline
+    INT-04 & SIMRS ke ERP: ringkasan tagihan & Ekspor berkas, harian & 5 & Belum API, calon privat & Manajer Keuangan \\ \hline
+    INT-05 & SIMRS ke 9 asuransi: tagihan, klaim & Portal, 7.800 per bulan & 9 & Belum API, calon mitra & Manajer Klaim \\ \hline
+    INT-06 & 3 laboratorium ke SIMRS: hasil & Surel, 1.100 per bulan & 3 & Belum API, calon mitra & Manajer Laboratorium \\ \hline
+    INT-07 & SIMRS ke 36 perusahaan: rekap & Surel, 36 per bulan & 36 & Belum API, calon mitra & Manajer Layanan Perusahaan \\ \hline
+    INT-08 & 2 bank ke ERP: mutasi & Unduh berkas, harian & 2 & Belum API, pakai API bank & Manajer Keuangan \\ \hline
+    INT-09 & 18 klinik ke pusat: rekap & Surel, 936 per tahun & 18 & Belum API, calon privat & Manajer Pelaporan \\ \hline
+    INT-10 & SIMRS ke 12 apotek: resep & Ekspor berkas, belum diketahui & 12 & Belum API & Belum ada \\ \hline
+  \end{tabularx}
+\end{table}
+
+\begin{kasus}[title={Kasus Medikara Health: Sepuluh Baris, Seratus Sambungan}]
+Tim menyusun Tabel \ref{tab:ch04-contoh-inventaris} dari daftar pertukaran data Bab 1 dan tiga sambungan
+terlemah Bab 3. Baris INT-04 dan INT-10 adalah tambahan pengandaian tim. Nama pemilik dan status bukti pada
+semua baris juga pengandaian latihan. Empat temuan menonjol dari tabel itu.
+\begin{enumerate}
+  \item Sepuluh baris mewakili 100 sambungan. Hanya 10 sambungan yang memakai API resmi, dan API itu milik pihak
+        wajib. Dua dari lima sambungan INT-03 memakai API bawaan SIMRS tanpa kontrak bersama, sehingga barisnya tetap dicatat
+        belum API. Medikara belum punya satu pun API mitra.
+  \item Dari sepuluh baris, 7 berstatus terverifikasi, 2 hanya dari wawancara, dan 1 belum terverifikasi.
+        Biaya perawatan 20 sambungan INT-01 sampai INT-04 tercatat Rp900 juta per tahun, sedangkan kerja manual lima baris lain
+        berjumlah 357 jam per bulan, atau Rp257,04 juta per tahun.
+  \item Peta keputusan menghasilkan 4 baris calon produk, 4 baris dirapikan, 1 dibiarkan, dan 1 ditelusuri.
+        Baris INT-03 ikut menjadi calon produk walaupun tidak ada di daftar Bab 3, karena Bab 3 melihat dari
+        sisi mitra, sedangkan vendor adalah pemasok.
+  \item Catatan integrasi: paling mahal adalah 20 sambungan INT-01 sampai INT-04. Paling rawan adalah INT-03
+        (temuan audit, 138 tabel di luar kebutuhan) dan INT-06 (salah ketik hasil pemeriksaan).
+\end{enumerate}
+
+Keputusan ini punya dua konsekuensi. Pertama, Bab 5 sampai Bab 7 memakai ID yang sama, sehingga peta integrasi,
+penilaian keamanan, dan penilaian interoperabilitas merujuk baris yang sama. Kedua, status bukti yang masih
+lemah menjadi pekerjaan rumah tim sebelum tinjauan C2, bukan alasan menunda keputusan.
+\end{kasus}
 
 \section{Aktivitas: Inventaris Integrasi dan API Saat Ini}
 
-% TODO
-% Tujuan aktivitas: memiliki daftar lengkap integrasi dan API yang berjalan sebagai dasar C2.
-% Peran dalam tim: anggota berlatar non-teknis mewawancarai pemilik proses tentang kegunaan dan
-% masalah tiap integrasi; anggota berlatar teknis menelusuri dokumentasi, konfigurasi, atau kontrak
-% vendor.
-% Langkah: mulai dari daftar pertukaran data Bab 1; isi templat inventaris; klasifikasikan audiens;
-% tandai integrasi paling mahal atau paling rawan; validasi bersama pemilik proses.
-% Luaran dan tonggak capstone: inventaris integrasi dan API, masuk ke C2.
-% Berkas sources yang direncanakan: sources/chapter04/inventaris-integrasi.csv,
-% sources/chapter04/panduan-wawancara-pemilik-proses.md,
-% sources/chapter04/contoh-inventaris-medikara.csv
+\subsection*{Tujuan}
+
+Tim menyusun inventaris integrasi dan API yang berjalan di organisasi capstone, lalu menandai integrasi yang
+paling mahal atau paling rawan. Organisasi nyata dipakai dengan izin dan data yang dianonimkan. Kasus Medikara
+Health menjadi alternatif bila akses tidak tersedia.
+
+\subsection*{Pembagian Peran}
+
+Tabel \ref{tab:ch04-peran} membagi kerja menurut latar belakang anggota tim. Dalam tim kecil, satu orang boleh
+memegang dua peran, kecuali penyusun dan penelaah.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Pembagian peran Aktivitas Bab 4}
+  \label{tab:ch04-peran}
+  \small
+  \begin{tabularx}{\textwidth}{K{3.2cm}J}
+    \hline
+    \textbf{Peran} & \textbf{Tugas} \\ \hline
+    Pewawancara, berlatar non-teknis & Mewawancarai pemilik proses tentang kegunaan dan masalah tiap integrasi, serta menanyakan akibat bagi pasien, keuangan, dan mitra \\ \hline
+    Penelusur, berlatar teknis & Menelusuri dokumentasi, konfigurasi, atau kontrak vendor untuk memastikan cara pertukaran dan pemilik teknis \\ \hline
+    Penyusun & Menjaga inventaris tetap satu versi, satu ID, dan menyepakati istilah antara kedua kelompok \\ \hline
+    Penelaah & Menantang asumsi dan memeriksa status bukti, tanpa mengganti bukti dengan pendapat \\ \hline
+  \end{tabularx}
+\end{table}
+
+\subsection*{Langkah Kerja}
+
+\begin{enumerate}
+  \item Ambil daftar pertukaran data dari Bab 1 dan tiga sambungan terlemah dari Bab 3 sebagai daftar awal.
+        Salin \berkas{sources/chapter04/inventaris-integrasi.csv}.
+  \item Pewawancara memakai \berkas{sources/chapter04/panduan-wawancara-pemilik-proses.md} untuk mewawancarai
+        pemilik proses, satu lembar per integrasi.
+  \item Penelusur memeriksa dokumentasi, konfigurasi, atau kontrak vendor. Hal yang tidak cocok dengan wawancara
+        dicatat, bukan dihapus.
+  \item Isi kolom wajib: sistem asal, sistem tujuan, data, pemilik, cara pertukaran, dan audiens. Lalu isi kolom
+        tambahan pada Tabel \ref{tab:ch04-kolom-inventaris}.
+  \item Pisahkan biaya terukur dari perkiraan yang belum terverifikasi. Tandai status bukti pada setiap baris.
+  \item Lewatkan setiap baris pada peta keputusan di Gambar \ref{fig:ch04-keputusan}.
+  \item Tulis catatan integrasi paling mahal atau paling rawan dengan
+        \berkas{sources/chapter04/catatan-integrasi-rawan.md}, lalu pilih tiga integrasi berisiko untuk ditelusuri
+        pada Bab 5 sampai Bab 7.
+\end{enumerate}
+
+Data organisasi nyata wajib dianonimkan. Rekam medis, kredensial, dan data pribadi pasien atau karyawan tidak boleh
+dimasukkan. Bila dokumen organisasi tidak boleh dibagikan, tim mencatat metadata buktinya saja. Penelusuran
+konfigurasi hanya dilakukan pada sistem sendiri atau yang sudah berizin tertulis, dan tidak mencakup pemindaian
+jaringan.
+
+\subsection*{Luaran dan Kaitan dengan Capstone}
+
+Luaran aktivitas ini adalah inventaris integrasi dan API, disertai catatan tentang integrasi yang paling mahal
+atau paling rawan. Keduanya masuk ke tonggak C2 Kondisi Saat Ini, yang ditinjau menjelang Ujian Tengah Semester (UTS). Inventaris menjadi
+daftar hubungan awal bagi peta integrasi di Bab 5. Tiga integrasi berisiko ditelusuri lagi pada penilaian keamanan
+di Bab 6 dan penilaian interoperabilitas di Bab 7. ID dan versi artefak dipertahankan saat dipakai bab berikutnya.
+
+\subsection*{Kriteria Penilaian}
+
+Tabel \ref{tab:ch04-kriteria} memuat kriteria penilaian singkat. Yang dinilai adalah kejujuran bukti dan kekuatan
+alasan, bukan banyaknya baris.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Kriteria penilaian Aktivitas Bab 4}
+  \label{tab:ch04-kriteria}
+  \small
+  \begin{tabularx}{\textwidth}{Jr}
+    \hline
+    \textbf{Kriteria} & \textbf{Bobot} \\ \hline
+    Ketepatan konsep: audiens, produk dan proyek, serta utang integrasi dipakai dengan benar & 25\% \\ \hline
+    Keterlacakan bukti: fakta, asumsi, dan perkiraan dibedakan dan punya sumber & 30\% \\ \hline
+    Alasan keputusan dan pengorbanan: integrasi paling mahal atau rawan dipilih dengan alasan terukur & 30\% \\ \hline
+    Keterbacaan artefak: inventaris dan catatan dipahami pembaca yang tidak ikut menyusun & 15\% \\ \hline
+  \end{tabularx}
+\end{table}
+
+Daftar lengkap berkas pendukung tersedia pada \berkas{sources/chapter04/README.md}. Templat tidak menggantikan
+percakapan dengan pemilik proses, dan ketidakpastian dicatat secara terbuka.
+
+\begin{pendalaman}[title={Pendalaman Teknis (opsional): Membaca Katalog SNAP dan Memeriksa Inventaris}]
+SNAP Developer Site milik ASPI adalah katalog API sektor pembayaran \cite{snap-devsite}. Halaman
+berandanya menampilkan layanan seperti Registrasi, Informasi Saldo, Riwayat Transaksi, Transfer Kredit, dan
+Transfer Debit, dan mengumumkan revisi standar teknis dan keamanan serta standar data dan spesifikasi teknis menjadi versi 1.0.2 pada September
+2024. Tim memilih dua layanan, lalu membandingkan cara katalog mendeskripsikan produk API: nama kemampuan,
+dokumentasi, syarat akses, dan cara mendapat bantuan. Hasilnya dibandingkan dengan satu API di inventaris tim.
+Kegiatan ini cukup dengan membaca dokumentasi publik. Uji beban atau pemindaian keamanan terhadap sistem milik
+pihak lain tidak boleh dilakukan tanpa izin tertulis.
+
+Anggota teknis juga dapat memeriksa kelengkapan inventaris dengan \berkas{sources/chapter04/periksa-inventaris.py}.
+Skrip itu menjumlahkan sambungan, biaya, dan jam manual, lalu mencetak baris tanpa pemilik. Pada contoh Medikara,
+keluarannya 10 baris, 100 sambungan, dan satu baris tanpa pemilik, yaitu INT-10.
+\end{pendalaman}
 
 \section{Ringkasan}
 
-% TODO
+Ekonomi API adalah pertukaran nilai yang terjadi ketika kemampuan bisnis dapat dipakai pihak lain lewat antarmuka
+yang terkelola. API tidak menghapus batas perusahaan. API menurunkan biaya melintasinya, sehingga pekerjaan yang dulu
+harus dikerjakan di dalam menjadi layak dikerjakan bersama pihak luar. Benzell dkk. mencatat tambahan pertumbuhan 38,7
+persen selama 16 tahun bagi perusahaan tercatat di bursa yang mengadopsi API publik, sekaligus risiko kebocoran data
+yang naik. Angka seperti itu dan laporan industri dibaca bersama penerbit, responden, dan apa yang diukur.
+
+API sebagai produk punya pengguna, masalah yang dilayani, pemilik, ukuran keberhasilan, dan siklus pemeliharaan. API
+sebagai proyek berhenti pada serah terima. Pada contoh API klaim, produk lebih mahal Rp108 juta dalam tiga tahun, tetapi
+penurunan penolakan dari 6 persen menjadi 2 persen menghemat Rp168,48 juta dan punya penanggung jawab. Pendekatan
+\textit{API-first} memindahkan keputusan kontrak ke awal, ketika perubahan masih murah.
+
+API privat melayani kebutuhan internal, API mitra melayani pihak yang disepakati, dan API publik dirancang bagi audiens
+luas. Audiens berbeda dari kepekaan data, dan lokasi internal tidak menjamin hak akses. Pada Medikara, jadwal dokter
+tampil dalam tiga bentuk, hasil pemeriksaan tidak pernah publik, dan vendor yang membaca 140 tabel padahal butuh 2 tabel
+menjadi alasan untuk beralih ke API privat.
+
+Integrasi \textit{point-to-point} murah di awal, tetapi utangnya terus berbunga. Medikara membayar Rp900 juta per tahun
+untuk 20 sambungan, ditambah sekitar Rp497 juta biaya tersembunyi yang sudah dapat dihitung. Lapisan bersama baru lebih
+murah mulai tiga tujuan pada asumsi bab ini. Model bisnis menjawab siapa membayar. Bagi Medikara, API mitra mendukung
+layanan dan tidak dijual sendiri, karena data kesehatan bukan komoditas bebas jual.
+
+Inventaris menyatukan seluruh bahasan itu. Sepuluh baris contoh Medikara mewakili 100 sambungan, dan hanya 10 di antaranya
+memakai API milik pihak wajib. Tidak semua baris perlu menjadi API: empat baris menjadi calon produk, sisanya dirapikan,
+dipantau, atau ditelusuri. Pesan utama bab ini: API yang tidak punya pemilik akan kembali menjadi proyek berikutnya, dan
+organisasi baru dapat memilih dengan jujur setelah tahu sambungan apa saja yang sedang dibayarnya.
 
 \section{Latihan}
 
+\subsection*{Latihan 1: Menghitung Beban Integrasi}
+
+Jelaskan dengan contoh mengapa integrasi \textit{point-to-point} yang jumlahnya terus bertambah menaikkan biaya
+organisasi. Latihan ini membuktikan bahwa biaya integrasi dapat dihitung dari sambungan yang berjalan, termasuk bagian
+yang tidak tercatat di anggaran.
+
 \begin{enumerate}
-  \item Jelaskan dengan contoh mengapa integrasi \textit{point-to-point} yang jumlahnya terus bertambah menaikkan biaya organisasi.
-  \item Tentukan apakah API pendaftaran pasien Medikara sebaiknya privat, mitra, atau publik, lalu tuliskan alasannya.
-  \item Sebutkan tiga ciri yang membedakan API yang dikelola sebagai produk dari API yang dibangun sebagai proyek sekali jadi.
+  \item Gambar hubungan yang benar-benar aktif pada satu proses, dan hitung sambungannya.
+  \item Hitung batas $n(n-1)/2$, lalu bandingkan dengan jumlah sambungan aktif.
+  \item Hitung biaya per sambungan dan biaya total per tahun.
+  \item Tambahkan biaya perubahan, kerja manual, dan gangguan.
+  \item Hitung tambahan biaya bila satu tujuan baru muncul, dengan
+        \berkas{sources/chapter04/hitung-beban-integrasi.py} atau hitungan tangan.
+\end{enumerate}
+
+Tabel \ref{tab:ch04-lat1-contoh} memakai angka Medikara pada bab ini. Tabel itu contoh penalaran, bukan satu-satunya
+jawaban yang benar.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 1}
+  \label{tab:ch04-lat1-contoh}
+  \small
+  \begin{tabularx}{\textwidth}{K{3.0cm}JK{2.5cm}}
+    \hline
+    \textbf{Unsur} & \textbf{Hitungan} & \textbf{Hasil} \\ \hline
+    Batas pasangan & $9 \times 8 / 2$ & 36 pasangan \\ \hline
+    Sambungan aktif & 5 SIMRS $\times$ 4 tujuan & 20 sambungan \\ \hline
+    Biaya tercatat & 20 $\times$ Rp45 juta & Rp900 juta per tahun \\ \hline
+    Perubahan & 4 pembaruan $\times$ 5 tempat $\times$ Rp12 juta & Rp240 juta per tahun \\ \hline
+    Kerja manual & 357 jam $\times$ 12 bulan $\times$ Rp60.000 & Rp257,04 juta per tahun \\ \hline
+    Satu insiden & 8 jam $\times$ Rp60.000 & Rp480.000, akibat bagi pasien belum dinilai \\ \hline
+    Satu tujuan baru & 5 sambungan $\times$ Rp45 juta & Tambah Rp225 juta per tahun \\ \hline
+  \end{tabularx}
+\end{table}
+
+Isi hasil tim pada Tabel \ref{tab:ch04-lat1-hasil}, dan tambahkan rujukan bukti dalam catatan kerja.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 1}
+  \label{tab:ch04-lat1-hasil}
+  \small
+  \begin{tabularx}{\textwidth}{K{3.0cm}JK{2.5cm}}
+    \hline
+    \textbf{Unsur} & \textbf{Hitungan} & \textbf{Hasil} \\ \hline
+    Batas pasangan & \dots & \dots \\ \hline
+    Sambungan aktif & \dots & \dots \\ \hline
+    Biaya tercatat & \dots & \dots \\ \hline
+    Perubahan & \dots & \dots \\ \hline
+    Kerja manual & \dots & \dots \\ \hline
+    Satu insiden & \dots & \dots \\ \hline
+    Satu tujuan baru & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+Pertanyaan analisis:
+\begin{enumerate}
+  \item Mengapa rumus pasangan tidak cukup untuk menyusun anggaran?
+  \item Bukti biaya mana yang paling lemah pada tabel tim, dan bagaimana cara memperkuatnya?
+  \item Pada jumlah tujuan berapa lapisan bersama menjadi lebih murah menurut angka tim? Apa yang terjadi bila biaya
+        lapisan naik dua kali lipat?
+\end{enumerate}
+
+\subsection*{Latihan 2: Menetapkan Audiens Pendaftaran}
+
+Tentukan apakah API pendaftaran pasien Medikara sebaiknya privat, mitra, atau publik, lalu tuliskan alasannya. Latihan
+ini membuktikan bahwa audiens ditetapkan per operasi, dari pemanggil dan data, bukan dari nama API.
+
+\begin{enumerate}
+  \item Pecah pendaftaran menjadi operasi yang dipakai pasien, aplikasi, dan klinik.
+  \item Daftar pemanggil dan data yang diperlukan tiap operasi.
+  \item Pilih audiens untuk tiap operasi, dan cocokkan dengan tangga keterbukaan Bab 3.
+  \item Jelaskan kontrol yang tetap diperlukan.
+\end{enumerate}
+
+Tabel \ref{tab:ch04-lat2-contoh} memuat contoh alasan, bukan satu-satunya jawaban yang benar.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 2}
+  \label{tab:ch04-lat2-contoh}
+  \small
+  \begin{tabularx}{\textwidth}{K{2.5cm}K{2.0cm}JK{1.8cm}J}
+    \hline
+    \textbf{Operasi} & \textbf{Pemanggil} & \textbf{Data} & \textbf{Audiens} & \textbf{Kontrol} \\ \hline
+    Cari jadwal dokter & Siapa saja & Dokter, poli, tanggal, tanpa data pasien & Publik, Tingkat 0 & 1.000 panggilan per hari \\ \hline
+    Pesan lewat Medikara+ & Aplikasi sendiri & Identitas pasien, slot & Privat & Otorisasi pasien, jejak akses \\ \hline
+    Daftarkan pasien oleh klinik & Sistem klinik mitra & Identitas pasien, slot, penjaminan & Mitra, Tingkat 2 & Kontrak, otorisasi per fasilitas, 300 panggilan per hari \\ \hline
+    Baca riwayat kunjungan & Klinik perujuk & Riwayat kunjungan pasien yang dilayani & Mitra, Tingkat 3 & Hubungan layanan aktif, tinjau tiap 90 hari \\ \hline
+  \end{tabularx}
+\end{table}
+
+Isi hasil tim pada Tabel \ref{tab:ch04-lat2-hasil}, dan tambahkan rujukan bukti dalam catatan kerja.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 2}
+  \label{tab:ch04-lat2-hasil}
+  \small
+  \begin{tabularx}{\textwidth}{K{2.5cm}K{2.0cm}JK{1.8cm}J}
+    \hline
+    \textbf{Operasi} & \textbf{Pemanggil} & \textbf{Data} & \textbf{Audiens} & \textbf{Kontrol} \\ \hline
+    \dots & \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+Pertanyaan analisis:
+\begin{enumerate}
+  \item Apakah kategori publik berarti tanpa \textit{token}? Jawab dengan data pada baris publik di tabel tim.
+  \item Bagaimana keputusan berubah bila pemanggil adalah aplikasi internal? Kontrol mana yang tetap ada?
+  \item Data apa yang, bila dihapus dari satu operasi, mengubah audiensnya?
+\end{enumerate}
+
+\subsection*{Latihan 3: Membedakan Produk dan Proyek}
+
+Sebutkan tiga ciri yang membedakan API yang dikelola sebagai produk dari API yang dibangun sebagai proyek sekali jadi.
+Latihan ini membuktikan bahwa perbedaan itu dapat diperiksa pada API yang berjalan, bukan sekadar dihafalkan.
+
+\begin{enumerate}
+  \item Pilih satu API atau sambungan dari inventaris tim.
+  \item Telusuri pemilik setelah serah terima dan sumber anggarannya.
+  \item Tuliskan tiga ciri beserta bukti pada API itu.
+  \item Tetapkan tiga indikator pengelolaan berlanjut, lengkap dengan sumber datanya.
+\end{enumerate}
+
+Tabel \ref{tab:ch04-lat3-contoh} memakai API janji temu sebagai contoh alasan, bukan satu-satunya jawaban yang benar.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 3}
+  \label{tab:ch04-lat3-contoh}
+  \small
+  \begin{tabularx}{\textwidth}{K{1.8cm}JJJ}
+    \hline
+    \textbf{Ciri} & \textbf{Bila proyek} & \textbf{Bila produk} & \textbf{Indikator} \\ \hline
+    Pemilik & Manajer proyek vendor, selesai saat serah terima & Manajer Layanan Rawat Jalan & Prioritas per triwulan tertulis \\ \hline
+    Dukungan & Garansi vendor & Tim produk menangani insiden dan pertanyaan mitra & Waktu menjawab pertanyaan mitra \\ \hline
+    Ukuran & Fitur selesai sesuai lingkup & Janji temu selesai dari 28.000 per bulan & Persen pemesanan bentrok \\ \hline
+  \end{tabularx}
+\end{table}
+
+Isi hasil tim pada Tabel \ref{tab:ch04-lat3-hasil}, dan tambahkan rujukan bukti dalam catatan kerja.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 3}
+  \label{tab:ch04-lat3-hasil}
+  \small
+  \begin{tabularx}{\textwidth}{K{1.8cm}JJJ}
+    \hline
+    \textbf{Ciri} & \textbf{Bila proyek} & \textbf{Bila produk} & \textbf{Indikator} \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+Pertanyaan analisis:
+\begin{enumerate}
+  \item Apa yang terjadi pada API tim bila anggaran berhenti setelah proyek? Sebutkan perubahan pertama yang tidak
+        akan tertangani.
+  \item Indikator mana yang paling sulit dikumpulkan, dan siapa yang memegang datanya?
 \end{enumerate}

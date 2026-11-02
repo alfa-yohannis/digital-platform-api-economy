@@ -1,0 +1,59 @@
+\begin{tikzpicture}[
+  sel/.style={draw, rounded corners, minimum height=0.98cm, align=flush center, font=\scriptsize,
+    inner sep=2pt},
+  baris/.style={sel, text width=1.45cm, fill=praditagreen!15, font=\scriptsize\bfseries},
+  g1/.style={sel, text width=2.95cm},
+  g2/.style={sel, text width=2.95cm},
+  g3/.style={sel, text width=3.2cm},
+  panah/.style={-{Stealth[length=2mm]}, thick}
+]
+  % Kepala kolom: tiap gelombang sama dengan satu siklus anggaran.
+  \node[g1, fill=praditagreen!15] (k1) at (3.0,0)
+    {\textbf{Gelombang 1: 2027}\\{\tiny\mdseries Fondasi dan uji terkendali}};
+  \node[g2, fill=praditagreen!15] (k2) at (6.35,0)
+    {\textbf{Gelombang 2: 2028}\\{\tiny\mdseries Layanan lintas fasilitas}};
+  \node[g3, fill=praditagreen!15] (k3) at (9.85,0)
+    {\textbf{Gelombang 3: 2029, 2030}\\{\tiny\mdseries Mitra, lalu agen terbatas}};
+  \draw[panah] (k1) -- (k2);
+  \draw[panah] (k2) -- (k3);
+
+  \node[baris] at (0.75,-1.12) {Fondasi};
+  \node[g1, fill=blue!8] at (3.0,-1.12)
+    {KI-01, KI-02, API-06\\{\tiny\mdseries forum federasi, \textit{gateway} A}};
+  \node[g2, fill=blue!8] at (6.35,-1.12)
+    {Sambungan ke MPI\\{\tiny\mdseries adaptor SIMRS Depok}};
+  \node[g3, fill=blue!8] at (9.85,-1.12)
+    {Adaptor 4 rumah sakit\\{\tiny\mdseries mengikuti konsolidasi SIMRS}};
+
+  \node[baris] at (0.75,-2.24) {API};
+  \node[g1, fill=blue!8] at (3.0,-2.24)
+    {API-01 versi 1.0.0\\{\tiny\mdseries penilaian dampak API-02}};
+  \node[g2, fill=blue!8] at (6.35,-2.24)
+    {API-02 dan API-04\\{\tiny\mdseries API-02 rilis Oktober 2028}};
+  \node[g3, fill=blue!8] at (9.85,-2.24)
+    {API-01 versi 1.1.0\\{\tiny\mdseries API-03 bila pemicunya terpenuhi}};
+
+  \node[baris] at (0.75,-3.36) {Pengguna};
+  \node[g1, fill=blue!8] at (3.0,-3.36)
+    {5 klinik uji\\{\tiny\mdseries jadwal nyata, pesan di \textit{sandbox}}};
+  \node[g2, fill=blue!8] at (6.35,-3.36)
+    {Medikara+ dan 18 klinik\\{\tiny\mdseries bertahap sejak April 2028}};
+  \node[g3, fill=green!10] at (9.85,-3.36)
+    {5 klinik Januari 2029\\{\tiny\mdseries 35 klinik Juli 2029, portal P2}};
+
+  \node[baris] at (0.75,-4.48) {Agen AI};
+  \node[g1, fill=gray!35] at (3.0,-4.48)
+    {Demo data sintetis\\{\tiny\mdseries penilaian kesiapan}};
+  \node[g2, fill=gray!35] at (6.35,-4.48)
+    {Belum dibuka\\{\tiny\mdseries bukti dikumpulkan}};
+  \node[g3, fill=orange!12] at (9.85,-4.48)
+    {2030: baca dan pratinjau\\{\tiny\mdseries lalu tulis dengan konfirmasi}};
+
+  \node[baris] at (0.75,-5.6) {IT40513};
+  \node[g1, fill=blue!8] at (3.0,-5.6)
+    {P1 dan P3\\{\tiny\mdseries MPI selesai pada T1, Maret 2028}};
+  \node[g2, fill=blue!8] at (6.35,-5.6)
+    {P7, P5 dimulai\\{\tiny\mdseries April sampai Desember 2028}};
+  \node[g3, fill=blue!8] at (9.85,-5.6)
+    {P8 sepanjang 2029\\{\tiny\mdseries P5 selesai September 2030}};
+\end{tikzpicture}

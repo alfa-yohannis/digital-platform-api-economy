@@ -1,0 +1,35 @@
+# Kegunaan: konfigurasi APISIX mode standalone untuk Pendalaman Bab 10. Cara pakai: dimuat otomatis oleh docker compose.
+routes:
+  - id: api-01-janji-temu
+    uris:
+      - /janji-temu
+      - /janji-temu/*
+      - /jadwal-dokter
+    plugins:
+      jwt-auth: {}
+      limit-req:
+        rate: 1
+        burst: 2
+        nodelay: true
+        rejected_code: 429
+        key_type: var
+        key: consumer_name
+      limit-count:
+        count: 300
+        time_window: 86400
+        rejected_code: 429
+        key_type: var
+        key: consumer_name
+        policy: local
+    upstream:
+      type: roundrobin
+      nodes:
+        "layanan-contoh:8000": 1
+consumers:
+  # Rahasia latihan. Nilainya harus sama dengan buat-token-latihan.py dan tidak boleh dipakai di produksi.
+  - username: klinik_mitra_01
+    plugins:
+      jwt-auth:
+        key: klinik-mitra-01
+        secret: rahasia-latihan-bab-10-jangan-dipakai-di-produksi
+#END

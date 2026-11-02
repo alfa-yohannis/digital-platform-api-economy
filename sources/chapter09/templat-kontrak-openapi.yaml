@@ -1,0 +1,110 @@
+# Templat kontrak OpenAPI Bab 09. Cara pakai: salin, ganti setiap teks ISI, lalu
+# jalankan periksa-kontrak.py. Berkas tetap valid sebelum diisi. Data wajib sintetis.
+openapi: 3.2.0
+info:
+  title: ISI nama API prioritas
+  summary: ISI satu kalimat tentang kemampuan yang dibuka.
+  description: >-
+    ISI penyedia, konsumen, kuota, batas data, dan aturan bidang tak dikenal.
+  version: 0.1.0
+  contact:
+    name: ISI jabatan pemilik produk
+    email: isi@organisasi.example
+servers:
+  - url: https://api.organisasi.example
+    description: Alamat fiktif untuk latihan.
+tags:
+  - name: isi-kelompok
+    description: ISI kelompok operasi.
+paths:
+  /isi-sumber-daya:
+    get:
+      operationId: bacaIsiSumberDaya
+      summary: ISI hal yang dicari dan batasnya.
+      tags: [isi-kelompok]
+      security:
+        - tokenOrganisasi: [isi.baca]
+      responses:
+        '200':
+          description: ISI arti berhasil menurut pemilik proses.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IsiSumberDaya'
+        '400':
+          $ref: '#/components/responses/Masalah'
+        '401':
+          $ref: '#/components/responses/Masalah'
+        '429':
+          $ref: '#/components/responses/Masalah'
+    post:
+      operationId: buatIsiSumberDaya
+      summary: ISI tindakan yang mengubah keadaan.
+      tags: [isi-kelompok]
+      security:
+        - tokenOrganisasi: [isi.tulis]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IsiSumberDaya'
+      responses:
+        '201':
+          description: ISI keadaan yang sudah pasti.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IsiSumberDaya'
+        '400':
+          $ref: '#/components/responses/Masalah'
+        '401':
+          $ref: '#/components/responses/Masalah'
+        '409':
+          $ref: '#/components/responses/Masalah'
+components:
+  schemas:
+    IsiSumberDaya:
+      type: object
+      description: ISI hanya data minimum. Tanpa nama tabel internal.
+      required: [id, status]
+      properties:
+        id:
+          type: string
+          description: ISI pengenal stabil, bukan nomor urut basis data.
+        status:
+          type: string
+          enum: [isi-status-satu, isi-status-dua]
+    Masalah:
+      type: object
+      description: Bentuk Problem Details menurut RFC 9457.
+      required: [type, title, status]
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri-reference
+  responses:
+    Masalah:
+      description: ISI arti gagal dan tindakan konsumen, per kode bila berbeda.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Masalah'
+  securitySchemes:
+    tokenOrganisasi:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://auth.organisasi.example/oauth2/token
+          scopes:
+            isi.baca: ISI arti hak membaca.
+            isi.tulis: ISI arti hak menulis.

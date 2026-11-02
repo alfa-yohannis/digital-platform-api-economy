@@ -1,0 +1,34 @@
+\begin{tikzpicture}[
+  kotak/.style={draw, rounded corners, text width=2.5cm, minimum height=1.55cm,
+    align=flush center, font=\scriptsize},
+  bukti/.style={draw, rounded corners, text width=2.5cm, minimum height=1.05cm,
+    align=flush center, font=\tiny},
+  panah/.style={-{Stealth[length=2mm]}, thick}
+]
+  \node[kotak, fill=blue!8] (a) at (0,0)
+    {\textbf{Pasar bersangkutan}\\{\tiny\mdseries barang atau jasa, wilayah, dan penggantinya}};
+  \node[kotak, fill=blue!8] (b) at (3,0)
+    {\textbf{Kekuatan pasar}\\{\tiny\mdseries 50 persen satu pelaku, atau 75 persen dua sampai tiga pelaku}};
+  \node[kotak, fill=orange!12] (c) at (6,0)
+    {\textbf{Perilaku}\\{\tiny\mdseries mengutamakan milik sendiri, syarat, diskriminasi}};
+  \node[kotak, fill=blue!8] (d) at (9,0)
+    {\textbf{Akibat}\\{\tiny\mdseries pilihan pasien dan peluang mitra berkurang}};
+  \draw[panah] (a) -- (b);
+  \draw[panah] (b) -- (c);
+  \draw[panah] (c) -- (d);
+  \node[bukti, fill=green!10] (a2) at (0,-1.75) {Bukti: wilayah layanan, izin, pilihan pasien};
+  \node[bukti, fill=green!10] (b2) at (3,-1.75) {Bukti: penjualan menurut wilayah, hambatan masuk};
+  \node[bukti, fill=green!10] (c2) at (6,-1.75) {Bukti: kriteria urutan, log tampilan, syarat mitra};
+  \node[bukti, fill=green!10] (d2) at (9,-1.75) {Bukti: perpindahan, harga, keluarnya mitra};
+  \draw[panah] (a) -- (a2);
+  \draw[panah] (b) -- (b2);
+  \draw[panah] (c) -- (c2);
+  \draw[panah] (d) -- (d2);
+  \node[draw, rounded corners, fill=praditagreen!15, text width=11.2cm, minimum height=0.7cm,
+    align=center, font=\scriptsize] (e) at (4.5,-3.1)
+    {\textbf{Tafsir diuji penasihat hukum.} Fakta perkara lain tidak otomatis berlaku bagi Medikara};
+  \draw[panah] (a2) -- (a2 |- e.north);
+  \draw[panah] (b2) -- (b2 |- e.north);
+  \draw[panah] (c2) -- (c2 |- e.north);
+  \draw[panah] (d2) -- (d2 |- e.north);
+\end{tikzpicture}

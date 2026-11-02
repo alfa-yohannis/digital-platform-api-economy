@@ -1,0 +1,8 @@
+# Kegunaan: pemisalan waktu per tahap onboarding satu klinik mitra, sumber gambar perjalanan dan tabel sasaran Bab 11. Cara pakai: salin, ganti dengan catatan tim, lalu jalankan hitung-onboarding-portal.py.
+tahap,kerja_saat_ini_jam,tunggu_saat_ini_jam,kerja_sasaran_jam,tunggu_sasaran_jam,sebelum_panggilan_pertama,menunggu_siapa
+Pendaftaran mitra,1,0,1,0,ya,Tidak ada
+Verifikasi,1,24,1,4,ya,Pemilik kemitraan
+Sandbox,0.5,16,0.5,0,ya,Tim integrasi membuat akun uji
+Uji integrasi,24,40,16,16,tidak,Jawaban tim integrasi atas pertanyaan klinik
+Persetujuan pemilik,1,40,1,16,tidak,Manajer Layanan Rawat Jalan dan petugas pelindungan data
+Akses produksi,1,8,1,4,tidak,Tim integrasi menerbitkan kredensial

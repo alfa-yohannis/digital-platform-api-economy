@@ -1,0 +1,31 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  tahap/.style={draw, rounded corners, minimum height=1.6cm, text width=2.9cm,
+                align=center, font=\scriptsize\bfseries},
+  gerbang/.style={draw, rounded corners, fill=orange!12, text width=2.6cm,
+                  align=center, font=\tiny, inner sep=3pt},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  garis/.style={dashed, gray!70!black}
+]
+  \node[tahap, fill=blue!8] (satu) at (0,0)
+    {Tahap 1: sisi internal\\{\tiny\mdseries pasien dan dokter Medikara sendiri,
+     subsidi dokter 9 bulan}};
+  \node[tahap, fill=blue!8] (dua) at (4.2,0)
+    {Tahap 2: micromarket\\{\tiny\mdseries 40 klinik mitra di Bekasi dan Depok}};
+  \node[tahap, fill=green!10] (tiga) at (8.4,0)
+    {Tahap 3: sisi tambahan\\{\tiny\mdseries asuransi swasta dan perusahaan klien}};
+
+  \draw[panah] (satu) -- (dua);
+  \draw[panah] (dua) -- (tiga);
+
+  \node[gerbang] (g1) at (2.1,-2.0)
+    {\textbf{Gerbang 1}\\paling sedikit 80 dokter aktif dan 40 konsultasi per dokter per bulan};
+  \node[gerbang] (g2) at (6.3,-2.0)
+    {\textbf{Gerbang 2}\\paling sedikit 30 klinik mitra aktif dan waktu tunggu paling lama 2 hari};
+  \draw[garis] (g1.north) -- (2.1,0);
+  \draw[garis] (g2.north) -- (6.3,0);
+
+  \node[font=\tiny, text=gray!60!black, anchor=south] at (satu.north) {bulan 1 sampai 12};
+  \node[font=\tiny, text=gray!60!black, anchor=south] at (dua.north) {bulan 13 sampai 24};
+  \node[font=\tiny, text=gray!60!black, anchor=south] at (tiga.north) {sesudah bulan 24};
+\end{tikzpicture}

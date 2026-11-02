@@ -1,0 +1,17 @@
+# Kegunaan: menjalankan Apache APISIX mode standalone dan layanan contoh di komputer sendiri. Cara pakai: docker compose up -d
+services:
+  gateway:
+    image: apache/apisix:3.19.0-debian
+    environment:
+      APISIX_STAND_ALONE: "true"
+    volumes:
+      - ./apisix.yaml:/usr/local/apisix/conf/apisix.yaml
+    ports:
+      - "9080:9080"
+    depends_on:
+      - layanan-contoh
+  layanan-contoh:
+    image: python:3.12-slim
+    command: python /app/layanan-contoh.py
+    volumes:
+      - ./layanan-contoh.py:/app/layanan-contoh.py

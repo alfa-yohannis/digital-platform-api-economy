@@ -1,0 +1,45 @@
+\begin{tikzpicture}[
+  kotak/.style={draw, rounded corners, text width=2.55cm,
+    minimum height=0.95cm, align=center, font=\scriptsize},
+  lebar/.style={draw, rounded corners, text width=9.6cm,
+    minimum height=0.8cm, align=center, font=\scriptsize},
+  panah/.style={-{Stealth[length=2mm]}, thick}
+]
+  \node[lebar, fill=praditagreen!15] (bisnis) at (4.35,0)
+    {\textbf{Hasil bisnis:} pendapatan langganan dan klinik yang bertahan\\
+    {\tiny\mdseries tertinggal, baru terlihat sesudah ukuran utama bergerak}};
+  \node[lebar, fill=green!10] (utama) at (4.35,-1.2)
+    {\textbf{Ukuran utama:} janji temu dan rujukan selesai tepat waktu per bulan\\
+    {\tiny\mdseries interaksi unik selesai, dasar 20.160, sasaran 34.884}};
+  \draw[panah] (utama.north) -- (bisnis.south);
+
+  \node[kotak, fill=blue!8] (d1) at (0,-2.6) {\textbf{Klinik aktif}\\
+    {\tiny\mdseries 28 ke 36}};
+  \node[kotak, fill=blue!8] (d2) at (2.9,-2.6) {\textbf{Pemesanan per klinik}\\
+    {\tiny\mdseries 1.000 ke 1.200}};
+  \node[kotak, fill=blue!8] (d3) at (5.8,-2.6) {\textbf{Tingkat kecocokan}\\
+    {\tiny\mdseries 90 ke 95 persen}};
+  \node[kotak, fill=blue!8] (d4) at (8.7,-2.6) {\textbf{Selesai tepat waktu}\\
+    {\tiny\mdseries 80 ke 85 persen}};
+  \draw[panah] (d1.north) -- (d1.north |- utama.south);
+  \draw[panah] (d2.north) -- (d2.north |- utama.south);
+  \draw[panah] (d3.north) -- (d3.north |- utama.south);
+  \draw[panah] (d4.north) -- (d4.north |- utama.south);
+
+  \node[kotak, fill=orange!12] (o1) at (0,-4.05) {Waktu sampai produksi, tiket per klinik\\
+    {\tiny\mdseries portal, sistem tiket}};
+  \node[kotak, fill=orange!12] (o2) at (2.9,-4.05) {Panggilan per janji, klinik tanpa transaksi\\
+    {\tiny\mdseries \textit{gateway}}};
+  \node[kotak, fill=orange!12] (o3) at (5.8,-4.05) {Konflik 409, latensi jadwal\\
+    {\tiny\mdseries \textit{gateway}, SIMRS}};
+  \node[kotak, fill=orange!12] (o4) at (8.7,-4.05) {Galat 5xx, SLO 99,4 persen\\
+    {\tiny\mdseries \textit{gateway}, SIMRS}};
+  \draw[panah] (o1.north) -- (d1.south);
+  \draw[panah] (o2.north) -- (d2.south);
+  \draw[panah] (o3.north) -- (d3.south);
+  \draw[panah] (o4.north) -- (d4.south);
+
+  \node[draw, rounded corners, fill=red!22, text width=11.1cm, minimum height=0.6cm,
+    align=center, font=\scriptsize] at (4.35,-5.3)
+    {\textbf{Penyeimbang:} telepon konfirmasi 2 persen, pasien ganda, insiden akses, sasaran waktu tetap};
+\end{tikzpicture}

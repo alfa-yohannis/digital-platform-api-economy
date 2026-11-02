@@ -1,0 +1,19 @@
+# Aturan Spectral opsional Bab 13 untuk butir GAYA-01 dan GAYA-04 panduan gaya.
+# Cara pakai: spectral lint kontrak.yaml --ruleset aturan-spectral-gaya.yaml
+extends: ["spectral:oas"]
+rules:
+  gaya-01-jalur-huruf-kecil:
+    description: Jalur memakai huruf kecil dan tanda hubung.
+    severity: error
+    given: "$.paths[*]~"
+    then:
+      function: pattern
+      functionOptions:
+        match: "^(/([a-z0-9]+(-[a-z0-9]+)*|\\{[a-zA-Z]+\\}))+$"
+  gaya-04-galat-problem-json:
+    description: Jawaban 4xx dan 5xx memakai application/problem+json.
+    severity: error
+    given: "$.paths[*][*].responses[?(@property.match(/^[45]/))].content"
+    then:
+      field: application/problem+json
+      function: truthy

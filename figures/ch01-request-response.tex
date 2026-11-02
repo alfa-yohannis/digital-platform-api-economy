@@ -1,0 +1,47 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  kotak/.style={draw, rounded corners, minimum height=1.25cm, text width=2.0cm,
+                align=center, font=\scriptsize\bfseries},
+  panah/.style={-{Stealth[length=2mm]}, thick}
+]
+  \node[kotak, fill=blue!8] (aplikasi) at (0,0)
+    {Aplikasi\\Medikara+\\{\tiny\mdseries di ponsel pasien}};
+  \node[kotak, fill=orange!12] (api) at (6.2,0) {API jadwal\\dokter};
+  \node[kotak, fill=blue!8] (simrs) at (9.6,0)
+    {SIMRS\\{\tiny\mdseries Rumah Sakit Bekasi}};
+
+  % Langkah 1 dan 4: percakapan antara aplikasi dan API.
+  \draw[panah] ([yshift=0.3cm]aplikasi.east) --
+    node[above, align=center, font=\scriptsize]
+    {\textbf{1} request\\[1pt]
+     {\ttfamily\tiny GET /jadwal-dokter}\\
+     {\ttfamily\tiny ?rumah\_sakit=bekasi}\\
+     {\ttfamily\tiny \&tanggal=2026-11-02}}
+    ([yshift=0.3cm]api.west);
+  \draw[panah] ([yshift=-0.3cm]api.west) --
+    node[below, align=center, font=\scriptsize]
+    {\textbf{4} response\\{\tiny kode status 200 OK dan isi JSON}}
+    ([yshift=-0.3cm]aplikasi.east);
+
+  % Langkah 2 dan 3: API mengambil data dari sistem di rumah sakit.
+  \draw[panah] ([yshift=0.25cm]api.east) --
+    node[above, font=\tiny] {\textbf{2} ambil} ([yshift=0.25cm]simrs.west);
+  \draw[panah] ([yshift=-0.25cm]simrs.west) --
+    node[below, font=\tiny] {\textbf{3} hasil} ([yshift=-0.25cm]api.east);
+
+  % Isi response dalam format JSON.
+  \node[draw, rounded corners, fill=green!10, align=left, font=\tiny\ttfamily,
+        anchor=north, inner sep=5pt] (json) at (4.8,-1.45)
+    {\{\\
+     \quad "rumah\_sakit": "Rumah Sakit Medikara Bekasi",\\
+     \quad "tanggal": "2026-11-02",\\
+     \quad "jadwal": [\\
+     \qquad \{"dokter": "dr. Rina", "poli": "Anak", "jam": "08:00-12:00",
+       "sisa\_kuota": 6\},\\
+     \qquad \{"dokter": "dr. Bayu", "poli": "Penyakit Dalam",
+       "jam": "13:00-16:00", "sisa\_kuota": 0\}\\
+     \quad ]\\
+     \}};
+  \node[font=\tiny, gray, anchor=south west] at (json.north west)
+    {isi response yang dibaca aplikasi};
+\end{tikzpicture}

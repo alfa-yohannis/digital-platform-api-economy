@@ -1,0 +1,11 @@
+# Contoh isi peta ekosistem Medikara (Bab 03). Pakai: hapus baris ini saat impor ke spreadsheet. Jumlah pelaku mengikuti Bab 1 dan Bab 2; angka aliran lain adalah asumsi latihan.
+no,pelaku,jumlah,peran,aliran_uang,aliran_data,aliran_layanan,aliran_reputasi,status_angka,sumber
+1,Medikara+,1,orkestrator,menyimpan Rp10 juta per paket,mengatur akses dan jejak,tidak melayani langsung pada platform,nama tercantum pada paket,asumsi,Bab 3
+2,Klinik mitra,40,pelengkap,menerima Rp70 juta per paket dan membayar Rp3 juta per bulan,jadwal dan rujukan,pemeriksaan dan konsultasi,ulasan per klinik,Bab 2 dan asumsi,Bab 2 dan Bab 3
+3,Laboratorium mitra,3,pelengkap,menerima Rp20 juta per paket,1.100 hasil pemeriksaan per bulan,pemeriksaan khusus,waktu hasil,fakta latihan dan asumsi,Bab 1 dan Bab 3
+4,Apotek daring,belum ditentukan,pelengkap,menerima pembayaran obat,resep,pengiriman obat,ketepatan kiriman,asumsi,Bab 3
+5,Asuransi swasta,9,pelengkap dan pelanggan,membayar Rp10.000 per verifikasi,7.800 klaim per bulan dan status penjaminan,penjaminan biaya,tidak dinilai pasien,Bab 1 dan Bab 2,Bab 1 dan Bab 2
+6,Perusahaan klien,36,pelanggan dan calon saluran,membayar Rp100 juta per paket 200 karyawan,rekap agregat tanpa hasil perorangan,tidak melayani,rekomendasi antarperusahaan,Bab 1 dan asumsi,Bab 1 dan Bab 3
+7,Pasien dan karyawan,sekitar 1.200.000 kunjungan per tahun,pengguna,membayar atau dijamin,data kesehatan sendiri,menerima layanan,memberi ulasan,fakta latihan,CLAUDE.md
+8,BPJS Kesehatan dan SATUSEHAT,2,pihak wajib,klaim sesuai aturan program,klaim dan pelaporan wajib,tidak melayani,tidak berlaku,fakta latihan,Bab 1 dan Bab 2
+9,Vendor Medikara+,1,pemasok,menerima biaya kontrak,jadwal dan janji temu; akses perlu dipersempit,mengembangkan aplikasi,tidak berlaku,fakta latihan,Bab 1

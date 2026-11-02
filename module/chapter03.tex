@@ -1,86 +1,1089 @@
+% !TeX root = digital-platform-api-economy.tex
+% !TeX encoding = UTF-8
 \chapter{Ekosistem dan Orkestrasi Mitra}
+\label{ch:ch03}
+
+% Kolom rata kiri untuk tabel bab ini: Y selebar sisa tabel, Z selebar yang ditentukan.
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{Z}[1]{>{\raggedright\arraybackslash}p{#1}}
 
 \section*{Tujuan Pembelajaran}
 \begin{itemize}
   \item Memetakan pelaku ekosistem, peran, dan aliran nilai di sekitar organisasi.
-  \item Membandingkan opsi strategi platform, yaitu membangun, bergabung, atau bermitra, beserta \textit{trade-off} masing-masing.
+  \item Membandingkan opsi strategi platform, yaitu membangun, bergabung, atau bermitra, beserta \textit{tradeoff} masing-masing.
   \item Merumuskan aturan dasar keterbukaan platform bagi mitra.
 \end{itemize}
 
 \section{Pendahuluan}
 
-% TODO
-% Cakupan: strategi "Satu Pasien, Satu Rekam Medis" bergantung pada klinik mitra, asuransi,
-% laboratorium, apotek daring, dan perusahaan klien; Medikara harus memilih peran di ekosistem itu.
+Medikara Health menginginkan layanan lintas fasilitas, tetapi pasien masih membawa hasil
+pemeriksaan dari satu tempat ke tempat lain. Membuka koneksi teknis saja tidak menyelesaikan
+pembagian tanggung jawab. Klinik, laboratorium, perusahaan asuransi, dan rumah sakit perlu
+menyepakati siapa memberi layanan, siapa membayar, dan siapa menangani keluhan. Tanpa kesepakatan
+itu, \textit{Application Programming Interface} (API) yang paling rapi pun hanya memindahkan
+perselisihan ke saluran yang lebih cepat.
+
+Bab 2 sudah memetakan sisi pasar Medikara+ dan efek jaringannya. Bab ini melebarkan pandangan ke
+seluruh pihak di sekitar platform. Bahasannya meliputi siapa saja pelakunya, nilai apa yang
+mengalir di antara mereka, sarana apa yang disediakan bagi mitra, seberapa jauh platform dibuka,
+siapa yang mengatur, dan apakah Medikara sebaiknya membangun platform sendiri, bergabung ke
+platform pihak lain, atau bermitra. Angka tambahan yang diawali kata ``Misalkan'' adalah asumsi
+latihan. Kesimpulan untuk organisasi nyata harus diuji dengan wawancara, dokumen, dan pengukuran
+yang berizin. Hasil bab ini menjadi bagian tonggak C1 dalam cetak biru transformasi digital.
+
+Rujukan utama bab ini dipakai untuk membedakan konsep dan membangun alasan keputusan, bukan untuk
+menggantikan penilaian konteks organisasi. Konsep ekosistem diambil dari Jacobides, Cennamo, dan
+Gawer \cite{jacobides2018ecosystems} serta Adner \cite{c03-adner2017ecosystem}.
+\textit{Boundary resources} diambil dari Ghazawneh dan Henfridsson \cite{ghazawneh2013boundary}.
+Keterbukaan diambil dari Boudreau \cite{c03-boudreau2010open} serta Parker dan Van Alstyne
+\cite{c03-parker2018innovation}. Tata kelola diambil dari Tiwana \cite{tiwana2014platform}.
+\textit{Platform envelopment} diambil dari Eisenmann, Parker, dan Van Alstyne
+\cite{eisenmann2011envelopment}.
+
+\IfFileExists{../figures/ch03-diagram-konsep.png}{%
+
+Gambar \ref{fig:ch03-ilustrasi-bab} merangkum hubungan komponen dan konsep utama bab ini.
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=\textwidth]{../figures/ch03-diagram-konsep.png}
+  \caption{Ekosistem dan batas kerja sama mitra}
+  \label{fig:ch03-ilustrasi-bab}
+\end{figure}
+}{}
 
 \section{Ekosistem sebagai Struktur Kerja Sama}
 
-% TODO
-% Cakupan: definisi ekosistem menurut Jacobides, Cennamo, dan Gawer; komplementaritas unik dan
-% supermodular; modularitas sebagai syarat ekosistem; perbedaan ekosistem dengan rantai pasok dan
-% aliansi.
-% Kasus Medikara: hubungan saling melengkapi antara rumah sakit, laboratorium, apotek, dan asuransi.
+Bab 1 mencatat Medikara berhubungan dengan 3 laboratorium mitra, 9 asuransi swasta, dan 36
+perusahaan klien. Pertanyaannya, apakah kumpulan hubungan itu sudah layak disebut ekosistem?
+Jawabannya bergantung pada cara para pihak saling bergantung, bukan pada jumlah kontraknya.
+
+Ekosistem adalah susunan pelaku yang saling melengkapi untuk menghasilkan satu tawaran nilai.
+Hubungannya melampaui kontrak pembelian karena keputusan satu pelaku memengaruhi manfaat bagi
+pelaku lain. Jacobides, Cennamo, dan Gawer menggambarkan ekosistem sebagai organisasi yang saling
+berinteraksi, dimungkinkan oleh modularitas, tidak dikelola secara hierarkis, dan terikat oleh
+investasi bersama yang sulit dipindahkan ke tempat lain \cite{jacobides2018ecosystems}. Adner
+melihatnya dari sisi susunan: ekosistem adalah penyelarasan sekelompok mitra yang perlu
+berinteraksi agar satu tawaran nilai terwujud \cite{c03-adner2017ecosystem}. Adner menguraikan
+susunan itu menjadi aktivitas, pelaku, posisi, dan tautan. Karena itu pemetaan ekosistem dimulai
+dari tawaran nilai, bukan dari daftar mitra.
+
+Analoginya paket perjalanan. Penginapan, angkutan, dan pemandu adalah usaha yang berbeda, dan tidak
+ada yang menjadi atasan pihak lain. Wisatawan menilai satu perjalanan utuh. Bila bus datang
+terlambat dua jam, kamar yang bagus tidak banyak menolong. Mutu paket bergantung pada titik
+sambungnya.
+
+Dua contoh penerapan pada Medikara:
+\begin{enumerate}
+  \item Misalkan 12 persen dari 1.100 pemeriksaan khusus per bulan di 3 laboratorium mitra selesai
+        melewati waktu yang dijanjikan. Sebanyak 132 pasien per bulan menunggu dokter mereka membaca
+        hasil. Menambah koneksi tidak mengubah angka itu. Kesepakatan waktu hasil lebih menentukan
+        pengalaman pasien daripada banyaknya koneksi.
+  \item Sembilan asuransi swasta memakai sembilan format klaim. Dari 7.800 klaim per bulan, sekitar
+        6 persen ditolak karena format, yaitu 468 klaim per bulan. Definisi kepesertaan tiap
+        asuransi memang berbeda. Satu format permintaan harus menyeragamkan cara mengirim, tetapi
+        tetap menghormati aturan manfaat masing-masing.
+\end{enumerate}
+
+Pertanyaan kemudian muncul: kapan saling melengkapi itu cukup kuat untuk membentuk ekosistem?
+Jacobides dan rekan menunjuk dua penentu \cite{jacobides2018ecosystems}. Penentu pertama adalah komplementaritas, yaitu keadaan ketika satu bagian menaikkan nilai bagian
+lain. Mereka membedakan dua jenis. Komplementaritas unik (\textit{unique}) berlaku bila A tidak
+bekerja dengan baik tanpa B. Verifikasi penjaminan asuransi dan pemesanan janji temu berpasangan
+seperti ini: pasien berasuransi belum dapat memesan dengan tenang sebelum penjaminnya jelas.
+Komplementaritas \textit{supermodular} berlaku bila makin banyak A membuat B makin bernilai.
+Misalkan perusahaan klien punya 1.200 karyawan di Bekasi dan Depok. Dengan 10 klinik mitra, 480
+karyawan tinggal dalam radius 10 km dari klinik. Dengan 40 klinik mitra, jumlahnya menjadi 1.020
+karyawan. Paket pemeriksaan karyawan menjadi lebih bernilai tanpa perubahan pada isi paketnya.
+
+Penentu kedua adalah modularitas. Modularitas memecah layanan menjadi bagian dengan antarmuka yang
+disepakati, sehingga satu bagian boleh berubah tanpa memaksa seluruh jaringan berubah. Organisasi
+yang berbeda lalu dapat berkoordinasi tanpa perintah dari satu atasan
+\cite{jacobides2018ecosystems}. Hitungannya sederhana. Misalkan 40 klinik mitra terhubung langsung
+ke 3 laboratorium mitra. Jumlah sambungannya $40 \times 3 = 120$. Bila semua pihak memakai satu
+kontrak hasil pemeriksaan lewat Medikara+, jumlahnya menjadi $40 + 3 = 43$. Misalkan perawatan satu
+sambungan Rp4 juta per tahun. Biaya turun dari Rp480 juta menjadi Rp172 juta per tahun, atau hemat
+Rp308 juta. Ketika satu laboratorium mengganti sistemnya, hanya satu sambungan yang berubah.
+
+Tabel \ref{tab:ch03-unsur-ekosistem} merangkum unsur yang perlu diperiksa sebelum sebuah kumpulan
+mitra diperlakukan sebagai ekosistem.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Tiga unsur yang diperiksa sebelum kumpulan mitra disebut ekosistem}
+  \label{tab:ch03-unsur-ekosistem}
+  \small
+  \begin{tabularx}{\textwidth}{Z{3.0cm}YY}
+    \hline
+    \textbf{Unsur} & \textbf{Contoh Medikara} & \textbf{Pertanyaan uji} \\ \hline
+    Komplementaritas & Klinik dan laboratorium dalam satu perjalanan pasien & Apakah nilai satu pihak turun bila pihak lain tidak ada? \\ \hline
+    Modularitas & Kontrak hasil pemeriksaan bersama & Dapatkah satu pihak berubah tanpa memaksa pihak lain berubah? \\ \hline
+    Batas ekosistem & Mitra layanan aktif, bukan semua pemasok & Apakah hubungan ini punya tujuan bersama yang dapat diukur? \\ \hline
+  \end{tabularx}
+\end{table}
+
+Dua hal pada pembahasan ini sering tertukar, yaitu rantai pasok dan ekosistem. Pembagiannya begini.
+Rantai pasok dikendalikan pembeli tunggal lewat kontrak dengan tiap pemasok. Ekosistem mengatur
+banyak pihak lewat peran yang menghadapi aturan serupa, sehingga kontrak khusus untuk tiap mitra
+tidak lagi diperlukan \cite{jacobides2018ecosystems}. Tabel \ref{tab:ch03-rantai-ekosistem}
+memperlihatkan bedanya.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Rantai pasok dan ekosistem berbeda pada cara koordinasinya}
+  \label{tab:ch03-rantai-ekosistem}
+  \small
+  \begin{tabularx}{\textwidth}{Z{2.7cm}YY}
+    \hline
+    \textbf{Aspek} & \textbf{Rantai pasok} & \textbf{Ekosistem} \\ \hline
+    Pengendali & Pembeli tunggal yang memberi perintah & Orkestrator yang menetapkan aturan main \\ \hline
+    Bentuk hubungan & Dua pihak, satu per satu & Banyak pihak yang saling bergantung \\ \hline
+    Aturan & Kontrak khusus tiap pemasok & Peran dengan aturan serupa \\ \hline
+    Investasi & Relatif mudah dipindahkan ke pemasok lain & Sulit dipindahkan keluar dari kelompok \\ \hline
+    Contoh Medikara & Pembelian reagen dari distributor & Jaringan rujukan klinik mitra dan laboratorium mitra \\ \hline
+  \end{tabularx}
+\end{table}
+
+\begin{kasus}[title={Kasus Medikara Health: Sudahkah Medikara Punya Ekosistem?}]
+Tim strategi membaca daftar pertukaran data dari Bab 1. Medikara berhubungan dengan 3 laboratorium
+mitra, 9 asuransi swasta, dan 36 perusahaan klien. Jumlahnya 48 hubungan, dan hampir semuanya
+berjalan dengan cara sendiri: surel berisi hasil pindaian, unggah berkas ke portal tiap asuransi,
+dan \textit{spreadsheet} bulanan.
+
+Kesimpulannya, Medikara saat ini punya kumpulan hubungan dua pihak, belum punya ekosistem. Setiap
+pihak punya kebiasaan khusus, dan perubahan di satu pihak diselesaikan satu per satu. Tim lalu menyusun ulang 48 hubungan itu menjadi tiga peran: laboratorium mitra, penjamin, dan
+perusahaan klien. Setiap peran menghadapi satu set aturan. Keputusan ini punya dua konsekuensi.
+Pertama, Medikara cukup merawat tiga set aturan, bukan 48 kebiasaan. Kedua, mitra kehilangan
+sebagian kelonggaran yang selama ini dinikmati, sehingga perpindahan perlu masa transisi dan alasan
+yang jelas bagi mereka.
+\end{kasus}
 
 \section{Peran dalam Ekosistem: Orkestrator, Pelengkap, dan Pengguna}
 
-% TODO
-% Cakupan: peran orkestrator, pelengkap (complementor), dan pengguna; aliran nilai berupa uang,
-% data, layanan, dan reputasi; penciptaan nilai bersama dan penangkapan nilai.
-% Kasus Medikara: calon peran Medikara sebagai orkestrator layanan kesehatan karyawan perusahaan.
+Setelah batas ekosistem jelas, pertanyaan berikutnya adalah siapa memainkan peran apa. Tanpa
+pembagian peran, setiap pihak mengira pihak lain yang bertanggung jawab ketika terjadi masalah.
+
+Orkestrator menetapkan aturan interaksi dan menjaga kesehatan ekosistem. Pelengkap
+(\textit{complementor}) menyediakan bagian layanan yang memperbesar nilai tawaran. Pengguna menerima
+atau memilih nilai tersebut. Satu organisasi dapat memegang lebih dari satu peran, sehingga analisis
+perlu menyebut konteks interaksinya. Nilai yang diciptakan bersama tidak otomatis dibagi secara
+adil. Pembagiannya perlu diatur.
+
+Pengelola pasar mengatur tempat dan aturan, pedagang menyediakan barang, dan pembeli memilih
+transaksi. Pada pagi hari, pedagang yang sama membeli sarapan dari pedagang lain, sehingga ia
+sekaligus pembeli. Bila pengelola membuka lapak sendiri, pedagang lain mulai bertanya apakah aturan
+pasar masih adil.
+
+Dua contoh penerapan pada Medikara:
+\begin{enumerate}
+  \item Misalkan Medikara mengatur paket pemeriksaan 200 karyawan perusahaan dengan harga Rp500.000
+        per karyawan, atau Rp100 juta per paket. Klinik mitra memberi layanan, sedangkan perusahaan
+        menjadi pembeli paket. Medikara mengatur, klinik mitra melengkapi, karyawan memakai, dan
+        perusahaan membayar. Pihak yang membayar berbeda dengan pihak yang memakai, sehingga
+        kepentingan keduanya perlu dicatat terpisah.
+  \item Asuransi swasta memegang dua peran sekaligus. Pada skema harga Bab 2, asuransi membayar
+        Rp10.000 untuk setiap verifikasi penjaminan otomatis. Dengan 96.000 pemesanan per tahun,
+        asuransi membayar Rp960 juta. Pada saat yang sama, asuransi menyediakan penjaminan yang
+        membuat pasien mau memesan. Asuransi adalah pelanggan fitur verifikasi dan pelengkap bagi
+        pengalaman pasien.
+\end{enumerate}
+
+Pasien juga tidak selalu pasif. Pasien menjadi pengguna layanan, tetapi dapat pula menyumbang
+penilaian mutu. Penilaian tersebut tidak mengubah pasien menjadi pemasok data bebas pakai. Hak pasien
+atas datanya tetap berlaku.
+
+Dua hal pada peran sering tertukar, yaitu mitra dan pelanggan. Bab 1 mendefinisikan mitra sebagai
+pihak luar yang ikut menciptakan atau menyalurkan nilai, bukan sekadar membeli. Arah uang tidak
+menentukan perbedaan itu. Pada Bab 2, klinik mitra membayar langganan Rp3 juta per bulan kepada
+Medikara+, tetapi klinik itu tetap mitra karena ikut menciptakan layanan. Tabel
+\ref{tab:ch03-mitra-pelanggan} merangkum pembedanya.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Mitra dan pelanggan dibedakan oleh perannya dalam menciptakan nilai, bukan oleh arah uang}
+  \label{tab:ch03-mitra-pelanggan}
+  \small
+  \begin{tabularx}{\textwidth}{Z{2.9cm}YY}
+    \hline
+    \textbf{Aspek} & \textbf{Mitra} & \textbf{Pelanggan} \\ \hline
+    Peran dalam nilai & Ikut menciptakan atau menyalurkan & Menerima dan memakai \\ \hline
+    Arah uang & Dapat menerima atau membayar & Umumnya membayar \\ \hline
+    Tanggung jawab mutu & Ikut menanggung, tertulis di perjanjian & Tidak menanggung \\ \hline
+    Hak utama & Akses teknis, data sesuai tujuan, kepastian aturan & Layanan sesuai janji, jalur keluhan \\ \hline
+    Contoh Medikara & Klinik mitra yang melayani paket karyawan & Perusahaan yang membeli paket untuk 200 karyawan \\ \hline
+  \end{tabularx}
+\end{table}
+
+Peran juga berubah menurut interaksinya. Perusahaan klien adalah pelanggan ketika membeli paket.
+Misalkan perusahaan yang sama memasang jadwal Medikara+ di aplikasi kepegawaian miliknya. Untuk
+interaksi itu, perusahaan menjadi mitra saluran. Pihak wajib seperti Badan Penyelenggara Jaminan
+Sosial (BPJS) Kesehatan dan SATUSEHAT ditulis terpisah dari mitra, karena Bab 2 sudah menjelaskan
+bahwa aturan mereka tidak dirundingkan lewat Medikara+. Vendor Medikara+ juga bukan pelengkap. Vendor
+adalah pemasok yang dibayar untuk mengerjakan aplikasi.
+
+\section{Aliran Nilai: Uang, Data, Layanan, dan Reputasi}
+
+Peta pelaku belum cukup. Dua pelaku dapat terhubung tanpa ada yang tahu apa yang berpindah di antara
+mereka. Pertanyaan berikutnya: apa yang mengalir, dari siapa, kepada siapa, dan apa imbalannya?
+
+Aliran nilai adalah segala sesuatu yang berpindah antarpelaku dan membuat mereka mau tetap bergabung.
+Ada empat jenis. Uang berupa pembayaran, langganan, dan komisi. Data berupa jadwal, hasil pemeriksaan,
+status penjaminan, dan rekap. Layanan berupa pemeriksaan, konsultasi, dan pengiriman obat. Reputasi
+berupa ulasan, peringkat, dan nama baik. Keempatnya sering berjalan ke arah yang berbeda, dan tanggung
+jawab keluhan biasanya mengikuti aliran layanan. Pemetaan yang hanya melihat uang akan melewatkan tiga
+aliran lain.
+
+Analoginya hajatan yang memakai jasa katering. Tuan rumah membayar katering. Katering mengirim makanan.
+Daftar tamu berpindah ke katering agar porsinya tepat. Tamu memuji atau mengeluh kepada tuan rumah,
+walaupun katering yang memasak. Pembayaran berhenti di katering, tetapi nama baik tetap melekat pada
+tuan rumah.
+
+Gambar \ref{fig:ch03-aliran-nilai} memperlihatkan keempat aliran pada paket pemeriksaan 200 karyawan.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch03-aliran-nilai.tex}
+  \caption{Empat aliran nilai pada paket pemeriksaan 200 karyawan. Perusahaan hanya menerima rekap
+           agregat, bukan hasil perorangan}
+  \label{fig:ch03-aliran-nilai}
+\end{figure}
+
+Dua contoh berangka memperlihatkan cara membacanya:
+\begin{enumerate}
+  \item Uang. Dari Rp100 juta, klinik mitra menerima Rp350.000 per karyawan atau Rp70 juta.
+        Laboratorium mitra menerima Rp100.000 per karyawan atau Rp20 juta. Medikara+ menyimpan
+        Rp50.000 per karyawan atau Rp10 juta. Medikara hanya memegang 10 persen uang, tetapi namanya
+        tercantum pada paket. Bila hasil terlambat, perusahaan mengeluh kepada Medikara, bukan kepada
+        laboratorium.
+  \item Reputasi. Misalkan Medikara+ menerima 300 keluhan per triwulan, dan 120 di antaranya berasal
+        dari 3 klinik mitra. Sebanyak 7,5 persen klinik menyumbang 40 persen keluhan. Pasien mengingat
+        nama Medikara+, bukan nama kliniknya. Cennamo dan Santaló menjelaskan pola ini lewat reputasi
+        sistem: aset bersama yang dinikmati semua peserta, sehingga sebagian peserta tergoda menumpang
+        tanpa ikut menjaganya \cite{c03-cennamo2019generativity}.
+\end{enumerate}
+
+Aliran data memerlukan ketelitian lebih. Data dan informasi kesehatan termasuk data pribadi yang
+bersifat spesifik menurut Undang-Undang Pelindungan Data Pribadi (UU PDP) \cite{uu27-2022-pdp}. Karena
+itu 200 hasil pemeriksaan berhenti pada klinik, laboratorium, dan karyawan yang bersangkutan.
+Perusahaan yang membayar hanya menerima rekap agregat, misalnya jumlah peserta yang sudah diperiksa.
+Membayar tidak memberi hak atas hasil perorangan. Tabel \ref{tab:ch03-empat-aliran} merangkum cara
+memeriksa setiap aliran.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Pertanyaan dan ukuran untuk empat aliran nilai}
+  \label{tab:ch03-empat-aliran}
+  \small
+  \begin{tabularx}{\textwidth}{Z{1.5cm}YYZ{2.6cm}}
+    \hline
+    \textbf{Aliran} & \textbf{Pertanyaan} & \textbf{Contoh Medikara} & \textbf{Ukuran} \\ \hline
+    Uang & Siapa membayar siapa, dan berapa? & Paket Rp100 juta, dibagi tiga pihak & Porsi tiap pihak \\ \hline
+    Data & Data apa, untuk tujuan apa, dengan hak apa? & Hasil ke klinik, rekap agregat ke perusahaan & Akses sesuai tujuan \\ \hline
+    Layanan & Siapa melayani, dan siapa menangani keluhan? & Pemeriksaan di klinik mitra & Waktu hasil, keluhan \\ \hline
+    Reputasi & Nama siapa yang naik atau turun? & Ulasan pada Medikara+ & Nilai ulasan per klinik \\ \hline
+  \end{tabularx}
+\end{table}
+
+Gambar \ref{fig:ch03-peta-ekosistem} menyatukan seluruh pelaku dan aliran menjadi peta ekosistem. Peta
+inilah yang menjadi luaran pertama Aktivitas bab ini.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch03-peta-ekosistem.tex}
+  \caption{Peta ekosistem Medikara+. Hijau: orkestrator. Oranye: pengguna. Biru: pelengkap dan
+           pembayar. Abu-abu: pihak wajib dan pemasok}
+  \label{fig:ch03-peta-ekosistem}
+\end{figure}
+
+\begin{kasus}[title={Kasus Medikara Health: Tiga Sambungan Terlemah}]
+Tim strategi membaca peta ekosistem bersama daftar pertukaran data dari Bab 1. Tiga aliran menonjol
+karena volumenya besar dan cara kerjanya masih manual. Pertama, 1.100 pemeriksaan khusus per bulan dari 3 laboratorium mitra dikirim lewat surel berisi hasil
+pindaian, lalu diketik ulang ke SIMRS (Sistem Informasi Manajemen Rumah Sakit). Kedua, 7.800 klaim per
+bulan diunggah ke portal 9 asuransi dengan 9 format, dan 468 klaim ditolak karena format. Ketiga, 36
+rekap bulanan bagi perusahaan klien disusun manual selama empat hari kerja.
+
+Ketiga aliran itu bukan masalah teknis semata. Pada aliran laboratorium, pihak yang dirugikan adalah
+pasien. Pada aliran klaim, pihak yang dirugikan adalah bagian keuangan. Pada aliran rekap, data
+karyawan beredar di surel. Karena itu ketiganya menjadi calon pertama API mitra yang dibahas di Bab 4,
+dan urutannya ditentukan oleh akibatnya, bukan oleh kemudahan teknisnya.
+\end{kasus}
 
 \section{Boundary Resources: Jembatan antara Platform dan Mitra}
 
-% TODO
-% Cakupan: model boundary resources (Ghazawneh dan Henfridsson); API, SDK, dokumentasi, ketentuan
-% penggunaan, dan program mitra; dua fungsi boundary resources, yaitu membuka akses dan menjaga
-% kendali.
-% Kasus Medikara: boundary resources yang belum dimiliki, misalnya dokumentasi API dan sandbox.
-% Pendalaman teknis: menelaah portal pengembang satu platform publik dan mengelompokkan isinya.
+Misalkan Medikara sudah sepakat membuka jadwal bagi klinik mitra. Apa yang harus diserahkan kepada
+klinik agar mereka dapat terhubung? Jawabannya lebih panjang daripada satu alamat API.
+
+\textit{Boundary resources} adalah sarana yang membuka partisipasi sekaligus membatasi perilaku mitra.
+Ghazawneh dan Henfridsson memakai istilah ini untuk alat perangkat lunak dan aturan yang menjadi
+antarmuka antara pemilik platform dan pengembang pihak ketiga \cite{ghazawneh2013boundary}. Mereka
+menunjuk dua pendorong di baliknya. \textit{Resourcing} memindahkan kemampuan merancang ke pihak luar.
+\textit{Securing} menjaga kendali pemilik atas platform. Kedua tujuan itu saling bertentangan, dan
+pertentangan itulah yang harus dikelola.
+
+Bentuk teknisnya mencakup API, dokumentasi, perangkat bantu pengembangan atau \textit{Software
+Development Kit} (SDK), dan lingkungan uji atau \textit{sandbox}. Bentuk kelembagaannya meliputi
+kontrak, aturan penggunaan, dan prosedur sengketa. Membuka satu \textit{endpoint} tanpa aturan tidak
+membentuk program mitra yang dapat dioperasikan. Gambar \ref{fig:ch03-boundary-resources}
+memperlihatkan posisi sarana itu di antara mitra dan inti platform. Pengelompokan menjadi akses
+teknis, pengetahuan, dan aturan adalah penyederhanaan untuk bab ini.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch03-boundary-resources.tex}
+  \caption{\textit{Boundary resources} berada di antara mitra dan inti platform, dengan dua pendorong
+           yang berlawanan}
+  \label{fig:ch03-boundary-resources}
+\end{figure}
+
+Analoginya pintu dan kartu akses di gedung kantor. Pintu memudahkan tamu masuk ke ruangan yang tepat.
+Kartu akses menjaga ruangan lain. Papan penunjuk arah mengurangi tamu yang bertanya ke resepsionis.
+Gedung yang hanya punya pintu tanpa kartu tidak aman, dan gedung yang hanya punya kartu tanpa papan
+penunjuk akan membuat resepsionis kewalahan.
+
+Dua contoh penerapan pada Medikara:
+\begin{enumerate}
+  \item Misalkan satu klinik memerlukan tiga hari pendampingan karena contoh permintaan tidak tersedia.
+        Untuk 40 klinik, kebutuhannya 120 hari kerja staf Medikara. Panduan langkah awal mengurangi
+        ketergantungan pada staf menjadi setengah hari per klinik, atau 20 hari kerja. Dengan 8 jam
+        per hari kerja dan tarif Rp60.000 per jam, satu hari kerja bernilai Rp480.000. Biaya turun dari
+        Rp57,6 juta menjadi Rp9,6 juta.
+  \item Lingkungan uji berisi 20 pasien sintetis memungkinkan pengujian galat tanpa menyalin rekam medis
+        produksi. Misalkan klinik baru lulus setelah menangani enam skenario gagal: pasien tidak
+        ditemukan, slot penuh, kode akses kedaluwarsa, kuota habis, penjamin menolak, dan format salah.
+        Kegagalan ditemukan sebelum menyentuh pasien sungguhan.
+\end{enumerate}
+
+Keputusan ini punya dua konsekuensi. Pertama, sarana itu tidak gratis. Misalkan membuat panduan dan
+\textit{sandbox} menelan Rp150 juta. Penghematan per klinik hanya 2,5 hari kerja atau Rp1,2 juta,
+sehingga investasinya baru kembali setelah 125 klinik. Pada 40 klinik, penghematan pendampingan saja
+belum menutup biaya. Alasan yang lebih kuat adalah keamanan: data produksi tidak lagi dipakai untuk
+uji. Kedua, sarana itu harus dipelihara. Eaton dan rekan mempelajari 30 \textit{boundary resources}
+pada iOS lewat 4.664 artikel blog. Mereka menemukan sarana itu terus dibentuk ulang lewat penyesuaian
+dan penolakan dari banyak pihak \cite{eaton2015distributed}. Panduan yang ditulis sekali lalu
+ditinggalkan akan segera tertinggal.
+
+Pertanyaan kemudian muncul: siapa yang menentukan isi sarana itu? Dal Bianco dan rekan menyimpulkan
+bahwa \textit{boundary resources} perlu dibuat untuk pengembang pihak ketiga, bukan sekadar diturunkan
+dari arsitektur platform \cite{dalbianco2014role}. Artinya panduan klinik mitra ditulis menurut
+langkah kerja petugas klinik, bukan menurut susunan tabel SIMRS. Tabel \ref{tab:ch03-sarana-mitra}
+memperlihatkan isi tiap kelompok beserta uji keberhasilannya.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Tiga kelompok \textit{boundary resources} beserta peran dan uji keberhasilannya}
+  \label{tab:ch03-sarana-mitra}
+  \small
+  \begin{tabularx}{\textwidth}{Z{2.2cm}YYY}
+    \hline
+    \textbf{Kelompok} & \textbf{Isi} & \textbf{Yang dibuka dan yang dijaga} & \textbf{Uji keberhasilan} \\ \hline
+    Akses teknis & API, SDK, \textit{sandbox}, kode akses & Membuka fungsi; menjaga data produksi & Mitra menguji mandiri dengan data sintetis \\ \hline
+    Pengetahuan & Panduan, contoh, kasus gagal & Membuka cara pakai; menjaga waktu staf & Panggilan pertama berhasil tanpa pendampingan \\ \hline
+    Aturan & Syarat penggunaan, kontrak, jalur eskalasi & Membuka kepastian; menjaga batas tindakan & Pelanggaran punya akibat dan pemilik \\ \hline
+  \end{tabularx}
+\end{table}
+
+Contoh publik yang dapat diperiksa adalah SATUSEHAT. Portal dokumentasinya memuat panduan registrasi
+fasilitas layanan kesehatan, survei keamanan, kode akses API yang terpisah untuk \textit{sandbox} dan
+produksi, koleksi Postman, serta \textit{dashboard} pemantauan transaksi \cite{satusehat}. Ketiga
+kelompok tadi hadir di sana.
+
+\begin{kasus}[title={Kasus Medikara Health: Yang Sudah Ada dan yang Belum}]
+Anggota teknis tim strategi memeriksa sarana yang dimiliki Medikara untuk klinik mitra. Tabel
+\ref{tab:ch03-status-sarana} memuat hasilnya. Status ini adalah contoh latihan.
+
+\begin{center}
+  \captionsetup{type=table}
+  \caption{Status \textit{boundary resources} Medikara pada awal Tahap 2}
+  \label{tab:ch03-status-sarana}
+  \small
+  \begin{tabularx}{\linewidth}{Z{3.2cm}Z{1.6cm}Y}
+    \hline
+    \textbf{Sarana} & \textbf{Status} & \textbf{Catatan} \\ \hline
+    Kontrak kerja sama & Sebagian & Ada untuk laboratorium, belum untuk klinik mitra \\ \hline
+    API jadwal dan pemesanan & Belum & Vendor masih membaca basis data SIMRS langsung \\ \hline
+    \textit{Sandbox} & Belum & Pengujian selama ini memakai salinan data \\ \hline
+    Panduan dan contoh & Belum & Pengetahuan tersimpan pada dua staf integrasi \\ \hline
+    Syarat penggunaan & Belum & Perlu disusun bersama bagian hukum \\ \hline
+  \end{tabularx}
+\end{center}
+
+Temuan terpenting ada pada baris kedua. Akses vendor yang lebih luas dari kebutuhan sudah menjadi
+temuan audit. Membuka akses serupa bagi 40 klinik akan melipatgandakan risiko itu. Karena itu API dan
+\textit{sandbox} didahulukan, sebelum klinik pertama diundang.
+\end{kasus}
 
 \section{Keterbukaan dan Kendali}
 
-% TODO
-% Cakupan: platform terbuka dan tertutup; manfaat inovasi pihak luar (Parker, Van Alstyne, dan
-% Jiang); risiko kehilangan kendali mutu dan keamanan; tingkat keterbukaan yang bertahap.
-% Kasus Medikara: kebocoran data lewat vendor pada 2025 sebagai pelajaran tentang kendali.
+Sarana sudah terdaftar, tetapi seberapa lebar pintunya dibuka? Pertanyaan ini sering dijawab dengan
+dua kubu: buka semua agar tumbuh, atau tutup semua agar aman. Keduanya melewatkan bahwa keterbukaan
+bukan saklar. Keterbukaan mempunyai beberapa dimensi: siapa boleh bergabung, data apa yang tersedia, dan aksi apa
+yang diperbolehkan. Platform dapat membuka katalog layanan sambil membatasi pemesanan kepada mitra
+terverifikasi. Kendali perlu sebanding dengan akibat tindakan. Boudreau membedakan dua cara membuka
+platform, yaitu memberi akses dan melepas kendali \cite{c03-boudreau2010open}. Memberi akses berarti
+mengizinkan pihak lain membangun pelengkap. Melepas kendali berarti menyerahkan pengaturan platform
+itu sendiri.
+
+Perbedaan itu punya bukti. Dengan data 21 sistem komputasi genggam pada 1990 sampai 2004, Boudreau
+menemukan pemberian akses mempercepat pengembangan perangkat baru sampai lima kali lipat, bergantung
+pada tingkat akses dan cara penerapannya. Melepas kendali setelah akses dibuka tetap berdampak positif,
+tetapi efek tambahannya satu orde lebih kecil \cite{c03-boudreau2010open}. Parker dan Van Alstyne
+merumuskan pertukarannya: menutup platform menaikkan kemampuan pemilik menarik bayaran atas akses,
+sedangkan membuka platform menaikkan kemampuan pengembang membangun di atasnya
+\cite{c03-parker2018innovation}. Temuan itu berasal dari industri perangkat dan model ekonomi, bukan
+layanan kesehatan. Arahnya berguna, tetapi angkanya tidak dapat dipindahkan begitu saja ke rumah sakit.
+
+Perpustakaan memberi gambaran yang mudah. Katalog terbuka bagi umum. Peminjaman memerlukan kartu
+anggota dan batas jumlah buku. Koleksi langka hanya dibaca di ruang khusus dengan izin petugas. Satu
+perpustakaan menjalankan tiga tingkat keterbukaan sekaligus, dan tidak ada yang menganggapnya aneh.
+
+Dua contoh penerapan pada Medikara:
+\begin{enumerate}
+  \item Misalkan jadwal praktik, yaitu 1.400 slot per hari dari Bab 2, tersedia untuk pencarian. Rincian
+        hasil laboratorium, sekitar 1.100 pemeriksaan per bulan, hanya tersedia bagi layanan berwenang
+        dengan tujuan yang sah. Kebocoran slot jadwal hanya merugikan persaingan. Kebocoran hasil
+        laboratorium merugikan pasien.
+  \item Mitra baru memperoleh kuota uji 100 panggilan per hari. Kenaikan kuota menunggu bukti pengujian
+        dan persetujuan pemilik layanan. Kuota produksinya dihitung dari kebutuhan. Satu klinik
+        rata-rata melayani 1.500 kunjungan per bulan menurut Bab 2, atau 60 kunjungan per hari dengan 25
+        hari kerja. Misalkan satu pemesanan butuh tiga panggilan, sehingga kebutuhannya 180 panggilan
+        per hari. Dengan cadangan, kuotanya 300 panggilan per hari.
+\end{enumerate}
+
+Gambar \ref{fig:ch03-tangga-keterbukaan} menyusun keterbukaan menjadi empat tingkat. Setiap kenaikan
+tingkat menuntut bukti baru.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch03-tangga-keterbukaan.tex}
+  \caption{Tangga keterbukaan Medikara+. Kenaikan tingkat mengikuti bukti, bukan mengikuti lamanya
+           kerja sama}
+  \label{fig:ch03-tangga-keterbukaan}
+\end{figure}
+
+\begin{kasus}[title={Kasus Medikara Health: Aturan Dasar Keterbukaan}]
+Kebocoran data pasien lewat vendor pada 2025 menjadi alasan memeriksa batas akses, bukan alasan menutup
+semua kolaborasi. Bab 1 mencatat vendor Medikara+ membaca basis data SIMRS langsung, padahal kebutuhannya
+hanya jadwal dokter dan janji temu. Misalkan vendor dapat membaca 140 tabel, padahal kebutuhannya 2 tabel.
+Sisanya, 138 tabel, adalah risiko yang tidak memberi manfaat apa pun. Tim strategi lalu merumuskan lima aturan dasar pada Tabel \ref{tab:ch03-aturan-keterbukaan}. Kelimanya
+menjadi isi catatan keputusan C1 dan rujukan bagi desain teknis pada bab-bab berikutnya.
+
+\begin{center}
+  \captionsetup{type=table}
+  \caption{Lima aturan dasar keterbukaan Medikara+}
+  \label{tab:ch03-aturan-keterbukaan}
+  \small
+  \begin{tabularx}{\linewidth}{YYZ{2.5cm}}
+    \hline
+    \textbf{Aturan} & \textbf{Penerapan} & \textbf{Pemilik} \\ \hline
+    Buka menurut tindakan, bukan menurut pihak & Membaca jadwal dan membaca hasil pemeriksaan diatur berbeda & Pemilik produk \\ \hline
+    Akses mengikuti tujuan layanan & Hasil hanya bagi fasilitas yang sedang melayani pasien itu & Petugas pelindungan data \\ \hline
+    Naik tingkat lewat bukti & Lulus 6 skenario gagal, kontrak ditandatangani & Pemilik kemitraan \\ \hline
+    Batas dapat diukur & Kuota 100 dan 300 panggilan per hari, jejak akses disimpan & Tim platform \\ \hline
+    Akses punya masa berlaku & Tingkat 3 ditinjau tiap 90 hari, dicabut saat kerja sama berakhir & Pemilik kemitraan \\ \hline
+  \end{tabularx}
+\end{center}
+
+Aturan ini punya dua konsekuensi. Pertama, proses bergabung menjadi lebih lama bagi mitra yang meminta
+akses tinggi. Kedua, vendor Medikara+ juga tunduk pada aturan yang sama, sehingga akses langsung ke basis
+data SIMRS harus diganti.
+\end{kasus}
+
+\begin{pendalaman}[title={Pendalaman Teknis (opsional): Aturan Akses sebagai Berkas}]
+Aturan yang hanya tertulis di dokumen sulit diperiksa ulang. Berkas tangga keterbukaan ditulis dalam
+format YAML (\textit{YAML Ain't Markup Language}). Listing \ref{lst:ch03-tingkat-akses} memperlihatkan
+satu tingkatnya. Berkas seperti ini dapat ditinjau dan diberi versi, lalu dibaca oleh \textit{API gateway}
+yang dibahas di Bab 10.
+
+\begin{lstlisting}[language=yaml, caption={Tingkat terverifikasi, tersedia di \berkas{sources/chapter03/tingkat-akses-mitra.yaml}}, label={lst:ch03-tingkat-akses}]
+  - nama: terverifikasi
+    yang_dibuka: [cari_slot, pesan_janji_temu, ubah_janji_temu]
+    scope: [system/Slot.rs, system/Appointment.cru]
+    syarat: [izin_usaha, kontrak, lulus_enam_skenario_gagal]
+    kuota_panggilan_per_hari: 300
+\end{lstlisting}
+
+Penulisan \textit{scope} pada contoh itu mengikuti SMART App Launch, panduan dari Health Level Seven (HL7)
+yang memakai huruf c, r, u, d, dan s untuk membuat, membaca, mengubah, menghapus, dan mencari. Contohnya,
+\texttt{system/Observation.rs} berarti hak membaca dan mencari hasil pengamatan pada tingkat sistem
+\cite{c03-smart-app-launch}. \textit{Open Authorization} (OAuth) dan \textit{scope} dibahas lebih rinci di
+Bab 6, sedangkan HL7 \textit{Fast Healthcare Interoperability Resources} (FHIR) dibahas di Bab 7.
+\end{pendalaman}
 
 \section{Tata Kelola Ekosistem}
 
-% TODO
-% Cakupan: siapa boleh bergabung; aturan perilaku mitra; pembagian nilai dan data; penyelesaian
-% sengketa; kurasi mitra; tata kelola API teknis dibahas di Bab 13.
-% Kasus Medikara: syarat minimum bagi klinik mitra yang ingin terhubung.
+Aturan keterbukaan menjawab apa yang boleh dilakukan. Pertanyaan yang tersisa: siapa yang memutuskan,
+siapa yang memeriksa, dan apa akibatnya bila aturan dilanggar?
+
+Tata kelola ekosistem mengatur penerimaan mitra, mutu, pembagian nilai, penggunaan data, dan penyelesaian
+sengketa. Aturan harus mempunyai pemilik dan konsekuensi yang dapat dijalankan. Tiwana dan rekan merumuskan
+tata kelola platform sebagai siapa memutuskan apa \cite{tiwana2010platform}. Tiwana lalu menguraikannya
+menjadi tiga dimensi: pembagian hak keputusan, pengendalian, dan penetapan harga
+\cite{tiwana2014platform}. Tata kelola teknis API pada Bab 13 melaksanakan sebagian aturan ini melalui
+standar dan pemeriksaan.
+
+Koperasi punya syarat anggota, pembagian hasil, dan tata cara menyelesaikan perselisihan. Pengurus tidak
+mengatur cara anggota menjalankan usahanya, tetapi pengurus mengatur apa yang harus dipenuhi agar tetap
+menjadi anggota. Rapat anggota memutuskan hal yang menyangkut semua pihak. Anggota yang keluar pun punya
+kewajiban yang harus diselesaikan dahulu.
+
+Dua contoh penerapan pada Medikara:
+\begin{enumerate}
+  \item Misalkan kesepakatan layanan menuntut 95 persen hasil selesai dalam 24 jam, dan satu laboratorium
+        mitra hanya mencapai 88 persen selama dua bulan berturut-turut. Medikara meninjau bukti, menyepakati
+        perbaikan 30 hari, lalu membatasi layanan baru bila perbaikan gagal. Penangguhan akses perlu
+        mempertimbangkan pasien yang sedang dilayani. Misalkan laboratorium itu menangani 400 dari 1.100
+        pemeriksaan per bulan. Bila akses dicabut mendadak, dua laboratorium lain harus menaikkan beban
+        dari 700 menjadi 1.100 pemeriksaan, atau naik 57 persen.
+  \item Misalkan satu klinik keluar dari program ketika masih punya 35 rujukan aktif. Rujukan aktif, hak
+        akses, dan kewajiban penyimpanan rekam medis harus diselesaikan sebelum kredensial dinonaktifkan
+        \cite{permenkes24-2022}. Medikara memberi waktu 30 hari, memindahkan rujukan, lalu mencabut akses.
+        Pencabutan yang terlambat meninggalkan pintu terbuka. Pencabutan yang terlalu cepat menelantarkan
+        35 pasien.
+\end{enumerate}
+
+Tabel \ref{tab:ch03-tata-kelola} merinci aturan menurut tahap hubungan dengan mitra.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Tata kelola ekosistem menurut tahap hubungan dengan mitra}
+  \label{tab:ch03-tata-kelola}
+  \small
+  \begin{tabularx}{\textwidth}{Z{1.7cm}YZ{2.5cm}Z{2.6cm}}
+    \hline
+    \textbf{Tahap} & \textbf{Aturan pokok} & \textbf{Pemilik} & \textbf{Bukti} \\ \hline
+    Masuk & Verifikasi izin dan kemampuan & Pemilik kemitraan & Berkas izin, hasil uji \\ \hline
+    Berjalan & Pemantauan mutu dan kesepakatan layanan & Pemilik layanan & Laporan bulanan \\ \hline
+    Pembagian nilai & Harga, komisi, dan subsidi diumumkan & Keuangan & Skema harga tertulis \\ \hline
+    Data & Peran pengendali dan prosesor data, tujuan akses & Petugas pelindungan data & Perjanjian data, jejak akses \\ \hline
+    Sengketa & Jalur eskalasi dan batas waktu & Komite kemitraan & Risalah keputusan \\ \hline
+    Keluar & Penyelesaian kasus aktif dan pencabutan akses & Pemilik kemitraan & Keputusan tercatat \\ \hline
+  \end{tabularx}
+\end{table}
+
+Baris data memerlukan penjelasan. UU PDP membedakan pengendali data pribadi, yang menentukan tujuan dan
+mengendalikan pemrosesan, dengan prosesor data pribadi, yang memproses atas nama pengendali
+\cite{uu27-2022-pdp}. Klinik mitra yang melayani pasiennya sendiri cenderung menjadi pengendali. Vendor
+aplikasi cenderung menjadi prosesor. Pembagian ini perlu ditetapkan di perjanjian, bersama penasihat
+hukum, dan tidak dapat disimpulkan dari diagram.
+
+\begin{kasus}[title={Kasus Medikara Health: Wasit yang Merangkap Pemain}]
+Medikara menghadapi konflik kepentingan yang tidak dialami pengelola pasar biasa. Medikara mengatur
+Medikara+, tetapi juga punya 18 klinik pratama yang bersaing dengan 40 klinik mitra untuk pasien yang sama. Misalkan klinik milik Medikara menerima 70 persen pemesanan, padahal jumlahnya hanya 31 persen dari 58
+klinik. Angka itu belum membuktikan kecurangan, karena klinik Medikara mungkin lebih dekat atau lebih
+dikenal. Namun klinik mitra akan menduga filter pencarian lebih memihak pemiliknya. Zhu dan Liu menemukan
+Amazon lebih mungkin masuk ke ruang produk penjual pihak ketiga yang sudah sukses. Masuknya Amazon membuat
+penjual yang terdampak enggan mengejar pertumbuhan di platform itu, walaupun konsumen memperoleh ongkos
+kirim yang lebih rendah \cite{c03-zhu2018competing}. Medikara perlu menghindari sikap menunggu seperti itu
+di pihak klinik mitra.
+
+Tim strategi menetapkan tiga keputusan. Pertama, kriteria filter diumumkan kepada mitra, yaitu
+spesialisasi, lokasi, penjamin, dan waktu tunggu. Kedua, data pemesanan klinik mitra tidak dibuka bagi
+manajemen klinik milik Medikara. Ketiga, sebaran pemesanan ditinjau tiap triwulan oleh komite yang
+melibatkan wakil mitra. Risiko persaingan usaha dan peran Komisi Pengawas Persaingan Usaha (KPPU) dibahas
+di Bab 13 \cite{uu5-1999-persaingan}.
+\end{kasus}
+
+\section{Platform Envelopment}
+
+Sejauh ini ekosistem Medikara dibahas seolah-olah tidak punya pesaing. Pertanyaan berikutnya: bagaimana
+bila pemilik platform lain, yang sudah punya banyak pengguna, masuk ke wilayah yang sama?
+
+\textit{Platform envelopment} terjadi ketika penyedia platform masuk ke pasar platform lain dengan
+membundel fungsinya sendiri dengan fungsi platform sasaran, sehingga hubungan pengguna dan komponen yang
+sudah dimiliki dapat dimanfaatkan \cite{eisenmann2011envelopment}. Penyerang tidak perlu menawarkan produk
+yang lebih baik. Penyerang cukup punya pengguna yang sama. Efek jaringan yang tadinya melindungi platform
+sasaran justru berbalik menguntungkan penyerang. Karena itu platform yang tampak aman dari pesaing sejenis
+tetap dapat diserang oleh platform tetangga.
+
+Warung pulsa di depan sekolah memberi gambaran yang mudah. Warung itu aman dari warung pulsa lain karena
+letaknya paling dekat. Lalu minimarket di sebelahnya mulai menjual pulsa. Pulsa minimarket tidak lebih
+baik, tetapi pelanggannya sudah berbelanja di sana setiap hari. Warung itu kehilangan pembeli tanpa pernah
+kalah dalam soal pulsa.
+
+Eisenmann dan rekan membagi serangan itu menurut hubungan kedua platform, yaitu saling melengkapi, pengganti
+lemah, atau tidak berkaitan secara fungsi \cite{c03-eisenmann2010envelopmentwp}. Contoh mereka yang paling
+dikenal adalah Microsoft yang membundel Windows Media Player ke dalam Windows. Pada 1998, RealNetworks
+menguasai lebih dari 90 persen pasar media \textit{streaming}. Fitur Windows Media Player tidak jauh lebih
+baik, tetapi pengguna kedua produk banyak yang sama, dan RealNetworks cepat kehilangan pangsa pasar
+\cite{c03-eisenmann2010envelopmentwp}. Tabel \ref{tab:ch03-jenis-envelopment} memetakan ketiga jenis itu ke
+kemungkinan pada Medikara+.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Tiga jenis \textit{platform envelopment} dan skenario pada Medikara+}
+  \label{tab:ch03-jenis-envelopment}
+  \small
+  \begin{tabularx}{\textwidth}{Z{2.2cm}Z{3.3cm}Y}
+    \hline
+    \textbf{Hubungan} & \textbf{Contoh Eisenmann dkk.} & \textbf{Misalkan pada Medikara+} \\ \hline
+    Saling melengkapi & Windows Media Player terhadap RealPlayer & Aplikasi asuransi menambah pemesanan janji temu bagi pesertanya \\ \hline
+    Pengganti lemah & Blockbuster terhadap Netflix & Aplikasi telekonsultasi nasional menambah pemesanan klinik \\ \hline
+    Tidak berkaitan & iPhone terhadap Gameboy & Aplikasi transportasi daring menambah layanan kesehatan \\ \hline
+  \end{tabularx}
+\end{table}
+
+Dua contoh berangka memperlihatkan arah serangan:
+\begin{enumerate}
+  \item Medikara sebagai sasaran. Misalkan satu asuransi dengan 180.000 peserta memberikan fitur pemesanan
+        gratis di aplikasinya, sedangkan klinik mitra membayar Rp3 juta per bulan ke Medikara+. Bila 10 dari
+        40 klinik pindah, pendapatan langganan turun Rp360 juta per tahun, yaitu 25 persen dari Rp1,44
+        miliar. Slot yang tampil di Medikara+ juga berkurang, sehingga pasien ikut berkurang.
+  \item Medikara sebagai penyerang. Misalkan aplikasi kesehatan karyawan kecil menarik Rp15.000 per karyawan
+        per bulan. Medikara memberikan fitur serupa secara gratis kepada 36 perusahaan klien sebagai bagian
+        dari paket pemeriksaan. Aplikasi kecil itu kehilangan pelanggan tanpa kalah mutu. Medikara perlu
+        memeriksa risiko persaingan usahanya.
+\end{enumerate}
+
+Eisenmann dan rekan menyebut dua pertahanan. Pertama, membuka platform agar pihak lain ikut berinvestasi
+dan menjadi sekutu. Kedua, menyusun bundel tandingan bila kemampuan dan sumber dayanya ada. Mereka juga
+mencatat bahwa persaingan antarbundel dapat berlangsung keras, sehingga dalam kondisi tertentu menerima
+kehadiran pesaing lebih menguntungkan \cite{c03-eisenmann2010envelopmentwp}.
+
+\begin{kasus}[title={Kasus Medikara Health: Membaca Risiko dari Pihak Asuransi}]
+Tim strategi menilai asuransi sebagai calon penyerang paling mungkin. Asuransi sudah punya hubungan dengan
+peserta, data kepesertaan, dan alasan untuk mengarahkan peserta ke fasilitas tertentu. Tim memilih pertahanan pertama. Medikara+ dibuka bagi klinik mitra dengan aturan yang sama, dan klinik mitra
+boleh tetap hadir di platform lain (\textit{multi-homing}). Keputusan ini punya dua konsekuensi. Pertama,
+klinik mitra tidak perlu meninggalkan Medikara+ untuk mencoba platform asuransi. Kedua, Medikara+ harus
+menang lewat waktu tunggu, karena klinik yang sama juga tampil di tempat lain. Target waktu tunggu paling
+lama 2 hari dari Gerbang 2 pada Bab 2 menjadi garis pertahanan yang dapat diukur.
+\end{kasus}
 
 \section{Opsi Strategi: Membangun, Bergabung, atau Bermitra}
 
-% TODO
-% Cakupan: tiga opsi strategi beserta trade-off; risiko platform envelopment (Eisenmann, Parker,
-% dan Van Alstyne); matriks keputusan; format catatan keputusan beserta justifikasi.
-% Kasus Medikara: membangun platform sendiri dibandingkan bergabung ke platform asuransi atau
-% aplikasi kesehatan nasional.
+Seluruh pembahasan tadi bermuara pada satu keputusan. Haruskah Medikara membangun platform mitra sendiri,
+bergabung ke platform pihak lain, atau bermitra? Membangun memberi kendali lebih besar tetapi memerlukan investasi dan kemampuan mengelola ekosistem.
+Bergabung mempercepat akses pasar dengan ketergantungan pada aturan platform lain. Bermitra membagi
+kemampuan serta tanggung jawab melalui kesepakatan tertentu. Ketiganya bukan tingkatan dari yang buruk ke
+yang baik. Setiap opsi menukar kendali, biaya, dan kecepatan dengan perbandingan yang berbeda.
+
+Membuka toko sendiri, menyewa tempat di pusat belanja, dan membuka gerai bersama memberikan kendali yang
+berbeda. Toko sendiri bebas mengatur harga dan jam buka, tetapi pemiliknya menanggung sewa dan mencari
+pengunjung sendiri. Pusat belanja membawa pengunjung, tetapi pengelola menetapkan aturan dan dapat menaikkan
+sewa. Gerai bersama membagi biaya, tetapi setiap keputusan perlu dirundingkan.
+
+Dua contoh penerapan pada Medikara:
+\begin{enumerate}
+  \item Misalkan platform asuransi membawa 2.000 calon pengguna per bulan, tetapi membatasi hubungan langsung
+        dengan perusahaan klien dan menarik komisi 12 persen. Dengan tarif konsultasi spesialis Rp250.000,
+        komisi seluruh pasien itu Rp60 juta per bulan. Sebagian pasien itu sudah menjadi pasien Medikara.
+        Misalkan margin pasien baru 40 persen atau Rp100.000 per konsultasi. Komisi baru tertutup bila ada
+        600 pasien baru per bulan, yaitu 30 persen dari 2.000. Bila hanya 25 persen yang baru, margin Rp50
+        juta tidak menutup komisi Rp60 juta, sehingga Medikara rugi Rp10 juta per bulan walaupun volumenya
+        naik.
+  \item Misalkan Medikara menguji kemitraan dengan lima klinik selama enam bulan sebelum membangun portal
+        yang lebih luas. Biayanya Rp600 juta, yaitu integrasi Rp60 juta per klinik ditambah tim pendamping
+        Rp50 juta per bulan. Angka itu seperenam dari investasi awal membangun sebesar Rp3,6 miliar.
+        Investasi mengikuti hasil uji. Enam bulan itu sejalan dengan masa uji klinik mitra pada Bab 2.
+\end{enumerate}
+
+Tabel \ref{tab:ch03-biaya-opsi} membandingkan ketiga opsi selama tiga tahun.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Perbandingan tiga opsi selama tiga tahun. Biaya berjalan Rp2,4 miliar per tahun mengikuti Bab 2,
+           angka lain adalah asumsi latihan}
+  \label{tab:ch03-biaya-opsi}
+  \small
+  \begin{tabularx}{\textwidth}{Z{2.0cm}YYY}
+    \hline
+    \textbf{Aspek} & \textbf{Membangun} & \textbf{Bergabung} & \textbf{Bermitra} \\ \hline
+    Biaya awal & Rp3,6 miliar & Rp400 juta, integrasi & Rp600 juta, uji lima klinik \\ \hline
+    Biaya berjalan & Rp2,4 miliar per tahun & Komisi Rp60 juta per bulan & 60 persen dari Rp2,4 miliar selama 30 bulan \\ \hline
+    Total tiga tahun & Rp10,8 miliar & Rp2,56 miliar & Rp4,2 miliar \\ \hline
+    Kendali pasien & Penuh & Terbatas & Bersama \\ \hline
+    Risiko utama & Mitra sepi, kemampuan tim kurang & Aturan berubah, \textit{envelopment} & Koordinasi lambat, sengketa \\ \hline
+  \end{tabularx}
+\end{table}
+
+Angka biaya belum memasukkan pendapatan. Opsi membangun memperoleh pendapatan mitra Rp2,4 miliar per tahun
+setelah masa uji selesai menurut Bab 2. Bila pendapatan itu baru mengalir 18 bulan dalam jendela tiga tahun,
+jumlahnya Rp3,6 miliar, sehingga biaya bersihnya Rp7,2 miliar. Selisih itu tetap besar, dan yang dibeli adalah
+kendali.
+
+Biaya hanya satu kriteria. Tabel \ref{tab:ch03-matriks-opsi} memperlihatkan matriks keputusan dengan lima
+kriteria dan skor 1 sampai 5. Skor 5 berarti opsi paling menguntungkan bagi Medikara pada kriteria itu.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Matriks keputusan opsi strategi Medikara. Bobot dan skor adalah asumsi latihan, dihitung dengan
+           \berkas{sources/chapter03/hitung-matriks-opsi.py}}
+  \label{tab:ch03-matriks-opsi}
+  \small
+  \begin{tabularx}{\textwidth}{YZ{1.1cm}Z{1.95cm}Z{1.85cm}Z{1.7cm}}
+    \hline
+    \textbf{Kriteria} & \textbf{Bobot} & \textbf{Membangun} & \textbf{Bergabung} & \textbf{Bermitra} \\ \hline
+    Kendali hubungan pasien & 25 & 5 & 1 & 3 \\ \hline
+    Kendali dan kepatuhan data & 25 & 5 & 2 & 4 \\ \hline
+    Kecepatan masuk pasar & 20 & 1 & 5 & 3 \\ \hline
+    Biaya tiga tahun & 15 & 1 & 4 & 3 \\ \hline
+    Kesesuaian kemampuan tim & 15 & 2 & 4 & 3 \\ \hline
+    \textbf{Skor tertimbang} & 100 & \textbf{3,15} & \textbf{2,95} & \textbf{3,25} \\ \hline
+  \end{tabularx}
+\end{table}
+
+Bermitra menang tipis dengan selisih 0,10. Selisih itu lebih kecil daripada keraguan tim saat memberi skor.
+Pertanyaan yang lebih penting: apa yang terjadi bila bobotnya berubah? Tabel \ref{tab:ch03-sensitivitas}
+memperlihatkan tiga pandangan yang wajar di rapat direksi. Setiap pandangan menghasilkan pemenang yang berbeda.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Pemenang berganti ketika bobot berubah. Urutan bobot mengikuti Tabel \ref{tab:ch03-matriks-opsi}}
+  \label{tab:ch03-sensitivitas}
+  \small
+  \begin{tabularx}{\textwidth}{YZ{2.6cm}Z{1.2cm}Z{1.2cm}Z{1.2cm}}
+    \hline
+    \textbf{Pandangan} & \textbf{Bobot} & \textbf{Bangun} & \textbf{Gabung} & \textbf{Mitra} \\ \hline
+    Dasar & 25, 25, 20, 15, 15 & 3,15 & 2,95 & \textbf{3,25} \\ \hline
+    Pasar lebih dahulu & 15, 15, 40, 15, 15 & 2,35 & \textbf{3,65} & 3,15 \\ \hline
+    Kendali lebih dahulu & 35, 35, 10, 10, 10 & \textbf{3,90} & 2,35 & 3,35 \\ \hline
+  \end{tabularx}
+\end{table}
+
+Keputusan ini punya dua konsekuensi. Pertama, matriks tidak menggantikan keputusan. Matriks hanya memaksa tim
+menyatakan apa yang dianggap penting, sehingga perdebatan berpindah dari ``opsi mana'' ke ``kriteria mana''.
+Kedua, satu jawaban untuk seluruh platform cenderung keliru. Gambar \ref{fig:ch03-peta-keputusan}
+memperlihatkan cara menjawabnya per lapisan layanan.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch03-peta-keputusan.tex}
+  \caption{Peta keputusan membangun, bergabung, atau bermitra untuk satu lapisan layanan}
+  \label{fig:ch03-peta-keputusan}
+\end{figure}
+
+\begin{kasus}[title={Kasus Medikara Health: Satu Keputusan per Lapisan}]
+Tim strategi memakai peta keputusan untuk empat lapisan layanan. Hasilnya pada Tabel
+\ref{tab:ch03-portofolio-opsi} sejalan dengan kesimpulan Bab 2, yaitu model hibrida.
+
+\begin{center}
+  \captionsetup{type=table}
+  \caption{Keputusan Medikara per lapisan layanan beserta pemicu tinjaunya}
+  \label{tab:ch03-portofolio-opsi}
+  \small
+  \begin{tabularx}{\linewidth}{Z{2.5cm}Z{1.9cm}YY}
+    \hline
+    \textbf{Lapisan} & \textbf{Opsi} & \textbf{Alasan} & \textbf{Pemicu tinjau} \\ \hline
+    Identitas pasien, izin, API mitra & Membangun & Data sensitif, pelajaran insiden 2025 & Dua kali gagal audit akses \\ \hline
+    Jaringan klinik dan laboratorium & Bermitra & Medikara tidak punya 40 klinik itu & Kurang dari 30 klinik aktif pada Gerbang 2 \\ \hline
+    Kanal peserta asuransi & Bergabung & 2.000 calon pengguna per bulan & Pasien baru di bawah 30 persen selama tiga bulan \\ \hline
+    Kesehatan karyawan & Bermitra & 36 perusahaan klien menjadi saluran & Rekap belum selesai dalam satu hari kerja \\ \hline
+  \end{tabularx}
+\end{center}
+
+Bergabung ke platform asuransi diberi tiga syarat: tidak eksklusif, data peserta yang memesan tetap dapat
+dipakai untuk layanan lanjutan sesuai izin pasien, dan Medikara punya hak keluar dengan pemberitahuan 90 hari.
+Syarat itu ditulis sebelum perundingan dimulai, agar volume 2.000 calon pengguna tidak mengaburkan penilaian.
+\end{kasus}
+
+\lstdefinestyle{ch03python}{language=Python, basicstyle=\ttfamily\scriptsize, keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape, stringstyle=\color{red}, showstringspaces=false, breaklines=true,
+  frame=lines, numbers=left, numberstyle=\tiny\color{gray}, backgroundcolor=\color{lightgray!10}, tabsize=2,
+  captionpos=b, xleftmargin=8pt}
+
+\begin{pendalaman}[title={Pendalaman Teknis (opsional): Menguji Kepekaan Bobot}]
+Skrip Python pada Listing \ref{lst:ch03-skor-tertimbang} menghitung skor pada Tabel
+\ref{tab:ch03-sensitivitas}. Tim mengganti konstanta di awal berkas dengan penilaiannya sendiri.
+
+\begin{lstlisting}[style=ch03python, caption={Skor tertimbang, tersedia di \berkas{sources/chapter03/hitung-matriks-opsi.py}}, label={lst:ch03-skor-tertimbang}]
+def hitung_skor_tertimbang(skor_per_kriteria, bobot_per_kriteria):
+  """Mengubah skor mentah menjadi satu angka pembanding.
+
+  Bobot wajib berjumlah 100 persen. Bila tidak, skor
+  antarskenario tidak sebanding dan pemenangnya salah dibaca.
+  """
+  if sum(bobot_per_kriteria) != TOTAL_BOBOT_PERSEN:
+    raise ValueError("Jumlah bobot harus 100 persen.")
+  total = 0
+  for skor, bobot in zip(skor_per_kriteria, bobot_per_kriteria):
+    total += skor * bobot
+  return total / TOTAL_BOBOT_PERSEN
+\end{lstlisting}
+
+Listing \ref{lst:ch03-jalan-skor} memperlihatkan cara menjalankannya beserta keluarannya.
+
+\begin{lstlisting}[language=bash, xleftmargin=8pt, caption={Menjalankan perhitungan, memakai \berkas{sources/chapter03/hitung-matriks-opsi.py}}, label={lst:ch03-jalan-skor}]
+python sources/chapter03/hitung-matriks-opsi.py
+Dasar -> Bermitra
+  Membangun 3.15  Bergabung 2.95  Bermitra 3.25
+Pasar lebih dahulu -> Bergabung
+  Membangun 2.35  Bergabung 3.65  Bermitra 3.15
+Kendali lebih dahulu -> Membangun
+  Membangun 3.90  Bergabung 2.35  Bermitra 3.35
+Komisi per bulan: Rp60,000,000
+Titik impas: 600 pasien baru per bulan
+\end{lstlisting}
+\end{pendalaman}
 
 \section{Aktivitas: Peta Ekosistem dan Keputusan Strategi Platform}
 
-% TODO
-% Tujuan aktivitas: menetapkan peran organisasi dalam ekosistem dan opsi strategi platform beserta
-% alasannya.
-% Peran dalam tim: anggota berlatar bisnis dan hukum memimpin analisis peran dan kepentingan tiap
-% pelaku; anggota berlatar teknis menandai boundary resources yang sudah ada dan yang belum ada.
-% Langkah: daftar pelaku ekosistem; gambar peta ekosistem dengan aliran nilai; nilai tiga opsi
-% strategi dalam matriks keputusan; tulis catatan keputusan satu halaman.
-% Luaran dan tonggak capstone: peta ekosistem mitra dan catatan keputusan strategi platform,
-% melengkapi C1.
-% Berkas sources yang direncanakan: sources/chapter03/peta-ekosistem.md,
-% sources/chapter03/matriks-opsi-strategi.md, sources/chapter03/catatan-keputusan-strategi.md
+\subsection*{Tujuan}
+
+Aktivitas ini menghasilkan artefak C1 yang dapat ditelusuri dari persoalan layanan sampai keputusan tim. Tim
+yang memakai organisasi sendiri mengerjakannya untuk organisasi itu, dengan izin dan data yang dianonimkan. Tim
+yang tidak punya akses memakai Medikara Health. Hasilnya bukan satu jawaban ``bangun'', ``gabung'', atau
+``mitra'', melainkan peta dan keputusan yang alasannya dapat diuji.
+
+\subsection*{Pembagian Peran}
+
+Tabel \ref{tab:ch03-peran} memuat pembagian peran yang disarankan. Satu orang boleh memegang dua peran bila
+anggota tim sedikit, asalkan peran pertama dan kedua dipegang oleh anggota dengan latar berbeda.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Pembagian peran dalam tim untuk Aktivitas Bab 3}
+  \label{tab:ch03-peran}
+  \small
+  \begin{tabularx}{\textwidth}{Z{2.8cm}Z{2.8cm}Y}
+    \hline
+    \textbf{Peran} & \textbf{Latar yang disarankan} & \textbf{Tanggung jawab} \\ \hline
+    Pemimpin analisis pelaku & Bisnis, manajemen, hukum, kesehatan & Memimpin analisis peran dan kepentingan tiap pelaku, serta batasan kontrak dan data \\ \hline
+    Penelaah sarana & Ilmu komputer, rekayasa perangkat lunak, teknologi informasi & Menandai \textit{boundary resources} yang sudah ada dan yang belum ada \\ \hline
+    Penelaah opsi & Akuntansi, keuangan, manajemen & Menyusun biaya tiap opsi dan menjalankan uji bobot \\ \hline
+    Penyunting & Siapa saja & Menyatukan peta, matriks, dan catatan satu halaman; menantang asumsi \\ \hline
+  \end{tabularx}
+\end{table}
+
+\subsection*{Langkah Kerja}
+
+\begin{enumerate}
+  \item Ambil kanvas platform dari Bab 2 dan daftar pertukaran data dari Bab 1. Tulis satu tawaran nilai yang
+        menjadi pusat peta.
+  \item Gambar pelaku dan perannya pada satu perjalanan pasien atau pelanggan dengan lembar
+        \berkas{sources/chapter03/peta-ekosistem.md}.
+  \item Bedakan aliran uang, data, layanan, dan reputasi. Beri angka pada aliran yang punya data, dan tandai
+        yang masih berupa asumsi.
+  \item Tandai tiga sambungan terlemah menurut akibatnya bagi pengguna.
+  \item Anggota teknis menandai \textit{boundary resources} yang sudah ada dan yang belum ada.
+  \item Sepakati kriteria dan bobot sebelum memberi skor. Isi matriks tiga opsi dengan
+        \berkas{sources/chapter03/matriks-opsi-strategi.md}, lalu uji paling sedikit dua set bobot lain.
+  \item Rumuskan aturan dasar keterbukaan dengan \berkas{sources/chapter03/aturan-keterbukaan-mitra.md}.
+  \item Tulis catatan keputusan satu halaman dengan
+        \berkas{sources/chapter03/catatan-keputusan-strategi.md}: opsi terpilih per lapisan, pengorbanan,
+        asumsi, pemilik, dan pemicu tinjau.
+\end{enumerate}
+
+Data pelaku organisasi nyata wajib dianonimkan. Rekam medis, kredensial, dan data pribadi pasien atau karyawan
+tidak boleh dimasukkan. Bila dokumen organisasi tidak boleh dibagikan, tim mencatat metadata buktinya saja.
+
+\subsection*{Luaran dan Kaitan dengan Capstone}
+
+Luaran aktivitas ini adalah peta ekosistem mitra, matriks opsi, aturan dasar keterbukaan, dan catatan keputusan
+strategi platform. Keempatnya masuk ke tonggak C1 Konteks dan Strategi, sekaligus menutup C1 sebelum tim beralih
+ke kondisi saat ini. Tiga sambungan terlemah menjadi titik awal inventaris integrasi di Bab 4 (C2). Aturan
+keterbukaan menjadi masukan desain portal pengembang di Bab 11 (C3). ID dan versi artefak dipertahankan saat
+dipakai bab berikutnya.
+
+\subsection*{Kriteria Penilaian}
+
+Tabel \ref{tab:ch03-kriteria} memuat kriteria penilaian singkat. Yang dinilai adalah ketajaman penalaran dan
+kecocokannya dengan data, bukan banyaknya kotak pada peta.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Kriteria penilaian Aktivitas Bab 3}
+  \label{tab:ch03-kriteria}
+  \small
+  \begin{tabularx}{\textwidth}{Yr}
+    \hline
+    \textbf{Kriteria} & \textbf{Bobot} \\ \hline
+    Ketepatan konsep: peran, aliran nilai, dan \textit{boundary resources} dipakai dengan benar & 25\% \\ \hline
+    Keterlacakan bukti: fakta, asumsi, dan target dibedakan dan punya sumber & 30\% \\ \hline
+    Alasan keputusan dan pengorbanan: opsi ditolak beserta alasan, uji bobot dilaporkan & 30\% \\ \hline
+    Keterbacaan artefak: peta dan catatan dipahami pembaca yang tidak ikut menyusun & 15\% \\ \hline
+  \end{tabularx}
+\end{table}
+
+Daftar lengkap berkas pendukung tersedia pada \berkas{sources/chapter03/README.md}. Templat tidak menggantikan percakapan
+dengan pemilik proses, dan ketidakpastian dicatat secara terbuka.
+
+\begin{pendalaman}[title={Pendalaman Teknis (opsional): Menelaah Portal Pengembang}]
+Pilih satu platform publik yang punya portal pengembang, misalnya dokumentasi SATUSEHAT. Kelompokkan
+\textit{boundary resources} yang disediakannya menjadi akses teknis, pengetahuan, dan aturan. Catat juga bagian
+yang membuka dan bagian yang menjaga. Penelaahan cukup dengan membaca dokumentasi publik dan \textit{sandbox}
+yang memang disediakan untuk uji. Uji beban atau pemindaian keamanan terhadap sistem milik pihak lain tidak boleh
+dilakukan tanpa izin tertulis.
+\end{pendalaman}
 
 \section{Ringkasan}
 
-% TODO
+Ekosistem adalah susunan pelaku yang saling melengkapi untuk menghasilkan satu tawaran nilai. Jumlah kontrak tidak
+membuat kumpulan hubungan menjadi ekosistem. Komplementaritas, modularitas, dan peran dengan aturan serupa yang
+membuatnya demikian. Pada Medikara, 48 hubungan yang berjalan dengan caranya sendiri disusun ulang menjadi tiga
+peran, dan sambungan klinik dengan laboratorium turun dari 120 menjadi 43.
+
+Peran orkestrator, pelengkap, dan pengguna melekat pada interaksi, bukan pada organisasinya. Mitra dibedakan dari
+pelanggan oleh keikutsertaannya menciptakan nilai, bukan oleh arah uang. Aliran nilai terdiri dari uang, data,
+layanan, dan reputasi, dan keempatnya sering tidak sejalan. Medikara hanya memegang 10 persen uang pada paket
+karyawan, tetapi menanggung nama baik atas seluruh paket.
+
+\textit{Boundary resources} membuka partisipasi sekaligus menjaga kendali. Isinya meliputi akses teknis,
+pengetahuan, dan aturan. Keterbukaan bukan saklar, melainkan tangga yang setiap anaknya menuntut bukti, mulai dari
+katalog publik sampai hasil pemeriksaan bagi layanan berwenang. Bukti empiris memperlihatkan bahwa memberi akses
+berdampak jauh lebih besar daripada melepas kendali, walaupun angkanya berasal dari industri lain.
+
+Tata kelola menetapkan siapa memutuskan apa, dari mitra masuk sampai mitra keluar. Medikara perlu perhatian khusus
+karena menjadi wasit sekaligus pemain, dengan 18 klinik sendiri di samping 40 klinik mitra. Di luar ekosistem,
+\textit{platform envelopment} mengancam lewat pengguna yang sama, bukan lewat produk yang lebih baik. Pertahanannya
+adalah membuka platform, menyusun bundel tandingan, atau menerima kehadiran pesaing dengan sadar.
+
+Pilihan membangun, bergabung, atau bermitra tidak punya jawaban tunggal. Matriks keputusan Medikara menghasilkan
+tiga pemenang berbeda hanya dengan mengubah bobot, dan tawaran 2.000 calon pengguna per bulan baru menguntungkan bila
+paling sedikit 30 persennya pasien baru. Pesan utama bab ini: keputusan strategi platform diambil per lapisan
+layanan, ditulis beserta pengorbanannya, dan punya pemicu tinjau yang jelas, karena ekosistem yang sehat dibangun
+dari aturan yang dapat diuji.
 
 \section{Latihan}
 
+\subsection*{Latihan 1: Mitra dan Pelanggan}
+
+Latihan ini membuktikan bahwa mitra dan pelanggan dibedakan oleh perannya dalam menciptakan nilai. Jelaskan
+perbedaan mitra dan pelanggan dalam ekosistem layanan kesehatan, dengan satu contoh untuk masing-masing.
+
 \begin{enumerate}
-  \item Jelaskan perbedaan mitra dan pelanggan dalam ekosistem layanan kesehatan, dengan satu contoh untuk masing-masing.
-  \item Misalkan sebuah perusahaan asuransi mengajak Medikara bergabung ke platform milik asuransi tersebut. Analisis untung dan ruginya bagi Medikara dibandingkan membangun platform sendiri.
-  \item Tentukan tiga \textit{boundary resources} yang perlu disediakan agar klinik mitra dapat terhubung tanpa pendampingan intensif.
+  \item Pilih satu interaksi layanan dari peta ekosistem.
+  \item Tentukan pemberi nilai, penerima nilai, dan arah uang.
+  \item Uji apakah satu pelaku punya dua peran pada interaksi yang berbeda, lalu tulis kesimpulannya.
+\end{enumerate}
+
+Tabel \ref{tab:ch03-lat1-contoh} memuat contoh dari kasus Medikara. Tabel \ref{tab:ch03-lat1-hasil} adalah lembar
+isian. Jawaban tiap mahasiswa boleh berbeda.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 1 pada paket pemeriksaan 200 karyawan}
+  \label{tab:ch03-lat1-contoh}
+  \small
+  \begin{tabularx}{\textwidth}{Z{2.5cm}YYZ{1.8cm}}
+    \hline
+    \textbf{Pelaku} & \textbf{Arah uang} & \textbf{Ikut menciptakan nilai?} & \textbf{Peran} \\ \hline
+    Klinik mitra & Menerima Rp70 juta & Ya, memberi pemeriksaan & Mitra \\ \hline
+    Perusahaan klien & Membayar Rp100 juta & Tidak, hanya membeli & Pelanggan \\ \hline
+    Asuransi swasta & Membayar Rp10.000 per verifikasi & Ya, menyediakan penjaminan & Keduanya \\ \hline
+  \end{tabularx}
+\end{table}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 1}
+  \label{tab:ch03-lat1-hasil}
+  \small
+  \begin{tabularx}{\textwidth}{Z{2.5cm}YYZ{1.8cm}}
+    \hline
+    \textbf{Pelaku} & \textbf{Arah uang} & \textbf{Ikut menciptakan nilai?} & \textbf{Peran} \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textbf{Pertanyaan analisis.}
+\begin{enumerate}
+  \item Pada kondisi apa pelanggan juga dapat menjadi mitra? Tunjukkan dengan angka atau interaksi pada Tabel
+        \ref{tab:ch03-lat1-contoh}.
+  \item Hak apa yang berubah ketika perannya berbeda, terutama hak atas data?
+\end{enumerate}
+
+\subsection*{Latihan 2: Menilai Tawaran Platform Asuransi}
+
+Latihan ini membuktikan bahwa tawaran volume harus diuji dengan hitungan dan syarat kendali. Misalkan sebuah
+perusahaan asuransi mengajak Medikara bergabung ke platform milik asuransi tersebut. Analisis untung dan ruginya
+bagi Medikara dibandingkan membangun platform sendiri.
+
+\begin{enumerate}
+  \item Tetapkan tujuan Medikara pada lapisan layanan yang ditawarkan.
+  \item Hitung komisi dan titik impas pasien baru, baik dengan tangan maupun dengan
+        \berkas{sources/chapter03/hitung-matriks-opsi.py}.
+  \item Bandingkan biaya, akses pasar, dan kendali dengan opsi membangun.
+  \item Periksa risiko \textit{platform envelopment} dari pihak asuransi.
+  \item Tulis keputusan bersyarat beserta bukti yang masih kurang.
+\end{enumerate}
+
+Tabel \ref{tab:ch03-lat2-contoh} memuat contoh alasan, bukan satu-satunya jawaban yang benar. Tabel
+\ref{tab:ch03-lat2-hasil} adalah lembar isian.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 2 dengan asumsi pada Tabel \ref{tab:ch03-biaya-opsi}}
+  \label{tab:ch03-lat2-contoh}
+  \small
+  \begin{tabularx}{\textwidth}{Z{2.3cm}YY}
+    \hline
+    \textbf{Aspek} & \textbf{Bergabung} & \textbf{Membangun} \\ \hline
+    Biaya tiga tahun & Rp2,56 miliar & Rp10,8 miliar \\ \hline
+    Akses pasar & 2.000 calon pengguna per bulan & Bertahap, dari 40 klinik mitra \\ \hline
+    Titik impas & 600 pasien baru per bulan, atau 30 persen & Rp2,4 miliar pendapatan mitra per tahun \\ \hline
+    Kendali & Aturan dan urutan tampil milik asuransi & Aturan milik Medikara \\ \hline
+    Keputusan & Bergabung tidak eksklusif, dengan hak keluar 90 hari & Tetap dibangun untuk lapisan identitas, izin, dan API mitra \\ \hline
+  \end{tabularx}
+\end{table}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 2}
+  \label{tab:ch03-lat2-hasil}
+  \small
+  \begin{tabularx}{\textwidth}{Z{2.3cm}YY}
+    \hline
+    \textbf{Aspek} & \textbf{Bergabung} & \textbf{Membangun} \\ \hline
+    Biaya tiga tahun & \dots & \dots \\ \hline
+    Akses pasar & \dots & \dots \\ \hline
+    Titik impas & \dots & \dots \\ \hline
+    Kendali & \dots & \dots \\ \hline
+    Keputusan & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textbf{Pertanyaan analisis.}
+\begin{enumerate}
+  \item Asumsi mana paling memengaruhi keputusan? Ubah satu asumsi pada komisi atau margin, lalu hitung ulang titik
+        impasnya.
+  \item Klausul kontrak apa yang melindungi hak keluar dan hubungan dengan pasien?
+  \item Pada Tabel \ref{tab:ch03-sensitivitas}, pandangan mana yang paling dekat dengan kondisi organisasi capstone,
+        dan mengapa?
+\end{enumerate}
+
+\subsection*{Latihan 3: Menyiapkan Boundary Resources}
+
+Latihan ini membuktikan bahwa \textit{boundary resources} dipilih dari kebutuhan mitra dan dapat diuji. Tentukan tiga
+\textit{boundary resources} yang perlu disediakan agar klinik mitra dapat terhubung tanpa pendampingan intensif.
+
+\begin{enumerate}
+  \item Daftar kebutuhan klinik baru, dari pendaftaran sampai pemesanan pertama.
+  \item Pilih tiga sarana minimum, paling sedikit satu dari kelompok aturan.
+  \item Tentukan yang dibuka, yang dijaga, dan satu uji keberhasilan berangka untuk setiap sarana.
+\end{enumerate}
+
+Tabel \ref{tab:ch03-lat3-contoh} memuat contoh dari kasus Medikara. Tabel \ref{tab:ch03-lat3-hasil} adalah lembar
+isian.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 3 untuk klinik mitra Medikara}
+  \label{tab:ch03-lat3-contoh}
+  \small
+  \begin{tabularx}{\textwidth}{Z{2.4cm}YYY}
+    \hline
+    \textbf{Sarana} & \textbf{Isi} & \textbf{Membuka dan menjaga} & \textbf{Uji keberhasilan} \\ \hline
+    Dokumentasi & Contoh permintaan dan kasus gagal & Membuka cara pakai; menjaga waktu staf & Pendampingan turun dari 3 hari menjadi setengah hari per klinik \\ \hline
+    \textit{Sandbox} & 20 pasien sintetis, 100 panggilan per hari & Membuka uji mandiri; menjaga data produksi & Klinik lulus 6 dari 6 skenario gagal \\ \hline
+    Syarat penggunaan & Batas akses dan kuota 300 panggilan per hari & Membuka kepastian; menjaga batas tindakan & Disetujui pemilik layanan; pelanggaran tercatat \\ \hline
+  \end{tabularx}
+\end{table}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 3}
+  \label{tab:ch03-lat3-hasil}
+  \small
+  \begin{tabularx}{\textwidth}{Z{2.4cm}YYY}
+    \hline
+    \textbf{Sarana} & \textbf{Isi} & \textbf{Membuka dan menjaga} & \textbf{Uji keberhasilan} \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textbf{Pertanyaan analisis.}
+\begin{enumerate}
+  \item Sarana mana mengurangi pendampingan paling besar? Hitung dengan jumlah klinik di organisasi capstone.
+  \item Bagaimana sarana tersebut membatasi penyalahgunaan, dan celah apa yang masih tersisa?
 \end{enumerate}

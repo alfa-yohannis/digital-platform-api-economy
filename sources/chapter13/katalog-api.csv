@@ -1,0 +1,10 @@
+# Kegunaan: katalog contoh API Medikara Bab 13, turunan matriks Bab 8, data latihan untuk hitung-tata-kelola.py. Cara pakai: salin, ganti dengan data tim, hapus baris ini saat impor ke spreadsheet.
+id,nama,pemilik,pemilik_metrik,audiens,versi,status,kelas_data,kontrak,masa_transisi_bulan,sla_persen,slo_persen,tinjau_berikut
+API-01,Jadwal dan Janji Temu,Manajer Layanan Rawat Jalan,Manajer Layanan Rawat Jalan,Medikara+ dan 40 klinik mitra,1.0.0,"Dibangun 2027, rilis bertahap April 2028",Pribadi umum dan spesialis tujuan,sources/chapter09/kontrak-api-01-janji-temu.yaml,6,99.0,99.4,Tiap triwulan
+API-02,Hasil Pemeriksaan,Manajer Laboratorium,Manajer Laboratorium,3 laboratorium dan 40 klinik mitra,Belum ada,"Kontrak 2027, rilis Oktober 2028",Spesifik kesehatan,Belum ada,6,Belum ada,Belum ada,Sebelum kontrak
+API-03,Klaim Asuransi,Manajer Klaim,Manajer Klaim,9 asuransi,Belum ada,Antrean,Spesifik kesehatan dan keuangan,Belum ada,Belum ada,Belum ada,Belum ada,Saat masuk prioritas
+API-04,Rekap Perusahaan,Manajer Layanan Perusahaan,Manajer Layanan Perusahaan,36 perusahaan klien,Belum ada,Antrean,Agregat,Belum ada,Belum ada,Belum ada,Belum ada,Saat masuk prioritas
+API-05,Rekap Klinik,Manajer Pelaporan,Manajer Pelaporan,18 klinik dan kantor pusat,Belum ada,Rapikan,Agregat,Belum ada,Belum ada,Belum ada,Belum ada,Tiap tahun
+API-06,Identitas dan Akses,Kepala Keamanan Informasi,Kepala Keamanan Informasi,Seluruh API mitra dan privat,Belum ada,Dibangun 2027,Identitas klien,Belum ada,6,Belum ada,Belum ada,Sebelum API-01 terbit
+API-07,Mutasi Bank,Manajer Keuangan,Manajer Keuangan,Tim keuangan,Belum ada,Rapikan,Keuangan perusahaan,Belum ada,Belum ada,Belum ada,Belum ada,Bila API bank berubah
+API-08,Resep Apotek,Belum ada,Belum ada,12 apotek,Belum ada,Telusuri dulu,Spesifik kesehatan,Belum ada,Belum ada,Belum ada,Belum ada,Sesudah pemilik ditunjuk

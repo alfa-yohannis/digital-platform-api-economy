@@ -1,4 +1,16 @@
+% !TeX root = digital-platform-api-economy.tex
+% !TeX encoding = UTF-8
 \chapter{Developer Experience dan Portal Pengembang}
+\label{ch:ch11}
+
+% Kolom rata kiri untuk tabel bab ini: G selebar sisa tabel, H selebar yang ditentukan.
+\newcolumntype{G}{>{\raggedright\arraybackslash}X}
+\newcolumntype{H}[1]{>{\raggedright\arraybackslash}p{#1}}
+\lstdefinestyle{ch11python}{language=Python, basicstyle=\ttfamily\scriptsize, keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape, stringstyle=\color{red}, showstringspaces=false, breaklines=true, frame=lines,
+  captionpos=b, xleftmargin=8pt, columns=fullflexible, keepspaces=true, tabsize=2}
+\lstdefinestyle{ch11bash}{language=bash, basicstyle=\ttfamily\scriptsize, captionpos=b, xleftmargin=8pt,
+  columns=fullflexible, keepspaces=true}
 
 \section*{Tujuan Pembelajaran}
 \begin{itemize}
@@ -9,75 +21,1071 @@
 
 \section{Pendahuluan}
 
-% TODO
-% Cakupan: klinik mitra butuh berbulan-bulan untuk terhubung karena dokumentasi tersebar, kredensial
-% dikirim lewat surel, dan lingkungan uji tidak tersedia.
+Klinik mitra telah menerima kontrak \textit{Application Programming Interface} (API), tetapi masih menunggu bantuan untuk
+memperoleh akun uji dan memahami kode galat. Integrasi yang tampak selesai bagi penyedia belum terasa siap bagi mitra.
+Misalkan petugas teknis satu klinik hanya butuh 20 menit membaca panduan API-01 Jadwal dan Janji Temu, tetapi menunggu
+akun uji 2 hari kerja. Bab 3 memisalkan setiap klinik memerlukan 3 hari pendampingan, atau 120 hari kerja untuk 40 klinik
+mitra. Pertanyaan kemudian muncul: apa yang membuat mitra cepat terhubung, tahap mana yang menghambat, dan seberapa
+besar portal yang layak dibangun?
+
+\textit{Developer experience} menjawab pertanyaan pertama. Alur \textit{onboarding} menjawab pertanyaan kedua. Portal
+pengembang menjawab pertanyaan ketiga. Pengalaman pengembang dinilai dari pekerjaan yang berhasil diselesaikan dan waktu
+tunggunya, bukan dari banyaknya halaman dokumentasi. Bab ini meneruskan empat janji dari bab sebelumnya. Bab 3
+menyerahkan aturan keterbukaan sebagai masukan desain portal. Bab 7 menjanjikan spesifikasi yang terdokumentasi dan
+tersedia bagi mitra. Bab 9 menyerahkan kontrak API-01 beserta model galatnya. Bab 10 menetapkan portal sebagai komponen
+platform, lalu menyisakan dua batas: ruang Rp30,4 juta per tahun dan cadangan 120 jam per tahun. Monetisasi dan metrik
+platform dibahas di Bab 12. Angka tambahan yang diawali kata ``Misalkan'' adalah asumsi latihan. Kesimpulan untuk
+organisasi nyata harus diuji dengan wawancara, dokumen, dan pengukuran yang berizin. Hasil bab ini menjadi bagian C3
+dalam cetak biru transformasi digital.
+
+Rujukan utama bab ini dipakai untuk membedakan konsep dan membangun alasan keputusan, bukan untuk menggantikan penilaian
+konteks organisasi. Arti \textit{developer experience} mengikuti Fagerholm dan Münch \cite{c11-fagerholm2012}. Pengukuran
+waktu sampai panggilan pertama mengikuti Lin \cite{c11-lin2021}. Pembagian dokumen mengikuti Diátaxis
+\cite{c11-diataxis}, dan masalah dokumentasi mengikuti Uddin dan Robillard \cite{c11-uddin2015}. Daftar praktik portal,
+\textit{onboarding}, dan tingkat layanan mengikuti data sumber \textit{API Management Focus Area Maturity Model}
+(API-m-FAMM) \cite{mathijssen2020}. Pembagian target dan janji layanan mengikuti buku \textit{Site Reliability
+Engineering} \cite{c11-sre-slo}. Kontrak yang menjadi sumber dokumentasi mengikuti OpenAPI 3.2.0 \cite{openapi32}. Cara
+memandang API sebagai produk bagi pemakainya mengikuti Medjaoui dkk. \cite{medjaoui2021continuous} dan Lauret
+\cite{lauret2025design}.
+
+\IfFileExists{../figures/ch11-diagram-konsep.png}{%
+
+Gambar \ref{fig:ch11-ilustrasi-bab} merangkum hubungan komponen dan konsep utama bab ini.
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=\textwidth]{../figures/ch11-diagram-konsep.png}
+  \caption{Gerbang \textit{onboarding} dari pendaftaran sampai produksi}
+  \label{fig:ch11-ilustrasi-bab}
+\end{figure}
+}{}
 
 \section{Mitra sebagai Pengguna API}
 
-% TODO
-% Cakupan: persona pengguna API (vendor SIMRS klinik, tim TI asuransi, pengembang aplikasi kesehatan
-% perusahaan); kebutuhan dan keterbatasan tiap persona; pengambil keputusan bisnis di pihak mitra.
-% Kasus Medikara: persona klinik mitra dengan tim TI kecil.
+Portal sering dirancang dari daftar fitur. Siapa yang memakainya, dan untuk tugas apa?
+
+Pengguna API adalah orang atau tim yang mengerjakan tugas tertentu melalui sistemnya. Pengguna teknis memerlukan petunjuk
+implementasi, sedangkan pemilik layanan memerlukan kejelasan proses dan dukungan. Kebutuhan keduanya dipelajari melalui
+wawancara serta pengamatan. Persona tidak cukup bila hanya berisi jabatan tanpa tugas, hambatan, dan konteks keputusan.
+Lauret menyebut sikap ini pola pikir yang mendahulukan konsumen \cite{lauret2025design}. Dal Bianco dan rekan, seperti
+dibahas di Bab 3, menyimpulkan bahwa sarana bagi pengembang pihak ketiga perlu dibuat untuk mereka, bukan sekadar
+diturunkan dari arsitektur platform \cite{dalbianco2014role}.
+
+Analoginya pelayanan loket. Pelayanan loket dinilai dari urusan warga yang selesai, bukan banyaknya formulir yang
+disediakan. Warga yang pulang membawa lima formulir dan urusan yang belum selesai tetap menilai loket itu gagal.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Petugas klinik ingin memastikan jadwal pasien. Pengembang klinik memerlukan contoh permintaan dan cara mengenali
+        konflik slot. Satu klinik menangani 60 pemesanan per hari, atau 1.500 per bulan pada 25 hari kerja. Bab 5
+        memisalkan 1 persen pemesanan bentrok, sehingga ada 15 konflik per klinik per bulan, atau 600 untuk 40 klinik.
+        Bila aplikasi klinik membaca 409 sebagai gangguan umum, dan petugas menelepon rumah sakit selama 3 menit,
+        bebannya 30 jam per bulan, atau Rp21,6 juta per tahun pada tarif Rp60.000 per jam.
+  \item Pemilik kemitraan memerlukan status persetujuan produksi. Dokumentasi \textit{endpoint} tidak menjawab
+        pertanyaan tersebut. Misalkan selama 4 minggu persiapan ia menanyakan status tiap klinik 2 kali per minggu, dan
+        tim integrasi menjawab dalam 15 menit. Untuk 40 klinik, bebannya 80 jam, atau Rp4,8 juta. Angka itu sudah dua
+        per tiga dari cadangan 120 jam per tahun pada Bab 10. Satu halaman status menghapus sebagian besar pertanyaan itu.
+\end{enumerate}
+
+Dua hal pada bahasan ini sering tertukar, yaitu klinik dan pengembang klinik. Pembagiannya begini. Klinik adalah
+organisasi yang menandatangani perjanjian dan menerima manfaat. Pengembang adalah orang yang memegang kredensial dan
+membaca dokumentasi, dan orang itu sering bukan pegawai klinik. Misalkan dari 40 klinik mitra, 28 klinik memakai 3 vendor
+sistem klinik, dan 12 klinik punya teknisi sendiri. Vendor mengerjakan satu integrasi untuk rata-rata 9 klinik, sehingga
+satu kesalahan vendor mengenai banyak klinik sekaligus. Teknisi klinik mengerjakan integrasi sekali, sering sambil
+mengurus pekerjaan lain. Tiap klinik tetap memegang identitas kliennya sendiri seperti pada Bab 6, walaupun vendornya
+sama. Tabel \ref{tab:ch11-pengguna} merangkum tugas dan hambatan tiap pengguna.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Pengguna API-01 menurut tugas dan hambatannya. Pengelompokan klinik adalah pemisalan latihan}
+  \label{tab:ch11-pengguna}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{2.3cm}GGG}
+    \hline
+    \textbf{Pengguna} & \textbf{Tugas yang ingin selesai} & \textbf{Hambatan} & \textbf{Yang dicari di portal} \\ \hline
+    Vendor sistem klinik & Memasang API-01 sekali untuk banyak klinik & Perubahan kontrak mengenai banyak klinik & Referensi, jadwal versi, koleksi contoh \\ \hline
+    Teknisi klinik & Membuat janji sah pertama & Akun uji tertunda, arti 409 dan 503 & Panduan mulai cepat, data uji \\ \hline
+    Petugas klinik & Memastikan pasien punya slot & Kapan boleh menulis terkonfirmasi & Tidak membuka portal, memakai aplikasi klinik \\ \hline
+    Pemilik kemitraan & Menambah klinik aktif & Status persetujuan tidak terlihat & Status per klinik, syarat tiap tingkat \\ \hline
+    Petugas pelindungan data & Memastikan data minimum & Data nyata dipakai untuk uji & Syarat penggunaan, daftar data \\ \hline
+    Tim integrasi & Menjaga operasi tetap sehat & Pertanyaan berulang lewat telepon & Tiket, status, pemilik yang dapat dihubungi \\ \hline
+  \end{tabularx}
+\end{table}
+
+Pembagian ini punya dua konsekuensi. Pertama, penilaian portal harus melibatkan kedua kelompok pengembang, karena
+keduanya gagal pada tempat yang berbeda. Kedua, sebagian kebutuhan tidak berupa dokumentasi. Baris pemilik kemitraan dan
+petugas pelindungan data pada tabel tidak terjawab oleh referensi operasi secanggih apa pun.
 
 \section{Developer Experience dan Waktu sampai Panggilan Pertama}
 
-% TODO
-% Cakupan: arti developer experience; waktu sampai panggilan pertama (time to first call) sebagai
-% ukuran utama; temuan Postman 2025 tentang dokumentasi yang tidak konsisten dan API yang sulit
-% ditemukan; hambatan umum mitra.
+Mengetahui pengguna belum cukup. Bagaimana mengukur cepat atau lambatnya mereka terhubung?
+
+\textit{Developer experience} mencakup penemuan API, pemahaman kontrak, akses uji, implementasi, pemecahan galat, dan
+operasi. Fagerholm dan Münch merumuskannya sebagai cara menangkap bagaimana pengembang berpikir dan merasakan
+kegiatannya \cite{c11-fagerholm2012}. Lin membagi perjalanan pengembang menjadi lima langkah, yaitu \textit{browse},
+\textit{signup}, \textit{first API call}, \textit{implementation}, dan \textit{usage} \cite{c11-lin2021}. \textit{Time to
+first call} mengukur waktu menuju panggilan awal yang berhasil, dengan definisi awal dan akhir yang eksplisit. Bab ini
+menyebutnya waktu sampai panggilan pertama. Lin menyebutnya ukuran terpenting bagi API publik, lalu mengusulkan analitik
+web untuk selisih waktu dan uji kemudahan pakai untuk pengalaman pengguna \cite{c11-lin2021}. Penulisnya bekerja di
+Postman, sehingga kata ``terpenting'' dibaca sebagai pendapat praktisi, bukan hasil penelitian. Panggilan pertama belum
+membuktikan integrasi siap produksi. Langkah berikutnya menguji keberhasilan tugas serta kasus gagal.
+
+Analoginya memesan makanan di restoran baru. Mudah menemukan alamat restoran belum membuktikan makanan diterima sesuai
+pesanan. Alamat yang jelas hanya menghapus hambatan pertama.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Misalkan pengembang memerlukan 20 menit membaca panduan, tetapi 2 hari kerja menunggu akun. Dengan 8 jam per
+        hari, waktunya 980 menit, dan membaca panduan hanya 2 persen dari angka itu. Menyingkat panduan menjadi 10 menit
+        menghemat 10 menit. Menerbitkan akun uji secara otomatis menghemat 960 menit. Hambatan terbesar berada pada
+        persetujuan akses.
+  \item Misalkan panggilan pertama berhasil dalam 10 menit, tetapi konflik slot tidak dipahami. Angka 10 menit terlihat
+        baik, padahal 15 konflik per klinik per bulan pada seksi sebelumnya tetap berpindah ke telepon. Ukuran
+        keberhasilan perlu dilengkapi uji tugas.
+\end{enumerate}
+
+Gambar \ref{fig:ch11-ukuran} menyusun garis akhir itu menjadi lima lapis. Setiap lapis membuktikan satu hal dan belum
+membuktikan hal berikutnya. Lapis pertama sampai ketiga diukur di \textit{sandbox}. Lapis terakhir memakai ukuran janji
+nilai API-01 dari Bab 8 dan Bab 10, yaitu telepon konfirmasi turun dari 10 ke 2 persen.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch11-lapisan-ukuran.tex}
+  \caption{Lima garis akhir pada perjalanan mitra, beserta hal yang sudah dan belum terbukti pada tiap garis}
+  \label{fig:ch11-ukuran}
+\end{figure}
+
+Dua hal pada ukuran ini sering tertukar, yaitu waktu kerja dan waktu tunggu. Pembagiannya begini. Waktu kerja adalah
+waktu pengembang memakai panduan dan alat. Perbaikannya berada pada isi dokumen. Waktu tunggu adalah waktu pengembang
+menanti pihak lain. Perbaikannya berada pada proses dan pemilik keputusan. Gambar \ref{fig:ch11-perjalanan} memisahkan
+keduanya untuk satu klinik pada API-01. Seluruh angkanya pemisalan latihan, dan dapat diulang dengan
+\berkas{sources/chapter11/hitung-onboarding-portal.py}.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch11-perjalanan-mitra.tex}
+  \caption{Waktu kerja dan waktu tunggu per tahap untuk satu klinik pada API-01, keadaan saat ini dan sasaran}
+  \label{fig:ch11-perjalanan}
+\end{figure}
+
+Seluruh tahap saat ini memakan 156,5 jam, atau 19,6 hari kerja. Dari jumlah itu, 128 jam atau 82 persen adalah waktu
+tunggu. Panggilan pertama baru terjadi pada jam ke-42,5, padahal kerja klinik sampai titik itu hanya 2,5 jam. Sasarannya
+6,5 jam untuk panggilan pertama dan 60,5 jam, atau 7,6 hari kerja, untuk seluruh tahap. Waktu tunggu tetap 66 persen,
+karena pemeriksaan bukti memang memerlukan orang lain.
+
+Mengapa waktu tunggu perlu dihitung dalam rupiah? Pada skema Bab 2, klinik membayar Rp3 juta per bulan, atau Rp120.000
+per hari kerja. Sasaran memangkas 96 jam, atau 12 hari kerja. Bila langganan dimulai sejak akses produksi, pendapatan
+datang lebih awal Rp1,44 juta per klinik, atau Rp57,6 juta untuk 40 klinik. Angka itu hanya terjadi sekali, dan hanya
+berlaku bila skema Bab 2 yang masih berupa usulan disetujui.
+
+Adakah angka baku untuk waktu sampai panggilan pertama? Sumber yang ditelaah bab ini tidak memberi angka baku. Sasaran dihitung dari perjalanan sendiri, sebagaimana
+masa transisi pada Bab 10 dihitung dari konsumen paling lambat. Medikara memilih kurang dari 1 hari kerja, karena
+verifikasi tingkat 1 hanya memeriksa kewenangan, dan akun uji dapat terbit otomatis.
+
+Sebelum sasaran ditetapkan, tim memerlukan data dari pengguna nyata. Tabel \ref{tab:ch11-lima-klinik} memuat pemisalan
+hasil uji pada 5 klinik uji yang sudah disebut Bab 8 dan Bab 10. Tata caranya tersedia pada
+\berkas{sources/chapter11/protokol-uji-panggilan-pertama.md}. Kolom waktu hanya menghitung menit kerja, dan akun uji sudah
+disiapkan lebih dulu.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Hasil uji pada 5 klinik uji. Seluruh angka adalah pemisalan latihan}
+  \label{tab:ch11-lima-klinik}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{1.05cm}H{2.1cm}H{1.75cm}H{1.55cm}H{1.55cm}G}
+    \hline
+    \textbf{Klinik} & \textbf{Kelompok} & \textbf{Panggilan pertama} & \textbf{Tugas normal} & \textbf{Skenario gagal} & \textbf{Titik berhenti terlama} \\ \hline
+    U1 & Vendor A & 20 menit & 3 dari 3 & 5 dari 6 & Membaca 503 \\ \hline
+    U2 & Vendor A & 25 menit & 3 dari 3 & 5 dari 6 & Membaca 503 \\ \hline
+    U3 & Vendor B & 30 menit & 3 dari 3 & 4 dari 6 & Membaca 429 \\ \hline
+    U4 & Teknisi sendiri & 40 menit & 2 dari 3 & 3 dari 6 & Kunci idempotensi \\ \hline
+    U5 & Teknisi sendiri & 150 menit & 1 dari 3 & 2 dari 6 & Memperoleh token \\ \hline
+    \textbf{Jumlah} & & \textbf{Median 30, rata-rata 53} & \textbf{12 dari 15} & \textbf{19 dari 30} & \\ \hline
+  \end{tabularx}
+\end{table}
+
+\begin{kasus}[title={Kasus Medikara Health: Membaca Hasil Lima Klinik Uji}]
+Misalkan tim integrasi, pemilik kemitraan, dan Manajer Layanan Rawat Jalan membaca Tabel \ref{tab:ch11-lima-klinik}. Seluruh
+rincian ini adalah data latihan. Median 30 menit terlihat baik. Apakah portal sudah siap?
+
+Tim membaca tiga hal. Pertama, rata-rata 53 menit terangkat oleh U5 yang memerlukan 150 menit. Median lebih tepat sebagai
+ukuran umum, tetapi U5 tidak dibuang, karena mewakili kelompok 12 klinik. Kedua, panggilan pertama tidak meramalkan hasil
+berikutnya. Tugas normal tercapai 80 persen dan skenario gagal 63 persen. U1 dan U2 sama-sama berhenti pada 503, dan
+keduanya memakai vendor yang sama, sehingga temuan itu baru satu pengamatan. Ketiga, Bab 9 sudah membedakan 503 dari daftar
+kosong, tetapi pembedaan itu belum sampai ke panduan.
+
+Apakah 5 klinik mewakili 40 klinik? Pertanyaan ini diajukan pada kanvas Bab 8. Nielsen dan Landauer menyusun rumus
+penemuan masalah $N(1-(1-L)^n)$ \cite{c11-nielsen1993}. Dengan $L$ sebesar 31 persen, yaitu rata-rata dari proyek yang
+ditelaah Nielsen, 5 peserta menemukan sekitar 85 persen masalah \cite{c11-nielsen2000}. Namun rumus itu hanya berlaku bagi
+pengguna yang sebanding, dan untuk dua kelompok Nielsen menyarankan 3 sampai 4 peserta per kelompok \cite{c11-nielsen2000}.
+Dengan 2 peserta, kelompok teknisi sendiri baru mencapai sekitar 52 persen pada rumus yang sama. Angka $L$ itu juga bukan
+hasil uji API, sehingga dipakai sebagai petunjuk ukuran uji.
+
+Rapat menghasilkan tiga keputusan.
+\begin{enumerate}
+  \item Perbaikan pertama menyasar proses. Tunggu verifikasi turun dari 24 ke 4 jam, dan akun uji terbit otomatis.
+        Panggilan pertama turun dari 42,5 ke 6,5 jam, tanpa mengubah satu kalimat pun pada panduan.
+  \item Panduan galat ditulis untuk 6 skenario, dimulai dari 503 dan 429. Sasarannya minimal 5 dari 6 skenario per klinik
+        tanpa bantuan.
+  \item Satu klinik bertipe teknisi sendiri ditambahkan sebagai U6. Uji ulang dilakukan sesudah kedua perbaikan selesai.
+\end{enumerate}
+
+Bukti yang dapat mengubah keputusan adalah hasil U6, serta pernyataan pemilik kemitraan bahwa verifikasi 4 jam tidak dapat
+dipenuhi.
+\end{kasus}
+
+Keputusan memakai ukuran ini punya dua konsekuensi. Pertama, definisi harus dikunci. Bila jam mulai dicatat sesudah akun
+dibuatkan staf, 40 jam tunggu hilang dari angka, dan 42,5 jam terlihat seperti 2,5 jam. Kedua, ukuran dapat dikejar secara
+keliru. Jawaban 200 pada satu operasi baca mudah dicapai, tetapi tidak membuktikan apa pun tentang pemesanan. Karena itu
+waktu sampai panggilan pertama selalu dibaca bersama hasil tugas utuh.
 
 \section{Dokumentasi, Sandbox, dan SDK}
 
-% TODO
-% Cakupan: dokumentasi referensi, panduan, dan contoh; sandbox dengan data uji sintetis agar data
-% pasien tidak dipakai; SDK dan koleksi contoh permintaan; menjaga dokumentasi tetap sesuai kontrak.
-% Pendalaman teknis: membangkitkan halaman dokumentasi dari kontrak OpenAPI Bab 9 dengan alat
-% gratis, lalu mengukur waktu sampai panggilan pertama bersama rekan yang belum mengenal API itu.
+Waktu kerja bergantung pada sarana yang disediakan penyedia. Bab 3 menyebut sarana itu \textit{boundary resources}. Sarana
+apa saja yang diperlukan, dan mana yang boleh ditunda?
+
+\subsection{Referensi, Panduan, dan Contoh}
+
+Referensi menjelaskan operasi secara rinci. Panduan menjelaskan cara menyelesaikan tugas. Contoh memperlihatkan permintaan
+dan respons konkret, dan perlu mencakup kegagalan, bukan hanya respons berhasil. Diátaxis membagi kebutuhan pembaca menjadi
+empat bentuk, yaitu tutorial, \textit{how-to guide}, \textit{reference}, dan \textit{explanation} \cite{c11-diataxis}.
+Kompasnya memakai dua pertanyaan: apakah isi itu menuntun tindakan atau pemahaman, dan apakah pembaca sedang memperoleh
+atau menerapkan keterampilan. Meng dkk. menemukan pengembang mula-mula membentuk gambaran umum tentang tujuan dan fitur
+utama API, lalu memakai strategi belajar yang berorientasi konsep atau berorientasi kode \cite{c11-meng2018}. Dokumentasi
+perlu melayani keduanya. API-m-FAMM menempatkan referensi sebagai keharusan, sedangkan dokumentasi awal dan contoh kode
+menjadi tambahan yang mempercepat pemahaman \cite{mathijssen2020}.
+
+Analoginya dapur. Buku manual kompor, resep langkah demi langkah, dan contoh masakan mempunyai fungsi yang berbeda. Buku
+manual yang tebal tidak mengajari orang memasak rendang, dan resep tidak menjelaskan mengapa kompor mati sendiri.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Panduan awal janji temu menunjukkan pencarian jadwal, pemesanan, dan pembatalan, yaitu 3 dari 4 operasi kontrak Bab
+        9. Data uji memuat satu slot penuh agar galat dapat dicoba. Bab 3 memisalkan panduan seperti ini memangkas
+        pendampingan dari 3 hari menjadi setengah hari per klinik, atau dari 24 jam menjadi 4 jam. Pada tarif Rp60.000 per
+        jam, biaya untuk 40 klinik turun dari Rp57,6 juta menjadi Rp9,6 juta, sama dengan hitungan Bab 3.
+  \item Referensi yang ditulis tangan cepat berbeda dari kontrak, padahal Bab 9 mewajibkan angka yang sama. Kapasitas
+        perubahan API-01 pada Bab 8 adalah 6 per triwulan, atau 24 per tahun. Bila tiap perubahan menuntut 1 jam penyuntingan
+        pada referensi, panduan, dan koleksi contoh, bebannya 72 jam per tahun. Bila referensi dibangkitkan dari kontrak,
+        beban tinggal 48 jam. Spesifikasi OpenAPI memang menyebut alat pembangkit dokumentasi, alat pembangkit kode, dan
+        alat pengujian sebagai pemakai deskripsi API \cite{openapi32}.
+\end{enumerate}
+
+Tabel \ref{tab:ch11-dokumen} memetakan keempat bentuk Diátaxis pada API-01. Contoh tidak menjadi bentuk tersendiri, karena
+contoh hadir di dalam keempatnya.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Empat bentuk dokumen menurut Diátaxis dan penerapannya pada API-01}
+  \label{tab:ch11-dokumen}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{1.75cm}H{2.6cm}GH{2.6cm}}
+    \hline
+    \textbf{Bentuk} & \textbf{Kebutuhan pembaca} & \textbf{Isi pada API-01} & \textbf{Cara dipelihara} \\ \hline
+    Tutorial & Belajar sambil melakukan & Panduan mulai cepat: token uji, cari jadwal, pesan, batalkan & Ditulis, diuji rekan baru tiap rilis besar \\ \hline
+    \textit{How-to guide} & Menyelesaikan satu tugas kerja & Menangani 409, mengulang dengan \texttt{Idempotency-Key}, pindah ke \texttt{/v2} & Ditulis dari tiket yang berulang \\ \hline
+    \textit{Reference} & Mencari rincian saat bekerja & Empat operasi, \textit{schema}, dan 9 tipe masalah dari Bab 9 & Dibangkitkan dari kontrak \\ \hline
+    \textit{Explanation} & Memahami alasan & Arti terkonfirmasi, mengapa daftar slot dapat basi 5 menit, tingkat akses & Ditulis pemilik produk \\ \hline
+  \end{tabularx}
+\end{table}
+
+Dua hal pada dokumentasi sering tertukar, yaitu tutorial dan \textit{how-to guide}. Pembagiannya begini. Tutorial menuntun
+orang yang belum bisa, dengan data yang sudah disiapkan dan satu jalur yang pasti berhasil. \textit{How-to guide} membantu
+orang yang sudah bisa menyelesaikan masalah kerjanya sendiri. U5 pada Tabel \ref{tab:ch11-lima-klinik} memerlukan tutorial.
+Vendor A yang berhenti pada 503 memerlukan \textit{how-to guide}. Satu halaman yang mencampur keduanya terasa terlalu
+panjang bagi vendor dan terlalu melompat bagi U5.
+
+Apakah dokumentasi yang lengkap sudah cukup? Uddin dan Robillard menelaah sepuluh masalah dokumentasi melalui dua survei
+atas 323 pengembang profesional dan analisis 179 unit dokumentasi API. Tiga masalah terberat adalah ambiguitas,
+ketidaklengkapan, dan isi yang salah. Responden kerap menyebut enam dari sepuluh masalah itu sebagai penghalang yang
+memaksa mereka beralih ke API lain \cite{c11-uddin2015}. Robillard menyimpulkan bahwa pengembang tetap memerlukan cara
+menemukan informasi yang dibutuhkan, bahkan pada API yang dirancang dan didokumentasikan dengan baik
+\cite{c11-robillard2009}. Laporan Postman 2025 mencatat 55 persen responden bergulat dengan dokumentasi yang tidak
+konsisten dan 34 persen tidak dapat menemukan API yang sudah ada \cite{postman2025}. Angka Postman itu menggambarkan hambatan
+kolaborasi tim API, bukan khusus mitra, sehingga tidak disalin menjadi perkiraan bagi klinik. Lengkap belum berarti jelas,
+belum berarti benar, dan belum berarti mudah ditemukan.
+
+\subsection{Sandbox dan Data Uji Sintetis}
+
+\textit{Sandbox} menyediakan lingkungan aman dengan data sintetis. API-m-FAMM mendefinisikannya sebagai lingkungan yang
+meniru ciri lingkungan produksi dan menghasilkan jawaban simulasi \cite{mathijssen2020}. Regulasi Uni Eropa 2018/389
+Pasal 30 ayat 5 mewajibkan penyedia rekening menyediakan fasilitas uji beserta dukungannya, dan melarang informasi sensitif
+dibagikan lewat fasilitas itu \cite{rts2018}. Aturan itu tidak mengikat Medikara, tetapi polanya dapat ditiru. Pada
+layanan kesehatan, Epic menyatakan \textit{sandbox}-nya meniru lingkungan rekam medis elektronik, hanya untuk pengujian, dan
+hanya boleh berisi data sampel atau sintetis \cite{c11-epic-sandbox}. Dokumentasi SATUSEHAT juga memisahkan kode akses
+\textit{sandbox} dan \textit{production} \cite{satusehat}.
+
+Analoginya manekin di ruang latihan perawat. Perawat baru belajar memasang infus pada manekin, termasuk saat pelatih sengaja
+membuat penyulit. Manekin tidak membuktikan perawat siap menghadapi semua pasien, tetapi kesalahan di ruang latihan tidak
+mencederai siapa pun.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Data uji memuat 20 pasien sintetis dan 6 skenario gagal dari Bab 3, dan pemicunya harus pasti. Stripe menyediakan
+        kartu uji: nomor 4242 4242 4242 4242 untuk pembayaran berhasil, nomor 4000 0000 0000 0002 untuk penolakan, dan
+        larangan memakai kartu nyata \cite{c11-stripe-testing}. API-01 meniru cara itu. Slot \texttt{BKS-20261102-0930}
+        selalu terisi, dan token \texttt{token-uji-kedaluwarsa} selalu ditolak. Tanpa pemicu pasti, satu percobaan token
+        kedaluwarsa menunggu 15 menit seperti pada Bab 6. Enam kali percobaan menjadi 90 menit untuk satu skenario.
+  \item \textit{Sandbox} tidak menggantikan uji pada Sistem Informasi Manajemen Rumah Sakit (SIMRS). Medikara punya 5 SIMRS
+        dengan versi berbeda. Misalkan klinik lulus seluruh skenario di \textit{sandbox}, tetapi format nama dokter dari
+        satu SIMRS merusak layar klinik. Bila kerusakan itu baru terlihat di produksi, 60 pemesanan per hari berpindah ke
+        telepon 3 menit, atau Rp180.000 per hari per klinik. Karena itu uji integrasi pada 5 klinik uji tetap menyentuh
+        adaptor SIMRS dengan data sintetis sebelum klinik lain masuk.
+\end{enumerate}
+
+Tabel \ref{tab:ch11-skenario} menghubungkan keenam skenario dengan model galat Bab 9. Bab 9 sudah mencatat bahwa skenario
+penjamin menolak berada di luar API-01, sehingga diganti SIMRS diperbarui. Berkas
+\berkas{sources/chapter11/sandbox-api-01.py} menjalankan seluruh baris tabel ini di komputer sendiri.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Enam skenario gagal API-01, pemicunya pada \textit{sandbox}, dan perilaku yang diharapkan dari klinik}
+  \label{tab:ch11-skenario}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{2.0cm}H{3.3cm}GG}
+    \hline
+    \textbf{Skenario} & \textbf{Kode dan tipe masalah} & \textbf{Pemicu} & \textbf{Perilaku klinik} \\ \hline
+    Pasien tidak ditemukan & 400 \berkas{pasien-tidak-dapat-dipakai} & Nomor di luar 20 pasien sintetis & Periksa nomor, jangan menebak \\ \hline
+    Slot penuh & 409 \berkas{slot-terisi} & Slot \berkas{BKS-20261102-0930} & Tawarkan slot lain \\ \hline
+    Kode akses kedaluwarsa & 401 \berkas{token-tidak-sah} & Token \berkas{token-uji-kedaluwarsa} & Minta token baru \\ \hline
+    Kuota habis & 429 \berkas{kuota-habis} & Panggilan ke-101 pada kuota uji 100 per hari & Tunda sesuai \texttt{Retry-After} \\ \hline
+    Format salah & 400 \berkas{masukan-tidak-sah} & Kode rumah sakit tidak dikenal & Perbaiki isian \\ \hline
+    SIMRS diperbarui & 503 \berkas{simrs-tidak-tersedia} & Tanggal \texttt{2026-11-03} & Coba lagi, jangan menulis tidak ada dokter \\ \hline
+  \end{tabularx}
+\end{table}
+
+\subsection{SDK dan Koleksi Contoh Permintaan}
+
+\textit{Software Development Kit} (SDK) adalah pustaka siap pakai yang membungkus panggilan API dalam satu bahasa pemrograman.
+SDK dapat mengurangi pekerjaan berulang, tetapi harus mengikuti perubahan kontrak. API-m-FAMM mencatat SDK dapat disediakan
+penyedia atau dibangkitkan sendiri oleh konsumen dari format seperti OpenAPI \cite{mathijssen2020}. Koleksi contoh
+permintaan adalah berkas berisi permintaan siap jalan yang dibuka pada alat uji API. Lin melaporkan bahwa pada satu penerbit
+API, panggilan pertama turun dari 17 menit menjadi 10 menit saat pengembang memakai koleksi dari penerbit, atau 1,7 kali
+lebih cepat \cite{c11-lin2023}. Sumbernya vendor alat koleksi, dan metodenya tidak dirinci. Angka itu dibaca sebagai
+petunjuk, bukan sebagai jaminan.
+
+Analoginya contoh formulir dan biro jasa. Contoh formulir yang sudah terisi membantu warga mengisi sendiri, dan biayanya
+kecil. Biro jasa mengurus seluruhnya atas nama warga, tetapi harus dibayar dan harus tahu setiap perubahan aturan.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Misalkan 12 klinik dengan teknisi sendiri memakai 4 bahasa pemrograman. Satu SDK tulisan tangan butuh 120 jam
+        pembuatan dan 40 jam per tahun. Empat bahasa berarti 480 jam, atau Rp28,8 juta, ditambah 160 jam per tahun. Angka
+        160 jam sudah melampaui cadangan 120 jam. Koleksi contoh butuh 1 jam per perubahan, atau 24 jam per tahun.
+  \item SDK yang hanya mendukung versi lama dapat memperlambat migrasi. Masa transisi pada Bab 10 adalah 6 bulan, dan vendor
+        Medikara+ butuh 4 bulan. Misalkan SDK versi 2 baru terbit 2 bulan sesudah pengumuman. Klinik pemakai SDK tinggal
+        punya 4 bulan, dan 2 bulan untuk uji bersama serta cadangan habis. Pemilik produk menetapkan dukungan serta tanggal
+        pembaruan sebelum SDK diterbitkan.
+\end{enumerate}
+
+Tabel \ref{tab:ch11-sarana} merangkum pilihannya. Keputusan pada Medikara dapat berubah bila jumlah mitra yang tidak dikenal
+bertambah. GitHub atau Stripe melayani pengembang yang tidak dikenalnya. Medikara melayani 41 konsumen yang semuanya punya
+kontak.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Empat sarana bantu integrasi. Jam adalah pemisalan latihan}
+  \label{tab:ch11-sarana}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{2.4cm}H{1.4cm}H{1.4cm}GH{2.5cm}}
+    \hline
+    \textbf{Sarana} & \textbf{Jam awal} & \textbf{Jam per tahun} & \textbf{Cocok bila} & \textbf{Pada Medikara} \\ \hline
+    Referensi dibangkitkan & 8 & Nol, ikut kontrak & Selalu, bila kontrak sudah ada & Wajib sejak klinik uji \\ \hline
+    Koleksi contoh & 16 & 24 & Mitra sedikit, banyak bahasa & Dipakai sekarang \\ \hline
+    SDK dibangkitkan & 40 per bahasa & 8 per bahasa & Kontrak stabil, mitra sebahasa banyak & Ditunda sampai 20 klinik sebahasa \\ \hline
+    SDK tulisan tangan & 120 per bahasa & 40 per bahasa & Mitra banyak dan tidak dikenal & Ditolak saat ini \\ \hline
+  \end{tabularx}
+\end{table}
 
 \section{Portal Pengembang dan Katalog API}
 
-% TODO
-% Cakupan: fungsi portal (katalog, dokumentasi, kredensial, status layanan, dukungan); struktur
-% halaman minimum; contoh portal SNAP Developer Site dan dokumentasi SATUSEHAT sebagai pembanding.
-% Kasus Medikara: kerangka portal pengembang Medikara.
+Sarana sudah tersedia. Di mana mitra menemukannya, dan siapa yang menjaganya tetap benar?
+
+Portal menggabungkan katalog, dokumentasi, pendaftaran, pengelolaan akses, status layanan, dan dukungan. Kerangka informasi
+mengikuti pertanyaan pengguna. Katalog menampilkan pemilik, audiens, versi, serta status siklus hidup. API-m-FAMM mencatat
+fungsi portal yang umum, yaitu pendaftaran dan masuk, pengelolaan pengguna, dokumentasi, pengelolaan kunci API, konsol uji,
+dan \textit{dashboard}. Katalog digambarkan sebagai daftar API yang dapat dicari menurut metadata dan \textit{tag}
+\cite{mathijssen2020}. Portal bukan kewajiban membeli produk baru. Kebutuhan dapat dipenuhi bertahap dengan alat yang
+dapat dipelihara tim. Sebagian layanan manajemen API sudah memuatnya: Azure API Management menyediakan portal yang
+dibangkitkan otomatis, tempat pengembang membaca dokumentasi, mencoba API lewat konsol, dan memperoleh kunci API
+\cite{azure-apim}. Regulasi 2018/389 Pasal 30 ayat 3, yang ditiru pada Bab 7, meminta dokumentasi teknis tersedia tanpa
+biaya atas permintaan, dengan ringkasan yang diterbitkan di situs web \cite{rts2018}. Eaton dan rekan, seperti dibahas di
+Bab 3, menemukan sarana semacam ini terus dibentuk ulang \cite{eaton2015distributed}, sehingga portal yang dibuat sekali
+lalu ditinggalkan akan segera tertinggal.
+
+Analoginya papan informasi dan petugas layanan rumah sakit. Keduanya harus memberi jawaban yang saling sesuai. Bila papan
+menulis poli buka pukul 08.00 dan petugas berkata pukul 09.00, pasien berhenti percaya pada papan dan kembali antre bertanya.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Mitra melihat API hasil laboratorium berstatus terbatas dan mengetahui syarat permohonan akses. Halaman tidak
+        menjanjikan produksi otomatis. API-02 Hasil Pemeriksaan berada pada tingkat 3 Bab 3, sehingga aksesnya ditinjau tiap
+        90 hari. Pada 3 laboratorium mitra, tinjauan itu berjumlah 12 kali per tahun. Bila satu tinjauan memakan 1 jam,
+        bebannya 12 jam per tahun, atau Rp720.000, dan seluruh mitra dapat membaca aturannya tanpa bertanya.
+  \item Status gangguan serta panduan penanganan mengurangi tiket berulang ketika masalah yang sama dialami banyak mitra.
+        Misalkan pembaruan SIMRS terjadi 5 kali per tahun. Tanpa status, 40 klinik masing-masing membuka 1 tiket 30 menit,
+        atau 20 jam per kejadian. Dengan status dan pemberitahuan lebih dulu, tiket tinggal 5. Selisihnya 87,5 jam per tahun,
+        atau Rp5,25 juta.
+\end{enumerate}
+
+Gambar \ref{fig:ch11-peta-portal} menyusun isi portal menurut pertanyaan pengguna, bukan menurut susunan organisasi Medikara.
+Baris terbawah menyebut sumber tiap isi. Sumber yang sama menjaga agar kuota 300 panggilan per hari per klinik tertulis sama di
+kontrak, perjanjian, dan portal.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch11-peta-portal.tex}
+  \caption{Kerangka portal pengembang: pertanyaan pengguna, kelompok halaman, isi, dan sumber tunggalnya}
+  \label{fig:ch11-peta-portal}
+\end{figure}
+
+Dua hal pada bahasan ini sering tertukar, yaitu inventaris internal dan katalog mitra. Pembagiannya begini. Inventaris
+memuat seluruh API, termasuk yang tidak pernah dibuka. \textit{National Institute of Standards and Technology} (NIST) memintanya
+sebagai bagian perlindungan API, seperti dibahas pada Bab 10 \cite{nist-sp800-228}. Katalog mitra hanya memuat API yang
+boleh diketahui mitra. Medikara punya 8 kandidat pada Bab 8, dan 3 kandidat yang dibangun lebih dulu. Klinik mitra perlu melihat
+API-01 sebagai tersedia dan API-02 sebagai terbatas. API-06 Identitas dan Akses cukup muncul sebagai cara memperoleh token.
+API-03 Klaim Asuransi muncul bagi 9 asuransi dengan status belum tersedia, supaya mereka berhenti menanyakannya.
+
+Lalu praktik mana yang perlu dikerjakan? Bab 10 menggolongkan portal ke dalam area \textit{Community} pada API-m-FAMM. Data
+sumbernya memuat 18 praktik pada area itu \cite{mathijssen2020}. Tabel \ref{tab:ch11-famm} memilah praktik yang dikerjakan
+sekarang dan yang ditunda. Nama praktik ditulis seperti sumber aslinya. Pilihannya adalah keputusan bab ini, bukan hasil
+penilaian dengan instrumen model tersebut.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Praktik area \textit{Community} pada API-m-FAMM dan pilihan Medikara untuk 41 konsumen}
+  \label{tab:ch11-famm}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{2.1cm}GG}
+    \hline
+    \textbf{Kapabilitas} & \textbf{Dikerjakan sekarang} & \textbf{Ditunda, dengan alasan} \\ \hline
+    \textit{Developer Onboarding} & \textit{Facilitate Developer Registration}, \textit{Provide Sandbox Environment Support} & \textit{Provide SDK Support} karena jam, \textit{Implement Interactive API Console} sampai produk portal diputuskan \\ \hline
+    \textit{Support} & \textit{Establish Communication Channel}, \textit{Manage Support Issues} & \textit{Dedicate Developer Support Team} karena tiket belum cukup banyak \\ \hline
+    \textit{Documentation} & \textit{Use Standard for Reference Documentation}, \textit{Provide Start-up Documentation \& Code Samples} & \textit{Create Video Tutorials} karena cepat usang \\ \hline
+    \textit{Community Engagement} & \textit{Provide Developer Portal}, \textit{Provide Community Forum} secara tertutup & \textit{Maintain Social Media Presence}, \textit{Organize Events}, \textit{Dedicate Evangelist} karena seluruh mitra sudah punya kontak \\ \hline
+    \textit{Portfolio Management} & \textit{Enable API Discovery}, \textit{Provide API Catalog} & \textit{Bundle APIs} sampai API-02 berjalan \\ \hline
+  \end{tabularx}
+\end{table}
+
+\subsection{Memilih Lingkup Portal}
+
+Bab 3 memisalkan panduan dan \textit{sandbox} menelan Rp150 juta. Bab 10 menyisakan ruang Rp30,4 juta per tahun, atau Rp91,2
+juta selama 3 tahun. Apakah keduanya cocok? Tidak, kecuali lingkupnya dipangkas.
+
+Tabel \ref{tab:ch11-pilihan-portal} membandingkan empat pilihan pada horizon 3 tahun, sama dengan Bab 10. Seluruh angkanya
+pemisalan latihan dan bukan harga produk. P2 mengandaikan langganan alternatif A pada Bab 10 sudah memuat portal bawaan, dan
+Rp24 juta dipakai untuk konfigurasi, isi, serta \textit{sandbox}. Satu tiket memakan 30 menit dan ditangani layanan pelanggan pada
+tarif Rp60.000 per jam. Pemeliharaan isi memakai jam tim integrasi, sehingga dibandingkan dengan cadangan 120 jam per tahun.
+Isi P2 berjumlah 60 jam: 24 perubahan dikali 2 jam untuk panduan dan koleksi, ditambah 12 jam peninjauan.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Empat pilihan lingkup portal selama 3 tahun, dalam juta rupiah. Seluruh angka adalah pemisalan latihan}
+  \label{tab:ch11-pilihan-portal}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{GH{1.75cm}H{1.75cm}H{1.75cm}H{1.75cm}}
+    \hline
+    \textbf{Komponen} & \textbf{Tanpa portal} & \textbf{P1: halaman statis} & \textbf{P2: portal bawaan} & \textbf{P3: portal kustom} \\ \hline
+    Penyiapan satu kali & 0 & 14,4 (240 jam) & 24 (400 jam) & 150 (Bab 3) \\ \hline
+    Pendampingan 40 klinik, satu kali & 57,6 (24 jam) & 19,2 (8 jam) & 9,6 (4 jam) & 9,6 (4 jam) \\ \hline
+    Tiket per tahun, menurut tiket per klinik per bulan & 57,6 (4 tiket) & 28,8 (2 tiket) & 14,4 (1 tiket) & 7,2 (0,5 tiket) \\ \hline
+    Pemeliharaan isi per tahun & 0 & 2,4 (40 jam) & 3,6 (60 jam) & 18 (300 jam) \\ \hline
+    \textbf{Total 3 tahun} & \textbf{230,4} & \textbf{127,2} & \textbf{87,6} & \textbf{235,2} \\ \hline
+    Terhadap ruang Rp91,2 juta & 139,2 di atas & 36 di atas & 3,6 di bawah & 144 di atas \\ \hline
+    Terhadap cadangan 120 jam per tahun & Sisa 120 jam & Sisa 80 jam & Sisa 60 jam & Kurang 180 jam \\ \hline
+    Panggilan pertama & 42,5 jam & 22,5 jam & 6,5 jam & 6,5 jam \\ \hline
+    \textit{Sandbox} dan data sintetis & Tidak ada & Ada, akun lewat tiket & Ada, akun otomatis & Ada, akun otomatis \\ \hline
+  \end{tabularx}
+\end{table}
+
+Tabel itu mudah disalahbaca. Tanpa portal terlihat nol pada penyiapan, tetapi totalnya Rp230,4 juta, dan klinik tidak punya
+tempat menguji selain data nyata. P1 paling murah di antara pilihan yang punya \textit{sandbox} bila hanya melihat penyiapan,
+tetapi bebannya pindah ke tiket, dan akun uji masih menunggu 16 jam. P2 satu-satunya yang muat. Kesimpulan itu bergantung
+pada satu asumsi, yaitu tiket turun menjadi 1 per klinik per bulan. P2 hanya muat bila tiket paling banyak 1,08. P2 lebih murah
+daripada P1 selama tiket di bawah 1,92. Bila tiket tetap 2, total P2 menjadi Rp130,8 juta, dan P1 yang Rp127,2 juta menjadi
+lebih murah. Skrip \berkas{sources/chapter11/hitung-onboarding-portal.py} mengulang seluruh hitungan ini.
+
+\begin{kasus}[title={Kasus Medikara Health: Portal yang Muat dalam Rp91,2 Juta}]
+Misalkan Manajer Keuangan, pemilik kemitraan, tim integrasi, dan Manajer Layanan Rawat Jalan membaca Tabel
+\ref{tab:ch11-pilihan-portal}. Seluruh rincian ini adalah data latihan. Sisa ruang P2 hanya Rp3,6 juta. Haruskah Medikara
+memilih pilihan setipis itu?
+
+Tim menolak memutuskan dari total saja. Sisa Rp3,6 juta tidak memuat uji coba Rp9,6 juta pada Bab 10. Bila uji coba itu
+dibebankan pada pagu yang sama, kurangnya Rp6 juta. P2 juga bergantung pada pilihan bersyarat Bab 10. Bila bukti lokasi data gagal dan
+alternatif C dipakai, portal bawaan harus diperiksa ulang.
+
+Rapat menghasilkan tiga keputusan.
+\begin{enumerate}
+  \item P2 menjadi pilihan bersyarat. Tiket diukur 3 bulan pada klinik uji. Bila rata-ratanya di atas 1,08 per klinik per bulan,
+        tim menulis ulang panduan dari tiket terbanyak lebih dulu, dan meninjau ulang pilihan bila rata-ratanya mencapai 1,92.
+  \item Manajer Keuangan menerima beban yang tidak merata. Tahun pertama, alternatif A dan P2 berjumlah Rp337,2 juta, atau Rp37,2 juta
+        di atas pagu Rp300 juta. Tahun kedua dan ketiga, jumlahnya Rp279,6 juta, atau Rp20,4 juta di bawah pagu. Pagu tetap
+        dibaca selama 3 tahun, yaitu Rp896,4 juta dari Rp900 juta.
+  \item P3 ditolak dengan pemicu tinjauan: mitra melebihi 100 organisasi, atau alternatif A berganti. Pada 40 klinik, kustomisasi
+        tidak membayar dirinya sendiri, sama seperti hitungan Rp150 juta pada Bab 3.
+\end{enumerate}
+
+Pilihan P2 punya harga. Cadangan tim integrasi turun dari 120 ke 60 jam per tahun. Isi portal bawaan juga ikut terikat pada
+produk, sehingga kontrak OpenAPI dan naskah panduan disimpan di luar produk, sesuai keputusan Bab 10. Catatan tim menyebut
+bukti yang belum tersedia: isi nyata portal bawaan, jumlah tiket, dan biaya uji coba.
+\end{kasus}
+
+\subsection{Ukuran Keberhasilan Portal}
+
+Portal sudah dipilih. Bagaimana mengetahui bahwa portal itu berhasil?
+
+Ukuran keberhasilan portal menilai hasil mitra, bukan aktivitas halaman. Setiap ukuran memerlukan definisi, sumber data, periode,
+dan pemilik. Medjaoui dkk. memandang API sebagai produk yang nilainya terwujud saat dipakai \cite{medjaoui2021continuous}, seperti
+tahap realisasi nilai pada Bab 10. Pemakaian yang sah lebih bermakna daripada kunjungan. Ukuran dipilih sedikit, dan masing-masing
+perlu punya tindakan bila angkanya memburuk.
+
+Analoginya jumlah pengunjung poliklinik. Ruang tunggu yang ramai tidak berarti banyak pasien sembuh. Bisa jadi banyak pasien datang
+berulang karena masalahnya belum selesai.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Misalkan portal mencatat 4.000 kunjungan per bulan. Dengan 40 klinik, rata-ratanya 100 kunjungan per klinik. Angka itu dapat
+        berarti portal berguna, dapat pula berarti petugas tersesat dan mengulang pencarian. Tiket yang tetap 2 per klinik per bulan
+        memihak tafsiran kedua.
+  \item Bab 8 menetapkan pemicu pensiun API-01 saat klinik mitra aktif di bawah 30. Bila aktif berarti pernah menerima kredensial,
+        40 klinik selalu terlihat aktif. Bila aktif berarti minimal satu jawaban 201 di produksi dalam 30 hari, angkanya dapat turun
+        menjadi 28, dan pemicu itu bekerja. Pada langganan Rp3 juta, 12 klinik yang berhenti berarti Rp432 juta per tahun.
+\end{enumerate}
+
+Tabel \ref{tab:ch11-ukuran-portal} menyusun lima ukuran. Metrik platform yang lebih luas, seperti pendapatan dan efek jaringan, dibahas
+di Bab 12.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lima ukuran keberhasilan portal. Sasaran adalah pemisalan latihan}
+  \label{tab:ch11-ukuran-portal}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{2.35cm}GH{2.2cm}H{1.5cm}G}
+    \hline
+    \textbf{Ukuran} & \textbf{Cara menghitung} & \textbf{Sumber data} & \textbf{Sasaran} & \textbf{Menyesatkan bila} \\ \hline
+    Waktu sampai panggilan pertama & Median dari pendaftaran sampai 200 pertama di \textit{sandbox} & Catatan portal dan \textit{gateway} & 6,5 jam & Akun dibuatkan staf sebelum jam mulai \\ \hline
+    Tugas selesai tanpa bantuan & Dari 3 tugas normal dan 6 skenario gagal, per klinik & Hasil uji, tiket & Minimal 5 dari 6 skenario & Skenario sulit dihapus dari daftar \\ \hline
+    Waktu sampai produksi & Median dari pendaftaran sampai kredensial produksi & Catatan tahap & 7,6 hari kerja & Syarat dikendurkan agar cepat \\ \hline
+    Tiket per klinik per bulan & Tiket dibagi klinik aktif, per kategori & Sistem tiket & 1 tiket & Kanal telepon tidak dihitung \\ \hline
+    Aktivasi mitra & Klinik dengan minimal satu 201 produksi dalam 30 hari & Identitas klien pada \textit{gateway} & Minimal 30 klinik & Klinik memesan uji di produksi \\ \hline
+  \end{tabularx}
+\end{table}
 
 \section{Alur Onboarding dan Verifikasi Mitra}
 
-% TODO
-% Cakupan: langkah pendaftaran, verifikasi identitas dan legalitas mitra, akses sandbox, uji
-% kelayakan, dan akses produksi; penerbitan kredensial yang aman; titik persetujuan bisnis dan
-% keamanan.
-% Kasus Medikara: onboarding laboratorium mitra dan asuransi.
+Portal menjawab di mana mitra memulai. Urutan apa yang harus dilaluinya, dan siapa memegang tiap gerbang?
+
+\textit{Onboarding} menghubungkan pendaftaran organisasi, verifikasi, persetujuan syarat, akses \textit{sandbox}, pengujian, dan izin
+produksi. Kredensial uji dipisahkan dari produksi. Setiap perpindahan mempunyai pemilik, bukti, dan sasaran waktu. Penghentian mitra
+juga dirancang agar akses dicabut dan kasus layanan aktif diselesaikan. Gambar \ref{fig:ch11-ilustrasi-bab} menulis tujuh tahap. Lima di
+antaranya adalah langkah inti: pendaftaran mitra, verifikasi, \textit{sandbox}, uji integrasi, dan akses produksi. Persetujuan pemilik
+adalah gerbang sebelum akses produksi. Dukungan berlanjut adalah keadaan sesudahnya. API-m-FAMM menuntut pendaftaran yang sederhana
+\cite{mathijssen2020}, sedangkan aturan Bab 3 menuntut kenaikan tingkat lewat bukti. Rancangan yang baik memisahkan langkah yang
+boleh mudah dari langkah yang harus ketat.
+
+Analoginya pegawai baru. Pegawai baru mendapat orientasi dan akses sesuai tugas sebelum menangani pekerjaan nyata. Kartu pegawai magang
+tidak membuka ruang arsip, walaupun orang yang memegangnya sudah terdaftar.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Misalkan verifikasi laboratorium selesai 1 hari, tetapi pengujian membutuhkan 3 perbaikan, dan tiap perbaikan menunggu 5 hari
+        kerja. Catatan waktu per tahap menunjukkan sumber penundaan: 15 hari berbanding 1 hari. Selama itu hasil masih diketik ulang.
+        INT-06 mencatat 110 jam manual per bulan untuk 3 laboratorium, sehingga 15 hari kerja pada satu laboratorium bernilai 22 jam,
+        atau Rp1,32 juta.
+  \item Akses produksi baru diberikan setelah uji otorisasi dan galat lulus. Keberhasilan \textit{sandbox} saja belum memenuhi syarat.
+        Misalkan persetujuan melibatkan 3 orang selama 1 jam per klinik, atau Rp180.000. Untuk 40 klinik, biayanya Rp7,2 juta. Bab 6
+        menghitung satu insiden kecil Rp23,7 juta, atau sekitar 3,3 kali seluruh biaya gerbang.
+\end{enumerate}
+
+Gambar \ref{fig:ch11-gerbang} memperlihatkan pemisahan lingkungan uji dan lingkungan produksi. Kredensial uji tidak pernah berlaku di
+produksi. Tabel \ref{tab:ch11-gerbang} merinci bukti, pemilik, dan sasaran tiap tahap. Isinya memakai istilah dan urutan yang sama dengan
+Gambar \ref{fig:ch11-ilustrasi-bab}, dan sasaran tunggunya sama dengan Gambar \ref{fig:ch11-perjalanan}.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch11-gerbang-kredensial.tex}
+  \caption{Pemisahan lingkungan uji dan lingkungan produksi, dengan persetujuan pemilik sebagai gerbangnya}
+  \label{fig:ch11-gerbang}
+\end{figure}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Tujuh tahap \textit{onboarding} klinik mitra pada API-01. Sasaran tunggu adalah pemisalan latihan}
+  \label{tab:ch11-gerbang}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{1.8cm}GH{2.1cm}H{1.3cm}H{1.5cm}}
+    \hline
+    \textbf{Tahap} & \textbf{Bukti kelulusan} & \textbf{Pemilik} & \textbf{Sasaran tunggu} & \textbf{Tingkat Bab 3} \\ \hline
+    Pendaftaran mitra & Identitas organisasi dan kontak teknis & Klinik & Tanpa tunggu & Tingkat 0 ke 1 \\ \hline
+    Verifikasi & Petugas berwenang mewakili klinik, syarat penggunaan disetujui & Pemilik kemitraan & 4 jam & Tingkat 1 \\ \hline
+    \textit{Sandbox} & Kredensial uji terbit, 200 pada \texttt{GET /jadwal-dokter} & Sistem portal & Tanpa tunggu & Tingkat 1, kuota 100 \\ \hline
+    Uji integrasi & 3 tugas normal, 6 skenario gagal, uji otorisasi objek & Tim integrasi & 16 jam & Tingkat 1 \\ \hline
+    Persetujuan pemilik & Izin usaha, perjanjian kerja sama, cakupan akses terbatas & Manajer Layanan Rawat Jalan & 16 jam & Syarat tingkat 2 \\ \hline
+    Akses produksi & Kredensial terpisah, kuota 300, kontak insiden & Tim integrasi & 4 jam & Tingkat 2 \\ \hline
+    Dukungan berlanjut & Kanal, prioritas, status, dan jadwal tinjau tersedia & Layanan pelanggan & Menurut prioritas & Tingkat 2 \\ \hline
+  \end{tabularx}
+\end{table}
+
+Dua hal pada alur ini sering tertukar, yaitu verifikasi dan persetujuan pemilik. Pembagiannya begini. Verifikasi menjawab siapa pemohon,
+dan apakah ia berwenang mewakili klinik. Akibat yang dibuka hanya \textit{sandbox}, sehingga pemeriksaannya ringan. Persetujuan pemilik
+menjawab apa yang boleh dilakukan klinik itu terhadap pasien nyata. Pemeriksaannya berat. Pembagian ini sekaligus menyelaraskan alur dengan
+tangga keterbukaan Bab 3. Pada tangga itu, tingkat 1 mensyaratkan akun dan persetujuan syarat penggunaan, sedangkan izin usaha, kontrak, dan 6
+skenario gagal baru menjadi syarat tingkat 2. Bila izin usaha sudah diperiksa sebelum \textit{sandbox}, seperti pada keadaan saat ini,
+klinik menunggu 24 jam hanya untuk mencoba data sintetis.
+
+Apakah semua mitra melewati gerbang yang sama? Tidak. Aturan pertama Bab 3 berbunyi buka menurut tindakan, bukan menurut pihak. Klinik yang
+memesan janji temu berhenti pada tingkat 2. Laboratorium yang membaca atau mengirim hasil pemeriksaan melalui API-02 memerlukan tingkat 3:
+hubungan layanan aktif, jejak akses, dan tinjauan tiap 90 hari. Asuransi belum punya jalur, karena API-03 belum masuk portofolio Bab 8.
+Praktik di luar kesehatan memperlihatkan pola serupa. Regulasi 2018/389 Pasal 30 ayat 4 meminta perubahan spesifikasi diberitahukan paling
+lambat 3 bulan sebelumnya, kecuali keadaan darurat \cite{rts2018}, sehingga kewajiban penyedia tidak berakhir saat akses terbit.
+
+Bagaimana bila mitra keluar? Penghentian dirancang sebelum akses produksi diberikan. Bab 6 memperlihatkan bagian teknisnya: identitas klien
+dicabut, token terakhir mati paling lama 15 menit kemudian, dan klinik lain tidak terganggu. Bagian layanannya sering terlupa. Misalkan satu
+klinik punya janji aktif untuk 5 hari kerja ke depan, atau 300 janji. Layanan pelanggan mengalihkannya dalam 3 menit per janji, atau 15 jam
+dan Rp900.000. Petugas pelindungan data mencatat data yang wajib disimpan dan data yang dihapus klinik. Status klinik pada katalog ikut diperbarui.
+
+Keputusan memakai gerbang punya dua konsekuensi. Pertama, gerbang menciptakan antrean. Misalkan rapat persetujuan digelar 2 kali per minggu, dan
+satu rapat memeriksa 5 klinik. Kapasitasnya 10 klinik per minggu, sehingga 35 klinik sesudah klinik uji selesai dalam 4 minggu bila datang
+bergelombang. Bila semuanya datang pada minggu yang sama, tunggu terakhir mencapai 4 minggu, jauh di atas sasaran 16 jam. Kedua, sasaran
+waktu dapat menekan pemeriksa. Karena itu ukuran waktu sampai produksi selalu dibaca bersama jumlah insiden, seperti pada kolom terakhir Tabel
+\ref{tab:ch11-ukuran-portal}.
 
 \section{Syarat Penggunaan, Tingkat Layanan, dan Dukungan}
 
-% TODO
-% Cakupan: syarat penggunaan dan batas pemakaian data; SLA (Service Level Agreement) dan cara
-% mengukurnya; saluran dukungan dan eskalasi; komunitas pengembang; aspek kontrak dengan pihak
-% ketiga dibahas rinci di IT40813.
+Akses produksi sudah terbit. Apa yang dijanjikan kedua pihak sesudah itu, dan apa akibatnya bila janji itu meleset?
+
+Syarat penggunaan menjelaskan tujuan, kewenangan, batas konsumsi, dan tanggung jawab mitra. \textit{Service Level Agreement} (SLA) menyatakan
+janji layanan serta mekanisme yang disepakati. Target teknis internal perlu mendukungnya. Dukungan mempunyai kanal, prioritas, dan waktu tanggap.
+Pengumpulan umpan balik membantu menemukan masalah kontrak atau dokumentasi yang berulang. Buku \textit{Site Reliability Engineering} membagi
+istilahnya menjadi tiga \cite{c11-sre-slo}. \textit{Service Level Indicator} (SLI) adalah ukuran kuantitatif yang didefinisikan dengan cermat.
+\textit{Service Level Objective} (SLO) adalah nilai target yang diukur dengan SLI. SLA adalah kontrak dengan pengguna yang memuat akibat bila SLO
+terpenuhi atau meleset. Zimmermann dkk. menulis SLA sebagai pola: janji mutu yang dapat diuji, cara mengukurnya, dan akibatnya
+\cite{zimmermann2022patterns}.
+
+Analoginya perjanjian sewa. Perjanjian sewa menjelaskan hak memakai ruangan dan cara menangani kerusakan, bukan hanya menyerahkan kunci. Penyewa
+perlu tahu siapa yang dihubungi saat atap bocor, dan berapa lama perbaikan boleh ditunggu.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Misalkan mitra melaporkan salah pasien. Prioritas penanganan berbeda dari permintaan penambahan contoh dokumentasi. Laporan pertama
+        ditanggapi dalam 15 menit, sedangkan permintaan kedua dalam 5 hari kerja, atau 160 kali lebih lama. Tanpa prioritas tertulis, kedua
+        tiket mengantre pada 40 tiket per bulan yang sama.
+  \item Komunitas pengembang dapat bertukar pola integrasi, tetapi tidak menjadi tempat membagikan token atau data klinis. Bab 6 menghitung
+        penggantian satu kredensial per klinik 2 jam, atau Rp120.000. Kredensial bersama yang bocor mengenai 40 klinik dan berbiaya Rp4,8 juta. Syarat
+        penggunaan melarang kredensial dibagikan, dan moderator forum menghapus unggahan seperti itu.
+\end{enumerate}
+
+Dua dokumen pada bahasan ini sering tertukar, yaitu syarat penggunaan dan perjanjian kerja sama. Pembagiannya begini. Syarat penggunaan berlaku
+bagi setiap pendaftar, termasuk yang hanya memakai \textit{sandbox}, sesuai tingkat 1 Bab 3. Perjanjian kerja sama berlaku per mitra untuk produksi,
+sesuai tingkat 2. Bab 9 menambahkan dokumen ketiga: kontrak API mengatur perilaku, sedangkan perjanjian mengatur tanggung jawab. Tabel
+\ref{tab:ch11-syarat} menempatkan tiap butir pada dokumennya. Templat bab ini adalah bahan latihan, bukan nasihat hukum, sehingga naskah untuk
+organisasi nyata wajib ditinjau bagian hukum.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Butir syarat dan janji pada API-01 beserta tempat penulisannya}
+  \label{tab:ch11-syarat}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{2.2cm}GH{2.35cm}H{2.2cm}}
+    \hline
+    \textbf{Butir} & \textbf{Isi pada contoh} & \textbf{Tempat} & \textbf{Pemilik} \\ \hline
+    Tujuan pemakaian & Mencari jadwal dan membuat janji bagi pasien klinik mitra & Syarat penggunaan & Pemilik kemitraan \\ \hline
+    Kewenangan & Hanya petugas yang diverifikasi. Kredensial tidak boleh dibagi & Syarat penggunaan & Pemilik kemitraan \\ \hline
+    Batas konsumsi & Kuota uji 100, kuota produksi 300 panggilan per hari per klinik & Syarat, perjanjian, kontrak API & Tim integrasi \\ \hline
+    Data \textit{sandbox} & Hanya 20 pasien sintetis. Data pasien nyata dilarang & Syarat penggunaan & Petugas pelindungan data \\ \hline
+    Tanggung jawab mitra & Hanya 201 yang ditulis sebagai janji terkonfirmasi & Kontrak API, syarat & Manajer Layanan Rawat Jalan \\ \hline
+    Biaya & Rp3 juta per klinik per bulan, masih usulan & Perjanjian kerja sama & Manajer Keuangan \\ \hline
+    Perubahan versi & Masa transisi 6 bulan, tanggal \textit{sunset} & Perjanjian, portal & Pemilik produk \\ \hline
+    Penghentian & Akses dicabut, janji aktif diselesaikan & Perjanjian kerja sama & Pemilik kemitraan \\ \hline
+  \end{tabularx}
+\end{table}
+
+\subsection{Janji Layanan yang Dapat Ditepati}
+
+Berapa persen yang boleh dijanjikan kepada 40 klinik? Jawabannya datang dari rantai, bukan dari harapan.
+
+Bab 5 memisalkan ketersediaan API janji temu 99,9 persen dan SIMRS 99,5 persen. Karena konfirmasi slot harus sinkron, ketersediaan rantai pemesanan
+99,40 persen, dan sekitar 168 dari 28.000 pemesanan gagal per bulan. Pada bulan 720 jam, 99,9 persen hanya memberi ruang 43 menit gangguan, sedangkan
+99,40 persen setara 4,32 jam. Janji penyedia komponen tidak menolong. Sebagai pembanding, Amazon API Gateway menjanjikan 99,95 persen per bulan, dengan
+kredit 10 persen di bawah angka itu, 25 persen di bawah 99,0 persen, dan 100 persen di bawah 95,0 persen \cite{c11-aws-sla}. Janji semacam itu hanya
+mencakup \textit{gateway}, bukan SIMRS, dan kreditnya hanya mengembalikan biaya \textit{gateway}. Alternatif A pada Bab 10 tidak merujuk produk tertentu,
+sehingga angka Amazon hanya contoh bentuk janji. Buku \textit{Site Reliability Engineering} memberi uji sederhana: bila tidak ada akibat yang tertulis
+saat target meleset, itu kemungkinan besar SLO, bukan SLA \cite{c11-sre-slo}.
+
+API-m-FAMM membedakan SLA informal, yang memadai bagi layanan tidak kritis dan hubungan yang dekat, dari SLA formal yang memuat jaminan ketersediaan,
+waktu tanggap insiden, kebijakan privasi dan keamanan, kuota, serta rencana bila janji gagal \cite{mathijssen2020}. Pemesanan janji temu yang dibayar
+klinik lebih dekat ke bentuk kedua. Tabel \ref{tab:ch11-opsi-sla} membandingkan tiga pilihan angka. Kreditnya mengikuti bentuk contoh pada katalog pola
+Zimmermann dkk., yaitu potongan 10 persen pada periode tagihan berjalan \cite{zimmermann2022patterns}: Rp300.000 per klinik, atau Rp12 juta bila seluruh
+klinik terdampak.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Tiga pilihan janji ketersediaan API-01. Jumlah bulan meleset adalah pemisalan latihan}
+  \label{tab:ch11-opsi-sla}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{GH{2.1cm}H{2.1cm}H{2.1cm}}
+    \hline
+    \textbf{Unsur} & \textbf{SLA 99,9 persen} & \textbf{SLA 99,4 persen} & \textbf{SLA 99,0 persen} \\ \hline
+    Gangguan yang boleh terjadi per bulan & 43 menit & 4,32 jam & 7,2 jam \\ \hline
+    Bulan meleset per tahun, dengan rata-rata rantai 99,40 persen & 12 bulan & 5 bulan & 1 bulan \\ \hline
+    Kredit per tahun, Rp12 juta per bulan meleset & Rp144 juta & Rp60 juta & Rp12 juta \\ \hline
+    Terhadap langganan Rp1,44 miliar per tahun & 10 persen & 4,2 persen & 0,8 persen \\ \hline
+    Pesan kepada klinik & Tinggi, tetapi tidak jujur & Sama dengan rata-rata, sering meleset & Dapat ditepati, ada ruang perbaikan \\ \hline
+  \end{tabularx}
+\end{table}
+
+\begin{kasus}[title={Kasus Medikara Health: Janji 99,9 Persen yang Tidak Dapat Ditepati}]
+Misalkan pemilik kemitraan ingin menulis 99,9 persen pada perjanjian, karena angka itu terlihat meyakinkan bagi klinik. Seluruh rincian ini adalah data
+latihan. Tim integrasi menunjukkan Tabel \ref{tab:ch11-opsi-sla}. Rantai pemesanan rata-rata 99,40 persen, sehingga janji 99,9 persen meleset setiap
+bulan. Kreditnya Rp144 juta per tahun, atau 10 persen dari langganan.
+
+Ada masalah kedua yang lebih besar. Bab 8 mencatat jadwal kosong 7 sampai 14 hari per tahun saat SIMRS diperbarui. Bila hari itu masuk hitungan,
+ketersediaan tahunan hanya 96,2 sampai 98,1 persen, dan ketiga pilihan pada tabel sudah gagal sebelum dihitung. Karena itu definisi SLI lebih menentukan
+daripada angka di belakang koma.
+
+Rapat menghasilkan tiga keputusan.
+\begin{enumerate}
+  \item SLI dihitung dari permintaan pemesanan yang dijawab tanpa 5xx, dibagi seluruh permintaan, per bulan. Pemeliharaan yang diumumkan 14 hari sebelumnya
+        lewat portal dikecualikan. Selama itu API-01 menjawab 503 dengan \texttt{Retry-After}, sesuai kontrak Bab 9.
+  \item SLA ditulis 99,0 persen. SLO internal ditulis 99,4 persen. Selisihnya 2,88 jam per bulan menjadi ruang bagi tim untuk bertindak sebelum kredit
+        berlaku. Manajer Keuangan mencatat risiko Rp12 juta per tahun sebagai pengurang pendapatan, bukan sebagai bagian pagu Rp300 juta.
+  \item Angka ditinjau sesudah 3 bulan data nyata. Bila rantai stabil di atas 99,6 persen, SLA boleh dinaikkan. Janji mudah dinaikkan, dan sulit diturunkan
+        tanpa merusak kepercayaan.
+\end{enumerate}
+
+Bukti yang belum tersedia adalah angka ketersediaan nyata. Angka 99,40 persen masih pemisalan Bab 5, dan jumlah bulan meleset pada tabel juga pemisalan.
+\end{kasus}
+
+\subsection{Dukungan dan Komunitas Pengembang}
+
+Janji layanan memerlukan orang yang menanggapi. Bagaimana tiket dibagi, dan apakah Medikara memerlukan komunitas pengembang?
+
+Tabel \ref{tab:ch11-prioritas} menyusun empat prioritas. API-m-FAMM memisahkan pembukaan kanal komunikasi dari pengelolaan masalah, dan pengelolaan
+itu mencakup pelaporan, pelacakan, serta penentuan prioritas tiket \cite{mathijssen2020}. Laporan salah pasien dapat menjadi kegagalan pelindungan
+data. Undang-Undang (UU) 27/2022 Pasal 46, seperti dibahas di Bab 6, mewajibkan pemberitahuan tertulis paling lambat 3 $\times$ 24 jam \cite{uu27-2022-pdp},
+sehingga jalur eskalasinya harus sudah ada sebelum kejadian. Waktu tanggap di luar jam kerja memakai biaya kesiagaan Rp12 juta per tahun pada alternatif A Bab
+10.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Empat prioritas dukungan pada API-01. Waktu tanggap adalah pemisalan latihan}
+  \label{tab:ch11-prioritas}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{1.5cm}GH{1.5cm}G}
+    \hline
+    \textbf{Prioritas} & \textbf{Contoh} & \textbf{Waktu tanggap} & \textbf{Eskalasi} \\ \hline
+    1 Kritis & Salah pasien, dugaan kebocoran data & 15 menit & Kepala Keamanan Informasi dan petugas pelindungan data \\ \hline
+    2 Tinggi & Satu klinik tidak dapat memesan & 1 jam & Tim integrasi \\ \hline
+    3 Sedang & Galat tidak jelas, kuota perlu ditinjau & 4 jam kerja & Tim integrasi \\ \hline
+    4 Rendah & Permintaan contoh dokumentasi & 5 hari kerja & Pemilik produk \\ \hline
+  \end{tabularx}
+\end{table}
+
+Tiket juga menjadi sumber perbaikan. Pada pilihan portal P2, ada 40 tiket per bulan, atau 120 per triwulan. Misalkan 30 persen menanyakan arti 503. Biayanya 18 jam per
+triwulan, atau Rp1,08 juta, dan satu halaman \textit{how-to guide} dapat menghapus sebagian besar. Bab 8 mencatat 12 usulan perubahan API-01 per triwulan
+dengan kapasitas 6. Masalah yang berulang pada tiket adalah bukti bagi usulan mana yang didahulukan.
+
+Apakah Medikara memerlukan komunitas pengembang? Komunitas berguna bila pengembang dapat saling menjawab. API-m-FAMM mencantumkan forum, acara, media sosial,
+dan \textit{evangelist} sebagai praktik \cite{mathijssen2020}, tetapi daftar praktik bukan daftar kewajiban. Medikara hanya punya 41 konsumen. Forum tertutup
+bagi mitra terverifikasi cukup untuk saat ini. Misalkan moderasinya 2 jam per bulan, atau 24 jam per tahun, dan dipegang pemilik kemitraan, sehingga
+cadangan 60 jam tim integrasi tidak berkurang. Tiga vendor sistem klinik menjadi peserta paling berguna, karena pengalaman mereka mewakili 28 klinik. Forum tidak menjadi jalur laporan
+insiden. Laporan salah pasien wajib masuk prioritas 1, bukan ditulis di forum.
+
+Keputusan tentang janji dan dukungan punya dua konsekuensi. Pertama, janji mengikat tim yang tidak hadir di rapat kemitraan. SLA 99,0 persen hanya dapat
+ditepati bila pemilik SIMRS memberi tahu jadwal pembaruan 14 hari sebelumnya. Kedua, dukungan memakan biaya berulang. Rp14,4 juta per tahun pada P2 adalah komponen
+terbesar biaya portal selama 3 tahun, yaitu Rp43,2 juta dari Rp87,6 juta. Dokumentasi yang lebih baik dinilai dari turunnya angka itu.
+
+Gambar \ref{fig:ch11-keputusan} merangkai pokok keputusan dalam bab ini. Urutan pembahasan membantu penelusuran alasan, sedangkan penerapannya tetap dapat berulang
+bila bukti berubah.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch11-peta-keputusan.tex}
+  \caption{Enam keputusan pada rancangan portal dan \textit{onboarding}, dengan jawaban pada Medikara}
+  \label{fig:ch11-keputusan}
+\end{figure}
 
 \section{Aktivitas: Rancangan Portal Pengembang dan Onboarding Mitra}
 
-% TODO
-% Tujuan aktivitas: merancang pengalaman mitra dari pendaftaran sampai produksi.
-% Peran dalam tim: anggota berlatar bisnis dan hukum menyusun syarat penggunaan, tingkat layanan,
-% dan alur persetujuan; anggota berlatar teknis menyusun kerangka portal dan isi dokumentasi
-% minimum.
-% Langkah: pilih satu jenis mitra; susun persona; gambar alur onboarding; susun kerangka portal;
-% tetapkan target waktu sampai panggilan pertama dan ukuran keberhasilan portal.
-% Luaran dan tonggak capstone: rancangan portal pengembang dan alur onboarding mitra, melengkapi C3.
-% Berkas sources yang direncanakan: sources/chapter11/alur-onboarding-mitra.md,
-% sources/chapter11/kerangka-portal-pengembang.md, sources/chapter11/templat-syarat-penggunaan.md
+\textbf{Tujuan.} Tim merancang alur \textit{onboarding} mitra, misalnya klinik mitra atau asuransi, mulai dari pendaftaran, verifikasi, akses
+\textit{sandbox}, pengujian, sampai akses produksi, beserta kerangka portal yang mendukungnya. Hasilnya artefak C3 yang dapat ditelusuri dari persoalan
+layanan sampai keputusan tim. Organisasi nyata digunakan dengan izin dan anonimisasi. Medikara menjadi alternatif bila akses tidak tersedia.
+
+\textbf{Pembagian peran.}
+\begin{itemize}
+  \item Anggota berlatar bisnis dan hukum menyusun syarat penggunaan, tingkat layanan, dan alur persetujuan.
+  \item Anggota berlatar teknis menyusun kerangka portal dan isi dokumentasi minimum.
+  \item Anggota berlatar kesehatan atau akuntansi menghitung dampak layanan dan biaya tiap pilihan.
+  \item Koordinator mencatat keputusan dan memastikan kedua kelompok menyepakati istilah.
+  \item Penelaah menantang asumsi tanpa mengganti bukti dengan pendapat.
+\end{itemize}
+
+\textbf{Langkah kerja.}
+\begin{enumerate}
+  \item Salin ID kontrak dan pemilik dari luaran Bab 9, serta portal dan gerbang penerbitan dari luaran Bab 10. Tulis pengguna dan tugasnya seperti Tabel
+        \ref{tab:ch11-pengguna}.
+  \item Gambarkan perjalanan mitra dari pendaftaran sampai izin produksi. Tentukan bukti, pemilik, dan sasaran tunggu tiap tahap pada salinan
+        \berkas{sources/chapter11/alur-onboarding-mitra.md}, dengan Tabel \ref{tab:ch11-gerbang} sebagai contoh.
+  \item Tetapkan target waktu sampai panggilan pertama. Tulis definisi awal dan akhirnya, lalu pisahkan waktu kerja dari waktu tunggu.
+  \item Susun isi portal minimum, serta contoh normal dan gagal, pada salinan \berkas{sources/chapter11/kerangka-portal-pengembang.md}.
+  \item Tulis syarat penggunaan, janji layanan, dan prioritas dukungan pada salinan \berkas{sources/chapter11/templat-syarat-penggunaan.md}. Hitung ketersediaan
+        rantai sebelum menulis angka janji.
+  \item Bandingkan minimal tiga pilihan lingkup portal pada salinan \berkas{sources/chapter11/pilihan-portal.csv}. Ubah satu asumsi dan catat apakah urutannya
+        berubah.
+  \item Uji panduan dengan rekan baru memakai \berkas{sources/chapter11/protokol-uji-panggilan-pertama.md}, lalu catat waktu serta hambatan.
+  \item Rancang penghentian mitra. Catat keputusan, alternatif yang ditolak, pemilik, dan pemicu tinjauan.
+\end{enumerate}
+
+\textbf{Luaran.} Tim menyerahkan rancangan portal pengembang dan alur \textit{onboarding} mitra: tabel tahap dan gerbang, kerangka portal, target waktu sampai
+panggilan pertama, syarat penggunaan, janji layanan, hasil uji panduan, catatan keputusan beserta alternatif yang ditolak, dan tautan bukti.
+
+\textbf{Kaitan dengan capstone.} Luaran ini menjadi rancangan portal pengembang dan alur \textit{onboarding} mitra pada tonggak C3 Kondisi Target. Kontrak Bab 9
+serta portal dan gerbang penerbitan Bab 10 menjadi masukannya. Bab 12 memakai ukuran keberhasilan portal sebagai masukan metrik platform. ID dan versi artefak
+dipertahankan saat dipakai bab berikutnya.
+
+\textbf{Kriteria penilaian.} Penilaian mencakup ketepatan konsep 25 persen, keterlacakan bukti 30 persen, alasan keputusan dan pengorbanan 30 persen, serta
+keterbacaan artefak 15 persen. Keterbacaan dinilai dari kemampuan anggota non-teknis menjelaskan kembali mengapa target waktu dipilih dan apa yang diperiksa
+pada persetujuan pemilik.
+
+\textbf{Berkas pendukung.} Daftar lengkap tersedia pada \berkas{sources/chapter11/README.md}. Templat tidak menggantikan percakapan dengan pemilik proses, dan
+ketidakpastian dicatat secara terbuka. Data pribadi pasien atau karyawan tidak boleh dipakai. Data organisasi nyata dipakai dengan izin dan dianonimkan.
+
+\begin{pendalaman}[title={Pendalaman Teknis (opsional): Dokumentasi dari Kontrak dan Sandbox Lokal}]
+Pendalaman ini membangkitkan halaman dokumentasi dari kontrak OpenAPI Bab 9, lalu mengukur waktu sampai panggilan pertama bersama rekan yang belum pernah melihat
+API tersebut. Perintah \texttt{build-docs} pada Redocly CLI menghasilkan satu berkas halaman web berisi dokumentasi API \cite{c11-redocly}. Perintah itu belum
+dijalankan pada waktu bab ditulis, dan dokumentasi yang dibaca tidak menyebut dukungan OpenAPI 3.2 secara khusus, sehingga hasilnya perlu dibandingkan oleh mahasiswa.
+
+\textbf{Peringatan.} Jalankan hanya pada komputer sendiri. Sandbox ini memakai data sintetis dan tidak boleh diisi data pasien nyata. Uji pada sistem milik orang
+lain memerlukan izin tertulis.
+
+\begin{lstlisting}[style=ch11bash, caption={Membangkitkan dokumentasi dan menjalankan \textit{sandbox}, tersedia di \berkas{sources/chapter11/README.md}}, label={lst:ch11-perintah}]
+# Terminal 1: dokumentasi dari kontrak Bab 9
+npx @redocly/cli build-docs ../chapter09/kontrak-api-01-janji-temu.yaml \
+  --output=dokumentasi-api-01.html
+
+# Terminal 2: sandbox lokal
+python sandbox-api-01.py
+
+# Terminal 3: panggilan pertama
+curl -i -H "Authorization: Bearer token-uji-klinik-01" \
+  "http://127.0.0.1:8011/jadwal-dokter?rumahSakit=bekasi&tanggal=2026-11-02"
+\end{lstlisting}
+
+Listing \ref{lst:ch11-perintah} memuat urutan perintahnya. Perintah terakhir dijawab 200 dengan satu slot sintetis. Listing \ref{lst:ch11-sandbox} memperlihatkan
+bagian pemesanan pada \textit{sandbox}. Pemeriksaan dibuat berurutan agar tiap skenario gagal punya pemicu yang pasti, seperti pada Tabel \ref{tab:ch11-skenario}.
+Seluruh operasi dan skenario pada berkas ini sudah dicoba pada Python 3.12 sewaktu bab ditulis.
+
+\begin{lstlisting}[style=ch11python, caption={Bagian pemesanan pada \textit{sandbox} lokal, tersedia di \berkas{sources/chapter11/sandbox-api-01.py}}, label={lst:ch11-sandbox}]
+def jawab_pemesanan(isi_permintaan, kunci_idempotensi):
+  """Membuat janji sintetis. Hanya 201 yang berarti slot sudah terkunci."""
+  slot = isi_permintaan.get("slot", "")
+  pasien = isi_permintaan.get("pasien", "")
+  if not kunci_idempotensi or not slot:
+    return buat_masalah(
+      400, "masukan-tidak-sah", "Masukan tidak sah",
+      "Periksa slot dan Idempotency-Key.")
+  if pasien not in PASIEN_SINTETIS:
+    return buat_masalah(
+      400, "pasien-tidak-dapat-dipakai", "Nomor pasien tidak dapat dipakai",
+      "Periksa kartu pasien, jangan menebak.")
+  if slot == SLOT_TERISI:
+    return buat_masalah(
+      409, "slot-terisi", "Slot sudah terisi", "Pilih slot lain.")
+  id_janji = f"JT-{len(JANJI_TEMU) + 1:05d}"
+  janji = {"id": id_janji, "slot": slot, "pasien": pasien,
+           "status": "terkonfirmasi"}
+  JANJI_TEMU[id_janji] = janji
+  return 201, janji, {"Location": f"/janji-temu/{id_janji}"}
+\end{lstlisting}
+
+Rekan penguji mengikuti protokol \berkas{sources/chapter11/protokol-uji-panggilan-pertama.md}. Pengamat mencatat menit kerja, titik berhenti, dan jenis hambatan,
+tanpa menjawab pertanyaan kecuali rekan itu berhenti lebih dari 15 menit.
+\end{pendalaman}
 
 \section{Ringkasan}
 
-% TODO
+Mitra terdiri dari orang dengan tugas yang berbeda. Pengembang memegang kredensial dan membaca dokumentasi, sedangkan pemilik kemitraan dan petugas pelindungan data
+memerlukan jawaban yang tidak ada pada referensi operasi. \textit{Developer experience} mencakup penemuan API, pemahaman kontrak, akses uji, implementasi, pemecahan
+galat, dan operasi. Pada contoh bab ini, 40 klinik terbagi menjadi 28 klinik yang memakai 3 vendor dan 12 klinik dengan teknisi sendiri, dan kedua kelompok gagal pada
+tempat yang berbeda.
+
+Waktu sampai panggilan pertama berguna bila definisi awal dan akhirnya dikunci, serta waktu kerja dipisahkan dari waktu tunggu. Pada contoh satu klinik, 82 persen dari
+156,5 jam adalah waktu tunggu, dan panggilan pertama baru terjadi pada jam ke-42,5, padahal kerja klinik hanya 2,5 jam. Perbaikan proses memangkasnya menjadi 6,5 jam
+tanpa mengubah panduan. Panggilan pertama belum membuktikan integrasi siap produksi, sehingga uji tugas, 6 skenario gagal, dan uji otorisasi tetap diperlukan.
+
+Sarana mitra dipilih menurut kebutuhan pembaca dan kemampuan memeliharanya. Referensi dibangkitkan dari kontrak, panduan ditulis untuk tugas, dan contoh mencakup
+kegagalan. \textit{Sandbox} memakai 20 pasien sintetis dengan pemicu yang pasti, walaupun tidak menggantikan uji pada SIMRS. SDK ditunda, karena 160 jam per tahun melampaui
+cadangan, sedangkan koleksi contoh hanya 24 jam. Portal mengikuti pertanyaan pengguna, dan lingkupnya dihitung selama 3 tahun. P2 Rp87,6 juta muat dalam ruang Rp91,2 juta
+hanya bila tiket turun menjadi sekitar 1 per klinik per bulan.
+
+\textit{Onboarding} memakai tujuh tahap dengan akses uji dan produksi yang terpisah. Verifikasi yang ringan membuka \textit{sandbox}, sedangkan persetujuan pemilik yang
+berat membuka data nyata. Penghentian mitra dirancang sebelum akses diberikan. Sesudah akses terbit, syarat penggunaan, perjanjian, dan kontrak API menyimpan butir yang
+berbeda dengan angka yang sama. Janji layanan dihitung dari rantai, sehingga 99,9 persen ditolak, dan SLA 99,0 persen ditopang SLO internal 99,4 persen.
+
+Pesan utama bab ini adalah menilai pengalaman mitra dari pekerjaan yang selesai dan waktu tunggunya. Dokumentasi yang lengkap belum tentu menghasilkan pengalaman yang
+baik, karena hambatan terbesar sering berada pada proses dan pemilik keputusan. Artefak C3 perlu menyebut pemilik serta pemicu peninjauan. Keputusan yang baik menjelaskan
+manfaat yang diharapkan sekaligus akibat yang harus ditanggung organisasi.
 
 \section{Latihan}
 
+\subsection*{Latihan 1: Menguji Dokumentasi dan Pengalaman}
+
+Jelaskan mengapa dokumentasi yang lengkap belum tentu menghasilkan \textit{developer experience} yang baik. Latihan ini membuktikan kemampuan memisahkan kekurangan isi
+dokumen dari hambatan proses dengan data pengamatan, bukan dengan pendapat.
+
 \begin{enumerate}
-  \item Jelaskan mengapa dokumentasi yang lengkap belum tentu menghasilkan \textit{developer experience} yang baik.
-  \item Susun lima langkah \textit{onboarding} untuk laboratorium mitra, lalu tandai langkah yang paling mungkin menjadi hambatan.
-  \item Tentukan tiga ukuran keberhasilan portal pengembang dan jelaskan cara mengumpulkan datanya.
+  \item Tulis definisi awal dan akhir pengukuran, lalu minta rekan yang belum pernah melihat API mengikuti panduan tanpa pendampingan.
+  \item Catat tiap titik berhenti dan waktu tunggunya sewaktu uji berlangsung.
+  \item Golongkan tiap titik berhenti menjadi kekurangan isi atau hambatan proses, lalu hitung porsinya.
+  \item Usulkan satu perbaikan pertama beserta cara membuktikannya.
+\end{enumerate}
+
+Tabel \ref{tab:ch11-lat1-contoh} merupakan contoh alasan untuk seorang teknisi klinik pada API-01, bukan satu-satunya jawaban yang benar. Panduannya lengkap, tetapi
+960 dari 1.017 menit, atau 94 persen, habis untuk menunggu.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 1: titik berhenti seorang teknisi klinik pada API-01}
+  \label{tab:ch11-lat1-contoh}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{GH{1.2cm}H{1.5cm}G}
+    \hline
+    \textbf{Titik berhenti} & \textbf{Menit} & \textbf{Jenis} & \textbf{Perbaikan} \\ \hline
+    Membaca panduan & 20 & Kerja wajar & Tidak mendesak \\ \hline
+    Menunggu akun uji & 960 & Proses & Akun uji terbit otomatis sesudah verifikasi \\ \hline
+    Token kedaluwarsa tanpa tahu sebabnya & 12 & Isi & Contoh 401 dan cara meminta token baru \\ \hline
+    409 dikira gangguan server & 25 & Isi & Panduan galat dengan slot uji yang selalu penuh \\ \hline
+    \textbf{Jumlah} & \textbf{1.017} & & Proses 94 persen, isi 4 persen, kerja wajar 2 persen \\ \hline
+  \end{tabularx}
+\end{table}
+
+Isi hasil tim pada Tabel \ref{tab:ch11-lat1-hasil}, dan tambahkan rujukan bukti dalam catatan kerja.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 1}
+  \label{tab:ch11-lat1-hasil}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{GH{1.2cm}H{1.5cm}G}
+    \hline
+    \textbf{Titik berhenti} & \textbf{Menit} & \textbf{Jenis} & \textbf{Perbaikan} \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textbf{Pertanyaan analisis.}
+\begin{enumerate}
+  \item Bagian mana diperbaiki lebih dahulu menurut data pada tabel, dan berapa menit yang dihematnya?
+  \item Bagaimana membuktikan perbaikannya membantu pengguna baru, bukan hanya rekan yang sudah pernah mencoba?
+  \item Bila median peserta 30 menit dan rata-ratanya 53 menit, apa yang perlu diperiksa pada data itu?
+\end{enumerate}
+
+\subsection*{Latihan 2: Merancang Onboarding Laboratorium}
+
+Susun lima langkah \textit{onboarding} untuk laboratorium mitra, lalu tandai langkah yang paling mungkin menjadi hambatan. Latihan ini membuktikan kemampuan menetapkan
+pemilik dan bukti per tahap, serta menunjuk hambatan dari perhitungan.
+
+\begin{enumerate}
+  \item Tetapkan tingkat akses yang diminta laboratorium dan akibat tindakannya.
+  \item Susun lima langkah inti, dari pendaftaran mitra sampai akses produksi, dan tempatkan persetujuan pemilik sebagai gerbang sebelum langkah terakhir.
+  \item Tandai pemilik, bukti kelulusan, dan perkiraan waktu tiap langkah.
+  \item Pilih langkah yang paling mungkin menjadi hambatan, lalu hitung biaya penundaannya.
+\end{enumerate}
+
+Tabel \ref{tab:ch11-lat2-contoh} merupakan contoh alasan untuk satu dari 3 laboratorium pada INT-06, bukan satu-satunya jawaban yang benar. Laboratorium memakai API-02
+Hasil Pemeriksaan pada tingkat 3 Bab 3. Tiga perbaikan yang masing-masing menunggu 5 hari kerja bernilai 22 jam ketik ulang, atau Rp1,32 juta.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 2: lima langkah \textit{onboarding} satu laboratorium mitra pada API-02}
+  \label{tab:ch11-lat2-contoh}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{1.8cm}H{1.9cm}GH{1.4cm}H{1.5cm}}
+    \hline
+    \textbf{Langkah} & \textbf{Pemilik} & \textbf{Bukti kelulusan} & \textbf{Perkiraan} & \textbf{Hambatan} \\ \hline
+    Pendaftaran mitra & Pemilik kemitraan & Identitas laboratorium dan kontak teknis & 1 hari & Rendah \\ \hline
+    Verifikasi & Pemilik kemitraan & Kewenangan petugas, syarat penggunaan disetujui & 1 hari & Rendah \\ \hline
+    \textit{Sandbox} & Tim integrasi & Kredensial uji, hasil sintetis terkirim & 1 hari & Rendah \\ \hline
+    Uji integrasi & Tim integrasi, Manajer Laboratorium & Format hasil benar, otorisasi objek, 3 perbaikan & 15 hari & \textbf{Paling mungkin} \\ \hline
+    Akses produksi, sesudah persetujuan pemilik & Manajer Laboratorium, petugas pelindungan data & Hubungan layanan aktif, jejak akses, tinjauan 90 hari & 3 hari & Sedang \\ \hline
+  \end{tabularx}
+\end{table}
+
+Isi hasil tim pada Tabel \ref{tab:ch11-lat2-hasil}, dan tambahkan rujukan bukti dalam catatan kerja.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 2}
+  \label{tab:ch11-lat2-hasil}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{1.8cm}H{1.9cm}GH{1.4cm}H{1.5cm}}
+    \hline
+    \textbf{Langkah} & \textbf{Pemilik} & \textbf{Bukti kelulusan} & \textbf{Perkiraan} & \textbf{Hambatan} \\ \hline
+    \dots & \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textbf{Pertanyaan analisis.}
+\begin{enumerate}
+  \item Di tahap mana tim menunggu pihak luar, dan berapa porsi waktu tunggu itu dari seluruh perkiraan?
+  \item Apa rencana bila mitra keluar setelah mendapat akses, termasuk hasil yang belum terkirim?
+  \item Mengapa laboratorium memerlukan gerbang lebih ketat daripada klinik, walaupun volumenya hanya 1.100 pemeriksaan per bulan?
+\end{enumerate}
+
+\subsection*{Latihan 3: Mengukur Portal}
+
+Tentukan tiga ukuran keberhasilan portal pengembang dan jelaskan cara mengumpulkan datanya. Latihan ini membuktikan kemampuan memilih ukuran hasil yang dapat ditindaklanjuti,
+serta mengenali cara ukuran itu menyesatkan.
+
+\begin{enumerate}
+  \item Pilih tiga ukuran hasil. Ukuran aktivitas seperti kunjungan halaman tidak dihitung.
+  \item Tulis definisi awal dan akhir, sumber data, serta periode tiap ukuran.
+  \item Isi nilai dasar dari data tim, atau dari data pemisalan bila data belum ada.
+  \item Periksa kemungkinan tiap ukuran dimanipulasi, lalu tentukan tindakan bila angkanya memburuk.
+\end{enumerate}
+
+Tabel \ref{tab:ch11-lat3-contoh} merupakan contoh alasan pada API-01, bukan satu-satunya jawaban yang benar. Nilai dasar mengambil Tabel \ref{tab:ch11-lima-klinik} dan
+Gambar \ref{fig:ch11-perjalanan}.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 3: tiga ukuran keberhasilan portal API-01}
+  \label{tab:ch11-lat3-contoh}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{1.9cm}GH{1.9cm}H{1.5cm}G}
+    \hline
+    \textbf{Ukuran} & \textbf{Cara mengumpulkan} & \textbf{Nilai dasar} & \textbf{Sasaran} & \textbf{Risiko dan tindakan} \\ \hline
+    Panggilan pertama & Catatan portal dan \textit{gateway}, median per gelombang klinik & 42,5 jam & 6,5 jam & Jam mulai digeser. Kunci definisinya \\ \hline
+    Tugas selesai & Hasil uji 6 skenario, per klinik & 19 dari 30 & 5 dari 6 per klinik & Skenario sulit dihapus. Tinjau daftarnya tiap rilis \\ \hline
+    Aktivasi mitra & Identitas klien, klinik dengan minimal satu 201 per 30 hari & Belum ada & Minimal 30 klinik & Pesanan uji di produksi. Periksa status janji \\ \hline
+  \end{tabularx}
+\end{table}
+
+Isi hasil tim pada Tabel \ref{tab:ch11-lat3-hasil}, dan tambahkan rujukan bukti dalam catatan kerja.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 3}
+  \label{tab:ch11-lat3-hasil}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{H{1.9cm}GH{1.9cm}H{1.5cm}G}
+    \hline
+    \textbf{Ukuran} & \textbf{Cara mengumpulkan} & \textbf{Nilai dasar} & \textbf{Sasaran} & \textbf{Risiko dan tindakan} \\ \hline
+    \dots & \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textbf{Pertanyaan analisis.}
+\begin{enumerate}
+  \item Mengapa kunjungan halaman belum cukup, bila dibaca bersama jumlah tiket pada contoh 4.000 kunjungan per bulan?
+  \item Bagaimana perubahan profil mitra, misalnya bertambahnya klinik dengan teknisi sendiri, memengaruhi interpretasi median?
+  \item Ukuran mana yang paling mudah dimanipulasi pada data tim, dan ukuran mana yang dapat memeriksanya?
 \end{enumerate}

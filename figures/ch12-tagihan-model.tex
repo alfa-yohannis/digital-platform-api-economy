@@ -1,0 +1,31 @@
+\begin{tikzpicture}[font=\scriptsize]
+  \begin{axis}[
+    width=11cm, height=6cm,
+    xmin=0, xmax=2600, ymin=0, ymax=6,
+    xtick={0,500,750,1500,1800,2500},
+    ytick={0,1,1.5,2,3,4,4.5,5,6},
+    yticklabels={0,1,{1,5},2,3,4,{4,5},5,6},
+    xlabel={Janji temu per bulan per klinik},
+    ylabel={Tagihan per bulan (juta rupiah)},
+    xticklabel style={/pgf/number format/.cd, 1000 sep={.}},
+    tick label style={font=\tiny},
+    label style={font=\scriptsize},
+    legend style={font=\tiny, at={(0.02,0.98)}, anchor=north west, draw=gray!50},
+    legend cell align=left,
+    grid=major, grid style={gray!20},
+    every axis plot/.append style={thick, mark=none}
+  ]
+    \addplot[gray!70!black, dashed] coordinates {(0,3) (2500,3)};
+    \addlegendentry{langganan datar Rp3 juta}
+    \addplot[blue!70!black] coordinates {(0,0) (2500,5)};
+    \addlegendentry{per janji sah Rp2.000}
+    \addplot[praditagreen, very thick] coordinates {
+      (0,1.5) (750,1.5) (750,3) (1800,3) (1800,4.5) (2500,4.5)};
+    \addlegendentry{berjenjang: kecil, sedang, besar}
+    \node[font=\tiny, anchor=west] at (axis cs:540,0.8) {klinik kecil};
+    \node[font=\tiny, anchor=north west] at (axis cs:1500,3) {klinik sedang};
+    \node[font=\tiny, anchor=south east] at (axis cs:2500,5) {klinik besar};
+    \addplot[only marks, mark=*, mark size=1.3pt, black] coordinates {
+      (500,1) (500,1.5) (500,3) (1500,3) (2500,3) (2500,4.5) (2500,5)};
+  \end{axis}
+\end{tikzpicture}

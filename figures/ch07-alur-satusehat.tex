@@ -1,0 +1,43 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000},
+  tahap/.style={draw, rounded corners, fill=blue!8, text width=1.65cm, minimum height=1.75cm, align=center},
+  utama/.style={tahap, fill=orange!12},
+  hasil/.style={tahap, fill=green!10},
+  tolak/.style={draw, rounded corners, fill=red!22, text width=1.65cm, minimum height=0.85cm, align=center, font=\tiny},
+  bilah/.style={draw, rounded corners, fill=blue!8, text width=11.5cm, minimum height=0.55cm, align=center},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  putus/.style={-{Stealth[length=2mm]}, thin, dashed}
+]
+  \node[tahap] (siap) at (0,0) {1. Persiapan\\{\tiny\mdseries autentikasi, organisasi, lokasi, IHS tenaga kesehatan}};
+  \node[tahap] (pasien) at (2.05,0) {2. Pasien\\{\tiny\mdseries nomor IHS dari MPI}};
+  \node[utama] (kunjungan) at (4.1,0) {3. Encounter\\{\tiny\mdseries kunjungan didaftarkan}};
+  \node[tahap] (klinis) at (6.15,0) {4. Data klinis\\{\tiny\mdseries Condition, Observation, dan lainnya}};
+  \node[tahap] (resume) at (8.2,0) {5. Composition\\{\tiny\mdseries resume medis}};
+  \node[hasil] (cocok) at (10.25,0) {6. Rekonsiliasi\\{\tiny\mdseries status tiap kiriman}};
+
+  \draw[panah] (siap) -- (pasien);
+  \draw[panah] (pasien) -- (kunjungan);
+  \draw[panah] (kunjungan) -- (klinis);
+  \draw[panah] (klinis) -- (resume);
+  \draw[panah] (resume) -- (cocok);
+
+  \node[tolak] (t1) at (0,-1.7) {token atau kredensial ditolak};
+  \node[tolak] (t2) at (2.05,-1.7) {pasien belum dikenali};
+  \node[tolak] (t3) at (4.1,-1.7) {kode lokasi atau organisasi salah};
+  \node[tolak] (t4) at (6.15,-1.7) {kode tidak sah atau keliru};
+  \node[tolak] (t5) at (8.2,-1.7) {rujukan antar-\textit{resource} putus};
+  \node[tolak] (t6) at (10.25,-1.7) {gagal senyap bila jawaban tidak dibaca};
+
+  \draw[panah] (siap) -- (t1);
+  \draw[panah] (pasien) -- (t2);
+  \draw[panah] (kunjungan) -- (t3);
+  \draw[panah] (klinis) -- (t4);
+  \draw[panah] (resume) -- (t5);
+  \draw[panah] (cocok) -- (t6);
+
+  \node[bilah] (daftar) at (5.125,-2.9) {Daftar kiriman gagal: ID kunjungan, penyebab, pemilik, dan tanggal selesai};
+  \foreach \penanda in {t1, t2, t3, t4, t5, t6} {
+    \draw[putus] (\penanda.south) -- (\penanda.south |- daftar.north);
+  }
+\end{tikzpicture}

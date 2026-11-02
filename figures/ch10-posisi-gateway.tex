@@ -1,0 +1,58 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000},
+  tahap/.style={draw, rounded corners, fill=blue!8, text width=1.2cm, minimum height=1.05cm, align=center},
+  tekan/.style={tahap, fill=orange!12},
+  hasil/.style={tahap, fill=green!10},
+  tolak/.style={draw, rounded corners, fill=red!22, text width=1.2cm, minimum height=0.95cm, align=center},
+  ket/.style={font=\tiny, align=center},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  putus/.style={-{Stealth[length=2mm]}, thin, dashed}
+]
+  % Dua kelompok digambar lebih dulu supaya berada di belakang node.
+  \draw[rounded corners, fill=praditagreen!15] (0.9,1.05) rectangle (7.05,-0.7);
+  \draw[rounded corners, fill=praditagreen!15] (7.2,1.05) rectangle (10.4,-0.7);
+  \node[ket] at (3.975,0.83) {\textbf{\textit{API gateway}: kebijakan bersama}};
+  \node[ket] at (8.8,0.83) {\textbf{Layanan bisnis: otorisasi objek}};
+
+  \node[tahap] (klien) at (0,0) {Mitra pengguna};
+  \node[tahap] (token) at (1.65,0) {Token sah?};
+  \node[tahap] (laju) at (3.2,0) {Laju wajar?};
+  \node[tahap] (kuota) at (4.75,0) {Kuota tersisa?};
+  \node[tahap] (rute) at (6.3,0) {\textit{Routing} ke versi};
+  \node[tekan] (objek) at (8.0,0) {Hak atas objek?};
+  \node[tahap] (slot) at (9.6,0) {Slot tersedia?};
+  \node[hasil] (simrs) at (11.2,0) {SIMRS};
+
+  \draw[panah] (klien) -- (token);
+  \draw[panah] (token) -- (laju);
+  \draw[panah] (laju) -- (kuota);
+  \draw[panah] (kuota) -- (rute);
+  \draw[panah] (rute) -- (objek);
+  \draw[panah] (objek) -- (slot);
+  \draw[panah] (slot) -- (simrs);
+
+  \node[tolak] (t401) at (1.65,-1.6) {401\\{\tiny\mdseries token ditolak}};
+  \node[tolak] (t429a) at (3.2,-1.6) {429\\{\tiny\mdseries terlalu cepat}};
+  \node[tolak] (t429b) at (4.75,-1.6) {429\\{\tiny\mdseries kuota habis}};
+  \node[tolak] (t410) at (6.3,-1.6) {410\\{\tiny\mdseries versi pensiun}};
+  \node[tolak] (t403) at (8.0,-1.6) {403\\{\tiny\mdseries bukan haknya}};
+  \node[tolak] (t409) at (9.6,-1.6) {409\\{\tiny\mdseries slot terisi}};
+
+  \draw[panah] (token) -- (t401);
+  \draw[panah] (laju) -- (t429a);
+  \draw[panah] (kuota) -- (t429b);
+  \draw[panah] (rute) -- (t410);
+  \draw[panah] (objek) -- (t403);
+  \draw[panah] (slot) -- (t409);
+
+  \node[draw, rounded corners, fill=blue!8, text width=9.9cm, minimum height=0.6cm, align=center] (telemetri)
+    at (5.6,-2.9) {Telemetri minimum ke analitik dan dukungan: ID permintaan, identitas klien, versi, operasi, kode jawaban, keputusan akses};
+
+  \draw[putus] (t401.south) -- (t401.south |- telemetri.north);
+  \draw[putus] (t429a.south) -- (t429a.south |- telemetri.north);
+  \draw[putus] (t429b.south) -- (t429b.south |- telemetri.north);
+  \draw[putus] (t410.south) -- (t410.south |- telemetri.north);
+  \draw[putus] (t403.south) -- (t403.south |- telemetri.north);
+  \draw[putus] (t409.south) -- (t409.south |- telemetri.north);
+\end{tikzpicture}

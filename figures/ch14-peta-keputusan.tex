@@ -1,0 +1,38 @@
+\begin{tikzpicture}[
+  kotak/.style={draw, rounded corners, text width=3.3cm, minimum height=0.95cm,
+    align=flush center, font=\scriptsize},
+  hasil/.style={kotak, text width=4.3cm},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  label/.style={font=\tiny, fill=white, inner sep=1pt}
+]
+  \node[kotak, fill=praditagreen!15] (usulan) at (-2,0)
+    {\textbf{Usulan aksi agen}\\{\tiny\mdseries satu operasi, satu pihak yang diwakili}};
+  \node[kotak, fill=blue!8] (t1) at (-2,-1.3)
+    {Mengubah keadaan atau membuka data pribadi?};
+  \node[kotak, fill=blue!8] (t2) at (-2,-2.6)
+    {Membuka data spesifik kesehatan?};
+  \node[kotak, fill=blue!8] (t3) at (-2,-3.9)
+    {Mengubah keadaan?};
+
+  \node[hasil, fill=green!10] (baca) at (3.6,-1.3)
+    {\textbf{Aksi baca}\\{\tiny\mdseries \texttt{cariJadwalDokter}: berjalan sendiri dalam kuota}};
+  \node[hasil, fill=red!22] (tutup) at (3.6,-2.6)
+    {\textbf{Ditutup bagi agen}\\{\tiny\mdseries API-02, rekam medis: ditinjau lagi sesudah bukti ada}};
+  \node[hasil, fill=green!10] (terbatas) at (-3.6,-5.65)
+    {\textbf{Baca terbatas dan pratinjau}\\{\tiny\mdseries \texttt{bacaJanjiTemu}, \texttt{pratinjauJanjiTemu}: server memeriksa hak atas objek}};
+  \node[hasil, fill=orange!12] (tulis) at (1.5,-5.65)
+    {\textbf{Aksi tulis}\\{\tiny\mdseries \texttt{buatJanjiTemu}, \texttt{batalkanJanjiTemu}: pratinjau, konfirmasi manusia, kunci idempotensi}};
+  \node[draw, rounded corners, fill=blue!8, font=\scriptsize, text width=10.1cm, align=flush center,
+    minimum height=0.8cm] (semua) at (-1.05,-7.1)
+    {\textbf{Berlaku di semua jalur}\\{\tiny\mdseries identitas agen dan pihak yang diwakili, kuota per agen, batas langkah per tugas, dan catatan audit}};
+
+  \draw[panah] (usulan) -- (t1);
+  \draw[panah] (t1) -- node[label] {tidak} (baca);
+  \draw[panah] (t1) -- node[label] {ya} (t2);
+  \draw[panah] (t2) -- node[label] {ya} (tutup);
+  \draw[panah] (t2) -- node[label] {tidak} (t3);
+  \draw[panah] (t3.south) -- ++(0,-0.25) -| node[label, pos=0.7] {tidak} (terbatas.north);
+  \draw[panah] (t3.south) -- ++(0,-0.25) -| node[label, pos=0.7] {ya} (tulis.north);
+  \draw[panah] (terbatas.south) -- (terbatas.south |- semua.north);
+  \draw[panah] (tulis.south) -- (tulis.south |- semua.north);
+\end{tikzpicture}

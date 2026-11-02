@@ -1,0 +1,6 @@
+# Kegunaan: pemisalan empat pilihan lingkup portal selama 3 tahun, sumber tabel pilihan portal Bab 11, bukan harga produk. Cara pakai: salin, ganti asumsinya, lalu jalankan hitung-onboarding-portal.py.
+pilihan,penyiapan_juta,pendampingan_jam_per_klinik,tiket_per_klinik_per_bulan,pemeliharaan_jam_per_tahun,tunggu_verifikasi_jam,tunggu_akun_uji_jam
+Tanpa portal,0,24,4,0,24,16
+P1 halaman statis,14.4,8,2,40,4,16
+P2 portal bawaan,24,4,1,60,4,0
+P3 portal kustom,150,4,0.5,300,4,0

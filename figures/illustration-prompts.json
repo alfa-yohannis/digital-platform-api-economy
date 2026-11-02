@@ -1,0 +1,145 @@
+{
+  "ch01-platform-dan-pertukaran.jpg": {
+    "tool": "imagegen bawaan",
+    "date": "2026-10-30",
+    "prompt": "Use case: scientific-educational. A finished landscape 16:9 conceptual illustration for an Indonesian postgraduate textbook using a fictional healthcare network as a teaching case. Clean flat editorial illustration with carefully composed people and concrete everyday visual metaphors, professional adult education style. Palette: restrained deep green #257147, soft blue, light gray, white background, small muted orange highlights only where helpful. No text, letters, numbers, labels, logos, watermarks, or legible screens. No private medical data. One coherent scene, visually clear at printed textbook size. A healthcare coordination hub makes useful connections between patients, a small partner clinic, a laboratory, and a hospital. In the foreground a clinic coordinator and a hospital coordinator exchange a small sealed standardized information parcel through a shared service window; in the background several independent providers meet around a central green shared plaza. Convey the difference between a simple one-way pipeline and a platform enabling interactions between several parties, with a request parcel going out and a distinct response parcel returning. Keep this an inviting everyday metaphor, not a network diagram.",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "bytes": 341655,
+    "note": "Ilustrasi konseptual; bukan dokumentasi pasien atau sistem produksi."
+  },
+  "ch02-efek-jaringan.jpg": {
+    "tool": "imagegen bawaan",
+    "date": "2026-10-30",
+    "prompt": "Use case: scientific-educational. A finished landscape 16:9 conceptual illustration for an Indonesian postgraduate textbook using a fictional healthcare network as a teaching case. Clean flat editorial illustration with carefully composed people and concrete everyday visual metaphors, professional adult education style. Palette: restrained deep green #257147, soft blue, light gray, white background, small muted orange highlights only where helpful. No text, letters, numbers, labels, logos, watermarks, or legible screens. No private medical data. One coherent scene, visually clear at printed textbook size. A small healthcare marketplace plaza with two complementary sides: patients arriving along one side and independent doctors arriving along the other. As more matching participants join, several useful conversations and service exchanges happen in the center; at one far edge an overcrowded cluster is gently managed by a coordinator. Convey positive cross-side network effects, the need to seed both sides, and a small hint of quality control. No arrows or labels needed.",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "bytes": 327593,
+    "note": "Ilustrasi konseptual; bukan dokumentasi pasien atau sistem produksi."
+  },
+  "ch03-ekosistem-mitra.jpg": {
+    "tool": "imagegen bawaan",
+    "date": "2026-10-30",
+    "prompt": "Use case: scientific-educational. A finished landscape 16:9 conceptual illustration for an Indonesian postgraduate textbook using a fictional healthcare network as a teaching case. Clean flat editorial illustration with carefully composed people and concrete everyday visual metaphors, professional adult education style. Palette: restrained deep green #257147, soft blue, light gray, white background, small muted orange highlights only where helpful. No text, letters, numbers, labels, logos, watermarks, or legible screens. No private medical data. One coherent scene, visually clear at printed textbook size. A hospital coordinator, partner-clinic clinician, laboratory professional, pharmacist, and company representative around a round table joining distinct pieces of a shared patient-service pathway. Each professional retains their own small work area while the pieces fit into a coherent whole. Convey complementary roles, ecosystem orchestration, and sharing value without implying one party owns every partner.",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "bytes": 261230,
+    "note": "Ilustrasi konseptual; bukan dokumentasi pasien atau sistem produksi."
+  },
+  "ch04-api-sebagai-produk.jpg": {
+    "tool": "imagegen bawaan",
+    "date": "2026-10-30",
+    "prompt": "Use case: scientific-educational. A finished landscape 16:9 conceptual illustration for an Indonesian postgraduate textbook using a fictional healthcare network as a teaching case. Clean flat editorial illustration with carefully composed people and concrete everyday visual metaphors, professional adult education style. Palette: restrained deep green #257147, soft blue, light gray, white background, small muted orange highlights only where helpful. No text, letters, numbers, labels, logos, watermarks, or legible screens. No private medical data. One coherent scene, visually clear at printed textbook size. A maintained healthcare service kiosk used by several partner-clinic representatives. A product steward observes users, a technician maintains the kiosk, and a small support desk remains staffed behind it. Contrast ongoing product stewardship with a folded-up construction barrier set aside unobtrusively. The kiosk has a simple physical slot for exchanging standardized parcels, no screen text. Convey API as a living service with users and ownership.",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "bytes": 247425,
+    "note": "Ilustrasi konseptual; bukan dokumentasi pasien atau sistem produksi."
+  },
+  "ch05-pilihan-jalur-integrasi.jpg": {
+    "tool": "imagegen bawaan",
+    "date": "2026-10-30",
+    "prompt": "Use case: scientific-educational. A finished landscape 16:9 conceptual illustration for an Indonesian postgraduate textbook using a fictional healthcare network as a teaching case. Clean flat editorial illustration with carefully composed people and concrete everyday visual metaphors, professional adult education style. Palette: restrained deep green #257147, soft blue, light gray, white background, small muted orange highlights only where helpful. No text, letters, numbers, labels, logos, watermarks, or legible screens. No private medical data. One coherent scene, visually clear at printed textbook size. One cohesive hospital-campus scene showing three communication methods: two coordinators speaking directly through a service window, a courier delivering a sealed notification to a clinic mailbox, and a visitor collecting a tailored selection of small colored information cards from a catalog counter. Clearly separate direct request/response, asynchronous notification, and selecting needed data. Show practical choices rather than a decorative technical network.",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "bytes": 254361,
+    "note": "Ilustrasi konseptual; bukan dokumentasi pasien atau sistem produksi."
+  },
+  "ch06-akses-sesuai-kewenangan.jpg": {
+    "tool": "imagegen bawaan",
+    "date": "2026-10-30",
+    "prompt": "Use case: scientific-educational. A finished landscape 16:9 conceptual illustration for an Indonesian postgraduate textbook using a fictional healthcare network as a teaching case. Clean flat editorial illustration with carefully composed people and concrete everyday visual metaphors, professional adult education style. Palette: restrained deep green #257147, soft blue, light gray, white background, small muted orange highlights only where helpful. No text, letters, numbers, labels, logos, watermarks, or legible screens. No private medical data. One coherent scene, visually clear at printed textbook size. A secure hospital records corridor. A recognized partner representative presents a badge at the entrance, but a second staff member separately checks which locked compartment the visitor is permitted to access. Other compartments remain closed. Small generic sealed folders contain no patient details. Convey the crucial distinction between authentication and object-level authorization, restrained calm security rather than hackers or padlock wallpaper.",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "bytes": 195312,
+    "note": "Ilustrasi konseptual; bukan dokumentasi pasien atau sistem produksi."
+  },
+  "ch07-standar-pertukaran-kesehatan.jpg": {
+    "tool": "imagegen bawaan",
+    "date": "2026-10-30",
+    "prompt": "Use case: scientific-educational. A finished landscape 16:9 conceptual illustration for an Indonesian postgraduate textbook using a fictional healthcare network as a teaching case. Clean flat editorial illustration with carefully composed people and concrete everyday visual metaphors, professional adult education style. Palette: restrained deep green #257147, soft blue, light gray, white background, small muted orange highlights only where helpful. No text, letters, numbers, labels, logos, watermarks, or legible screens. No private medical data. One coherent scene, visually clear at printed textbook size. Staff from two different clinics and a hospital align differently shaped blank information cards into a shared standardized tray at a healthcare exchange desk. A laboratory professional checks matching shapes and colors, and a payment partner uses a separate coordinated tray. Convey shared data standards, consistent meaning, and distinct clinical versus financial processes. No real logos, codes, records, or text.",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "bytes": 251029,
+    "note": "Ilustrasi konseptual; bukan dokumentasi pasien atau sistem produksi."
+  },
+  "ch08-prioritas-portofolio-api.jpg": {
+    "tool": "imagegen bawaan",
+    "date": "2026-10-30",
+    "prompt": "Use case: scientific-educational. A finished landscape 16:9 conceptual illustration for an Indonesian postgraduate textbook using a fictional healthcare network as a teaching case. Clean flat editorial illustration with carefully composed people and concrete everyday visual metaphors, professional adult education style. Palette: restrained deep green #257147, soft blue, light gray, white background, small muted orange highlights only where helpful. No text, letters, numbers, labels, logos, watermarks, or legible screens. No private medical data. One coherent scene, visually clear at printed textbook size. A healthcare leadership and technology team arranging several small service models on a planning table: appointment calendar icon, laboratory vial, patient-identity card with blank face, and partner-clinic model. They choose a small priority set while carefully keeping prerequisite pieces beneath it. Convey business-capability-driven API portfolio prioritization, explicit dependencies, and limited capacity.",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "bytes": 245689,
+    "note": "Ilustrasi konseptual; bukan dokumentasi pasien atau sistem produksi."
+  },
+  "ch09-kontrak-sebelum-membangun.jpg": {
+    "tool": "imagegen bawaan",
+    "date": "2026-10-30",
+    "prompt": "Use case: scientific-educational. A finished landscape 16:9 conceptual illustration for an Indonesian postgraduate textbook using a fictional healthcare network as a teaching case. Clean flat editorial illustration with carefully composed people and concrete everyday visual metaphors, professional adult education style. Palette: restrained deep green #257147, soft blue, light gray, white background, small muted orange highlights only where helpful. No text, letters, numbers, labels, logos, watermarks, or legible screens. No private medical data. One coherent scene, visually clear at printed textbook size. A clinic representative and a software vendor jointly review a large clean blueprint of a service window before a nearby builder assembles it. The blueprint contains only geometric fields and small neutral shapes, with a matching small sample prototype next to it. Include a normal-path parcel and a returned parcel with a small orange indicator. Convey contract-first design, shared expectations, and error cases without any text.",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "bytes": 242786,
+    "note": "Ilustrasi konseptual; bukan dokumentasi pasien atau sistem produksi."
+  },
+  "ch10-gerbang-dan-siklus-layanan.jpg": {
+    "tool": "imagegen bawaan",
+    "date": "2026-10-30",
+    "prompt": "Use case: scientific-educational. A finished landscape 16:9 conceptual illustration for an Indonesian postgraduate textbook using a fictional healthcare network as a teaching case. Clean flat editorial illustration with carefully composed people and concrete everyday visual metaphors, professional adult education style. Palette: restrained deep green #257147, soft blue, light gray, white background, small muted orange highlights only where helpful. No text, letters, numbers, labels, logos, watermarks, or legible screens. No private medical data. One coherent scene, visually clear at printed textbook size. A staffed gateway at the entrance to a hospital service campus routes partner visitors to different counters. A small parallel temporary walkway supports visitors migrating from an older service booth to a newer booth, with both available during transition. Show admission checks, traffic regulation, operations staff, and managed retirement. The gate is helpful rather than intimidating; no lettering or signs.",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "bytes": 365184,
+    "note": "Ilustrasi konseptual; bukan dokumentasi pasien atau sistem produksi."
+  },
+  "ch11-perjalanan-pengembang-mitra.jpg": {
+    "tool": "imagegen bawaan",
+    "date": "2026-10-30",
+    "prompt": "Use case: scientific-educational. A finished landscape 16:9 conceptual illustration for an Indonesian postgraduate textbook using a fictional healthcare network as a teaching case. Clean flat editorial illustration with carefully composed people and concrete everyday visual metaphors, professional adult education style. Palette: restrained deep green #257147, soft blue, light gray, white background, small muted orange highlights only where helpful. No text, letters, numbers, labels, logos, watermarks, or legible screens. No private medical data. One coherent scene, visually clear at printed textbook size. A partner developer follows a welcoming sequence through a healthcare innovation center: information desk, clearly safe miniature test counter with synthetic colored parcels, and a supervised production doorway. A helpful guide and a simple kit of blank example cards make the first task easy. Convey developer experience, sandbox practice, onboarding, and support. Avoid literal text or any complex user interface.",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "bytes": 255317,
+    "note": "Ilustrasi konseptual; bukan dokumentasi pasien atau sistem produksi."
+  },
+  "ch12-nilai-dan-metrik-platform.jpg": {
+    "tool": "imagegen bawaan",
+    "date": "2026-10-30",
+    "prompt": "Use case: scientific-educational. A finished landscape 16:9 conceptual illustration for an Indonesian postgraduate textbook using a fictional healthcare network as a teaching case. Clean flat editorial illustration with carefully composed people and concrete everyday visual metaphors, professional adult education style. Palette: restrained deep green #257147, soft blue, light gray, white background, small muted orange highlights only where helpful. No text, letters, numbers, labels, logos, watermarks, or legible screens. No private medical data. One coherent scene, visually clear at printed textbook size. A healthcare team at a table connects a small set of coins and resource blocks on one side to completed patient-service journeys represented by people arriving successfully at a clinic on the other. Many tiny request tokens are separated from a smaller set of meaningful completed journeys. Convey API unit economics and outcome-based platform metrics rather than merely counting calls. No numeric charts or labels.",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "bytes": 309528,
+    "note": "Ilustrasi konseptual; bukan dokumentasi pasien atau sistem produksi."
+  },
+  "ch13-tata-kelola-federasi.jpg": {
+    "tool": "imagegen bawaan",
+    "date": "2026-10-30",
+    "prompt": "Use case: scientific-educational. A finished landscape 16:9 conceptual illustration for an Indonesian postgraduate textbook using a fictional healthcare network as a teaching case. Clean flat editorial illustration with carefully composed people and concrete everyday visual metaphors, professional adult education style. Palette: restrained deep green #257147, soft blue, light gray, white background, small muted orange highlights only where helpful. No text, letters, numbers, labels, logos, watermarks, or legible screens. No private medical data. One coherent scene, visually clear at printed textbook size. Representatives from five healthcare facilities meet around a shared central set of green guide rails and a common toolbox. Each facility retains a distinct small workbench within the same agreed boundaries. A neutral facilitator compares proposals fairly, with partner participants given equal visible access. Convey federated API governance, minimum shared standards, fair ecosystem rules, and accountable local autonomy.",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "bytes": 309566,
+    "note": "Ilustrasi konseptual; bukan dokumentasi pasien atau sistem produksi."
+  }
+}

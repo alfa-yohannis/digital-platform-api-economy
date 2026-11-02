@@ -1,0 +1,36 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  kotak/.style={draw, rounded corners, minimum height=0.8cm, align=center,
+                font=\scriptsize\bfseries},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  duaarah/.style={{Stealth[length=2mm]}-{Stealth[length=2mm]}, thick},
+  ket/.style={font=\tiny, align=center, fill=white, inner sep=1.5pt}
+]
+  \node[kotak, fill=blue!8, minimum width=2.3cm] (klinik) at (-4.7,1.0) {Klinik mitra};
+  \node[kotak, fill=blue!8, minimum width=2.3cm] (lab) at (-4.7,0) {Laboratorium mitra};
+  \node[kotak, fill=blue!8, minimum width=2.3cm] (apotek) at (-4.7,-1.0) {Apotek daring};
+
+  \node[kotak, fill=orange!12, minimum width=4.5cm] (akses) at (0,1.0)
+    {Akses teknis\\{\tiny\mdseries API, SDK, \textit{sandbox}, kode akses}};
+  \node[kotak, fill=orange!12, minimum width=4.5cm] (tahu) at (0,0)
+    {Pengetahuan\\{\tiny\mdseries panduan, contoh, kasus gagal}};
+  \node[kotak, fill=orange!12, minimum width=4.5cm] (aturan) at (0,-1.0)
+    {Aturan\\{\tiny\mdseries syarat penggunaan, kontrak, jalur eskalasi}};
+
+  \node[kotak, fill=praditagreen!15, minimum width=2.3cm, minimum height=2.8cm,
+        text width=2.1cm] (inti) at (4.7,0)
+    {Inti platform\\[2pt]{\tiny\mdseries jadwal, pemesanan, rekam medis, kendali akses}};
+
+  \draw[duaarah] (klinik.east) -- (akses.west);
+  \draw[duaarah] (lab.east) -- (tahu.west);
+  \draw[duaarah] (apotek.east) -- (aturan.west);
+  \draw[duaarah] (akses.east) -- ([yshift=1.0cm]inti.west);
+  \draw[duaarah] (tahu.east) -- (inti.west);
+  \draw[duaarah] (aturan.east) -- ([yshift=-1.0cm]inti.west);
+
+  \node[font=\scriptsize\bfseries] at (0,1.68) {\textit{Boundary resources}};
+  \draw[panah] (4.7,2.25) -- node[ket] {\textit{resourcing}: memindahkan kemampuan ke mitra}
+    (-4.7,2.25);
+  \draw[panah] (-4.7,-1.85) -- node[ket] {\textit{securing}: menjaga kendali atas platform}
+    (4.7,-1.85);
+\end{tikzpicture}

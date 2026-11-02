@@ -1,0 +1,45 @@
+\begin{tikzpicture}[
+  kotak/.style={draw, rounded corners, text width=2.45cm, minimum height=0.95cm,
+    align=flush center, font=\scriptsize},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  dua/.style={{Stealth[length=2mm]}-{Stealth[length=2mm]}, thick},
+  label/.style={font=\tiny, fill=white, inner sep=1pt}
+]
+  % Latar host: dimiliki perusahaan klien, bukan Medikara.
+  \draw[rounded corners, fill=praditagreen!15] (1.35,0.55) rectangle (4.75,-3.7);
+  \node[font=\scriptsize\bfseries] at (3.05,0.25) {Host: aplikasi agen};
+
+  \node[kotak, fill=blue!8, text width=1.55cm] (pengguna) at (0,-1.15)
+    {\textbf{Pengguna}\\{\tiny\mdseries memberi tugas, menyetujui}};
+  \node[kotak, fill=blue!8] (model) at (3.05,-0.5)
+    {\textbf{Model bahasa}\\{\tiny\mdseries memilih \textit{tool}}};
+  \node[kotak, fill=blue!8] (client1) at (3.05,-1.8)
+    {\textbf{Client 1}\\{\tiny\mdseries penghubung protokol}};
+  \node[kotak, fill=blue!8] (client2) at (3.05,-3.05)
+    {\textbf{Client 2}\\{\tiny\mdseries penghubung protokol}};
+
+  \node[kotak, fill=orange!12] (server1) at (7.8,-1.8)
+    {\textbf{Server MCP Jadwal}\\{\tiny\mdseries \textit{tools}, \textit{resources}, \textit{prompts}}};
+  \node[kotak, fill=blue!8] (server2) at (7.8,-3.05)
+    {\textbf{Server MCP lain}\\{\tiny\mdseries belum tentu tepercaya}};
+  \node[kotak, fill=green!10] (api) at (11.35,-1.8)
+    {\textbf{API-01 dan API-06}\\{\tiny\mdseries hak atas objek diperiksa di sini}};
+  \node[kotak, fill=gray!35] (data) at (11.35,-3.05)
+    {\textbf{Data pihak lain}\\{\tiny\mdseries di luar kendali Medikara}};
+
+  \draw[panah] (pengguna.east) -- node[above=1pt, font=\tiny] {tugas} (1.82,-1.15);
+  \draw[dua] (model) -- (client1);
+  \draw[dua] (client1.east) -- (server1.west);
+  \node[font=\tiny, above=1pt] at (5.72,-1.8) {JSON-RPC 2.0};
+  \draw[dua] (client2.east) -- (server2.west);
+  \draw[dua] (server1.east) -- (api.west);
+  \node[font=\tiny, align=center, above=1pt] at (9.57,-1.8) {token\\sendiri};
+  \draw[dua] (server2.east) -- (data.west);
+
+  % Garis batas kepercayaan antara host dan server.
+  \draw[dashed, red!70!black, thick] (5.0,0.55) -- (5.0,-3.7);
+  \node[font=\tiny, red!70!black, align=left, anchor=west] at (5.1,0.25)
+    {batas kepercayaan: deskripsi dan hasil\\dari server diperlakukan sebagai data};
+  \node[font=\tiny, align=center] at (11.35,-0.85)
+    {milik Medikara, memegang\\keputusan akhir};
+\end{tikzpicture}

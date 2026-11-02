@@ -1,0 +1,412 @@
+# Kontrak OpenAPI API-01 Jadwal dan Janji Temu, contoh terisi Bab 09, data sintetis.
+# Cara pakai: baca bersama lembar aturan bisnis, lalu jalankan periksa-kontrak.py.
+openapi: 3.2.0
+info:
+  title: API-01 Jadwal dan Janji Temu
+  summary: Mencari slot dokter dan membuat janji temu di lima rumah sakit.
+  description: >-
+    Penyedia adalah Medikara Health, organisasi fiktif. Konsumen adalah
+    aplikasi Medikara+ dan 40 klinik mitra. Kuota 300 panggilan per hari per
+    klinik. Kontrak ini tidak membuka rekam medis. Konsumen wajib mengabaikan
+    bidang jawaban yang tidak dikenal.
+  version: 1.0.0
+  contact:
+    name: Manajer Layanan Rawat Jalan
+    email: api-01@medikara.example
+servers:
+  - url: https://api.medikara.example
+    description: Alamat fiktif untuk latihan.
+tags:
+  - name: jadwal
+    description: Membaca slot yang dapat dipesan.
+  - name: janji-temu
+    description: Membuat, membaca, dan membatalkan janji temu.
+paths:
+  /jadwal-dokter:
+    get:
+      operationId: cariJadwalDokter
+      summary: Mencari slot dokter pada satu rumah sakit dan satu tanggal.
+      description: >-
+        Daftar slot bukan janji. Jawaban boleh berumur sampai lima menit,
+        sehingga slot dapat terisi sebelum dipesan. Urutan selalu menurut
+        waktu mulai, lalu menurut pengenal slot.
+      tags: [jadwal]
+      security:
+        - tokenMedikara: [jadwal.baca]
+      parameters:
+        - $ref: '#/components/parameters/RumahSakit'
+        - $ref: '#/components/parameters/Tanggal'
+        - $ref: '#/components/parameters/Spesialis'
+        - $ref: '#/components/parameters/Batas'
+        - $ref: '#/components/parameters/Kursor'
+      responses:
+        '200':
+          description: Pencarian berhasil. Daftar kosong berarti tidak ada slot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DaftarSlot'
+              examples:
+                adaSlot:
+                  $ref: '#/components/examples/DaftarSlotBekasi'
+        '400':
+          $ref: '#/components/responses/MasukanTidakSah'
+        '401':
+          $ref: '#/components/responses/TokenTidakSah'
+        '403':
+          $ref: '#/components/responses/AksesTidakCukup'
+        '429':
+          $ref: '#/components/responses/KuotaHabis'
+        '503':
+          $ref: '#/components/responses/SimrsTidakTersedia'
+  /janji-temu:
+    post:
+      operationId: buatJanjiTemu
+      summary: Mengunci slot dan membuat janji temu.
+      description: >-
+        Hanya 201 yang boleh ditampilkan sebagai janji terkonfirmasi.
+        202 berarti permintaan masih diproses dan hasilnya belum pasti.
+      tags: [janji-temu]
+      security:
+        - tokenMedikara: [janji.tulis]
+      parameters:
+        - $ref: '#/components/parameters/KunciIdempotensi'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JanjiTemuBaru'
+      responses:
+        '201':
+          description: Janji terkonfirmasi. Slot sudah terkunci di SIMRS.
+          headers:
+            Location:
+              $ref: '#/components/headers/LokasiJanji'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JanjiTemu'
+        '202':
+          description: Permintaan diterima. Janji belum terkonfirmasi.
+          headers:
+            Location:
+              $ref: '#/components/headers/LokasiJanji'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JanjiTemu'
+        '400':
+          $ref: '#/components/responses/MasukanTidakSah'
+        '401':
+          $ref: '#/components/responses/TokenTidakSah'
+        '403':
+          $ref: '#/components/responses/AksesTidakCukup'
+        '409':
+          $ref: '#/components/responses/SlotTerisi'
+        '429':
+          $ref: '#/components/responses/KuotaHabis'
+        '503':
+          $ref: '#/components/responses/SimrsTidakTersedia'
+  /janji-temu/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdJanjiTemu'
+    get:
+      operationId: bacaJanjiTemu
+      summary: Membaca status satu janji temu.
+      tags: [janji-temu]
+      security:
+        - tokenMedikara: [janji.baca]
+      responses:
+        '200':
+          description: Status janji temu saat ini.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JanjiTemu'
+        '401':
+          $ref: '#/components/responses/TokenTidakSah'
+        '404':
+          $ref: '#/components/responses/JanjiTidakDitemukan'
+        '429':
+          $ref: '#/components/responses/KuotaHabis'
+    delete:
+      operationId: batalkanJanjiTemu
+      summary: Membatalkan janji temu paling lambat dua jam sebelum slot mulai.
+      description: >-
+        Pembatalan mengubah status menjadi dibatalkan. Data janji tetap ada
+        untuk rekonsiliasi. Pembatalan berulang memberi jawaban yang sama.
+      tags: [janji-temu]
+      security:
+        - tokenMedikara: [janji.tulis]
+      responses:
+        '200':
+          description: Janji sudah berstatus dibatalkan.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JanjiTemu'
+        '401':
+          $ref: '#/components/responses/TokenTidakSah'
+        '404':
+          $ref: '#/components/responses/JanjiTidakDitemukan'
+        '409':
+          $ref: '#/components/responses/PembatalanTerlambat'
+        '429':
+          $ref: '#/components/responses/KuotaHabis'
+components:
+  parameters:
+    RumahSakit:
+      name: rumahSakit
+      in: query
+      required: true
+      description: Satu dari lima rumah sakit Medikara.
+      schema:
+        $ref: '#/components/schemas/KodeRumahSakit'
+    Tanggal:
+      name: tanggal
+      in: query
+      required: true
+      description: Tanggal praktik, satu hari per pencarian.
+      schema:
+        type: string
+        format: date
+      example: '2026-11-02'
+    Spesialis:
+      name: spesialis
+      in: query
+      description: Mempersempit daftar menurut spesialis dokter.
+      schema:
+        type: string
+      example: anak
+    Batas:
+      name: batas
+      in: query
+      description: Jumlah slot per halaman.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+    Kursor:
+      name: kursor
+      in: query
+      description: Penunjuk halaman berikutnya dari jawaban sebelumnya.
+      schema:
+        type: string
+    KunciIdempotensi:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: >-
+        Nilai unik per pemesanan. Kiriman ulang dengan kunci yang sama selama
+        24 jam mengembalikan janji yang sama, bukan janji baru.
+      schema:
+        type: string
+        maxLength: 64
+      example: '"8e03978e-40d5-43e8-bc93-6894a57f9324"'
+    IdJanjiTemu:
+      name: id
+      in: path
+      required: true
+      description: Pengenal janji temu.
+      schema:
+        $ref: '#/components/schemas/IdJanjiTemu'
+  headers:
+    LokasiJanji:
+      description: Alamat janji temu untuk membaca statusnya.
+      schema:
+        type: string
+      example: /janji-temu/JT-40771
+    TungguUlang:
+      description: Jumlah detik sebelum konsumen boleh mencoba lagi.
+      schema:
+        type: integer
+        minimum: 0
+      example: 3600
+  schemas:
+    KodeRumahSakit:
+      type: string
+      enum: [jakarta, bekasi, depok, bogor, bandung]
+    IdSlot:
+      type: string
+      pattern: '^[A-Z]{3}-[0-9]{8}-[0-9]{4}$'
+      examples: [BKS-20261102-0915]
+    IdPasien:
+      type: string
+      pattern: '^PSN-[0-9]{5}$'
+      examples: [PSN-58213]
+    IdJanjiTemu:
+      type: string
+      pattern: '^JT-[0-9]{5}$'
+      examples: [JT-40771]
+    Slot:
+      type: object
+      required: [id, namaDokter, spesialis, mulai, durasiMenit]
+      properties:
+        id:
+          $ref: '#/components/schemas/IdSlot'
+        namaDokter:
+          type: string
+        spesialis:
+          type: string
+        mulai:
+          type: string
+          format: date-time
+        durasiMenit:
+          type: integer
+          minimum: 5
+    DaftarSlot:
+      type: object
+      required: [rumahSakit, tanggal, slot]
+      properties:
+        rumahSakit:
+          $ref: '#/components/schemas/KodeRumahSakit'
+        tanggal:
+          type: string
+          format: date
+        slot:
+          type: array
+          maxItems: 50
+          items:
+            $ref: '#/components/schemas/Slot'
+        kursorBerikutnya:
+          type: string
+          description: Tidak ada pada halaman terakhir.
+    JanjiTemuBaru:
+      type: object
+      required: [slot, pasien]
+      properties:
+        slot:
+          $ref: '#/components/schemas/IdSlot'
+        pasien:
+          $ref: '#/components/schemas/IdPasien'
+    JanjiTemu:
+      type: object
+      required: [id, slot, pasien, status]
+      properties:
+        id:
+          $ref: '#/components/schemas/IdJanjiTemu'
+        slot:
+          $ref: '#/components/schemas/IdSlot'
+        pasien:
+          $ref: '#/components/schemas/IdPasien'
+        status:
+          type: string
+          enum: [menunggu, terkonfirmasi, ditolak, dibatalkan]
+          description: Hanya terkonfirmasi yang berarti slot sudah terkunci.
+    Masalah:
+      type: object
+      description: Bentuk Problem Details menurut RFC 9457.
+      required: [type, title, status]
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri-reference
+  examples:
+    DaftarSlotBekasi:
+      summary: Satu slot sintetis di rumah sakit Bekasi.
+      value:
+        rumahSakit: bekasi
+        tanggal: '2026-11-02'
+        slot:
+          - id: BKS-20261102-0915
+            namaDokter: dr. Contoh Sintetis
+            spesialis: anak
+            mulai: '2026-11-02T09:15:00+07:00'
+            durasiMenit: 15
+    SlotTerisi:
+      summary: Slot sudah dipakai pasien lain.
+      value:
+        type: https://api.medikara.example/masalah/slot-terisi
+        title: Slot sudah terisi
+        status: 409
+        detail: Slot BKS-20261102-0915 sudah terisi. Pilih slot lain.
+        instance: /kejadian/MSL-20261102-00731
+  responses:
+    MasukanTidakSah:
+      description: Format salah atau nomor pasien tidak dapat dipakai.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Masalah'
+    TokenTidakSah:
+      description: Token tidak ada, tidak sah, atau kedaluwarsa.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Masalah'
+    AksesTidakCukup:
+      description: Token sah, tetapi scope atau hak atas pasien tidak cukup.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Masalah'
+    JanjiTidakDitemukan:
+      description: Janji tidak ada atau bukan milik konsumen pemanggil.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Masalah'
+    SlotTerisi:
+      description: Slot sudah terisi. Janji temu tidak dibuat.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Masalah'
+          examples:
+            slotTerisi:
+              $ref: '#/components/examples/SlotTerisi'
+    PembatalanTerlambat:
+      description: Slot mulai kurang dari dua jam lagi. Hubungi rumah sakit.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Masalah'
+    KuotaHabis:
+      description: Kuota 300 panggilan per hari per klinik sudah habis.
+      headers:
+        Retry-After:
+          $ref: '#/components/headers/TungguUlang'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Masalah'
+    SimrsTidakTersedia:
+      description: SIMRS sedang diperbarui. Ini bukan berarti tidak ada jadwal.
+      headers:
+        Retry-After:
+          $ref: '#/components/headers/TungguUlang'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Masalah'
+  securitySchemes:
+    tokenMedikara:
+      type: oauth2
+      description: >-
+        Klinik mitra memakai client credentials. Medikara+ memakai authorization
+        code dengan PKCE. Layanan tetap memeriksa hak atas pasien.
+      flows:
+        clientCredentials:
+          tokenUrl: https://auth.medikara.example/oauth2/token
+          scopes:
+            jadwal.baca: Membaca slot.
+            janji.baca: Membaca status janji temu.
+            janji.tulis: Membuat dan membatalkan janji temu.
+        authorizationCode:
+          authorizationUrl: https://auth.medikara.example/oauth2/authorize
+          tokenUrl: https://auth.medikara.example/oauth2/token
+          scopes:
+            jadwal.baca: Membaca slot.
+            janji.baca: Membaca status janji temu.
+            janji.tulis: Membuat dan membatalkan janji temu.

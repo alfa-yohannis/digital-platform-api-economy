@@ -1,0 +1,39 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  kotak/.style={draw, rounded corners, minimum height=0.95cm, minimum width=2.5cm,
+                align=center, font=\scriptsize\bfseries},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  uang/.style={panah},
+  data/.style={panah, dashed},
+  layanan/.style={panah, draw=praditagreen},
+  reputasi/.style={panah, dotted},
+  ket/.style={font=\tiny, align=center, fill=white, inner sep=1.5pt}
+]
+  \node[kotak, fill=blue!8] (perusahaan) at (-4.6,1.4)
+    {Perusahaan klien\\{\tiny\mdseries Rp500.000 per karyawan}};
+  \node[kotak, fill=praditagreen!15] (medikara) at (0,1.4)
+    {Medikara+\\{\tiny\mdseries menyimpan Rp10 juta}};
+  \node[kotak, fill=orange!12] (karyawan) at (-4.6,-1.4)
+    {200 karyawan\\{\tiny\mdseries pengguna}};
+  \node[kotak, fill=blue!8] (klinik) at (0,-1.4)
+    {Klinik mitra\\{\tiny\mdseries pelengkap}};
+  \node[kotak, fill=blue!8] (lab) at (4.6,-1.4)
+    {Laboratorium mitra\\{\tiny\mdseries pelengkap}};
+
+  \draw[uang] ([yshift=2.5mm]perusahaan.east) --
+    node[ket, above=1pt] {uang: Rp100 juta} ([yshift=2.5mm]medikara.west);
+  \draw[data] ([yshift=-2.5mm]medikara.west) --
+    node[ket, below=1pt] {data: rekap agregat} ([yshift=-2.5mm]perusahaan.east);
+  \draw[uang] (medikara.south) -- node[ket] {uang: Rp70 juta} (klinik.north);
+  \draw[uang] (medikara.east) -- node[ket] {uang: Rp20 juta} (lab.north);
+  \draw[data] (lab.west) -- node[ket, above=1pt] {data: 200 hasil} (klinik.east);
+  \draw[layanan] (klinik.west) --
+    node[ket, above=1pt] {layanan:\\200 pemeriksaan} (karyawan.east);
+  \draw[reputasi] (karyawan.north) -- node[ket] {reputasi: ulasan}
+    (medikara.south west);
+
+  \draw[uang] (2.7,2.15) -- (3.5,2.15) node[right, font=\tiny] {uang};
+  \draw[data] (2.7,1.85) -- (3.5,1.85) node[right, font=\tiny] {data};
+  \draw[layanan] (2.7,1.55) -- (3.5,1.55) node[right, font=\tiny] {layanan};
+  \draw[reputasi] (2.7,1.25) -- (3.5,1.25) node[right, font=\tiny] {reputasi};
+\end{tikzpicture}

@@ -1,0 +1,21 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000},
+  judul/.style={draw, rounded corners, fill=praditagreen!15, text width=11.6cm, minimum height=0.7cm, align=center},
+  sel/.style={draw, rounded corners, fill=blue!8, text width=2.6cm, minimum height=2.45cm, align=left, anchor=north west},
+  tekan/.style={sel, fill=orange!12},
+  hasil/.style={sel, fill=green!10}
+]
+  % Baris atas menjawab apakah kandidat bernilai, baris bawah menjawab apakah kandidat layak dijalankan.
+  \node[judul] at (5.95,0.55) {\textbf{Kanvas produk API-01: Jadwal dan Janji Temu.} Versi 0.1, seluruh isi masih hipotesis};
+
+  \node[sel] at (0.0,0) {\textbf{Pengguna}\\Aplikasi Medikara+ dan petugas 40 klinik mitra};
+  \node[tekan] at (3.0,0) {\textbf{Masalah}\\Jadwal dibaca langsung dari basis data, dan pemesanan masih diikuti telepon};
+  \node[sel] at (6.0,0) {\textbf{Tawaran nilai}\\Slot terkonfirmasi saat dipesan, tanpa telepon ulang};
+  \node[hasil] at (9.0,0) {\textbf{Ukuran}\\Janji terkonfirmasi tanpa kerja ulang, telepon konfirmasi turun dari 10 ke 2 persen};
+
+  \node[sel] at (0.0,-2.7) {\textbf{Operasi}\\Cari jadwal, pilih slot, kunci slot, batalkan, baca status};
+  \node[sel] at (3.0,-2.7) {\textbf{Dependensi}\\API-06, adaptor 5 SIMRS, perubahan aplikasi oleh vendor Medikara+};
+  \node[tekan] at (6.0,-2.7) {\textbf{Risiko}\\Slot ganda, jadwal kosong saat SIMRS diperbarui, akses 138 tabel bila peralihan tertunda};
+  \node[hasil] at (9.0,-2.7) {\textbf{Pemilik}\\Manajer Layanan Rawat Jalan. Tim integrasi menjaga operasi};
+\end{tikzpicture}

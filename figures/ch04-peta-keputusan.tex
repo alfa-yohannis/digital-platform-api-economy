@@ -1,0 +1,37 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  mulai/.style={draw, rounded corners, fill=praditagreen!15, text width=1.75cm,
+                minimum height=1.25cm, align=center, font=\scriptsize\bfseries},
+  tanya/.style={draw, rounded corners, fill=blue!8, text width=1.95cm,
+                minimum height=1.25cm, align=center},
+  telusur/.style={draw, rounded corners, fill=gray!35, text width=1.95cm,
+                  minimum height=1.1cm, align=center},
+  rapikan/.style={draw, rounded corners, fill=orange!12, text width=1.95cm,
+                  minimum height=1.1cm, align=center},
+  produk/.style={draw, rounded corners, fill=green!10, text width=2.15cm,
+                 minimum height=1.25cm, align=center, font=\scriptsize\bfseries},
+  ket/.style={font=\tiny, fill=white, inner sep=1pt},
+  panah/.style={-{Stealth[length=2mm]}, thick}
+]
+  % Setiap baris inventaris melewati tiga pertanyaan, dari bukti sampai kepemilikan kemampuan.
+  \node[mulai] (baris) at (0,0) {Satu baris inventaris};
+  \node[tanya] (q1) at (2.55,0) {Buktinya cukup untuk dinilai?};
+  \node[tanya] (q2) at (5.2,0) {Ada biaya atau risiko yang terukur?};
+  \node[tanya] (q3) at (7.85,0)
+    {Dipakai banyak pihak, dan milik organisasi?};
+  \node[produk] (p) at (10.6,0)
+    {Jadikan\\produk API\\{\tiny\mdseries lalu pilih audiens}};
+
+  \node[telusur] (t1) at (2.55,-2.2) {Telusuri dulu\\{\tiny\mdseries INT-10}};
+  \node[telusur] (t2) at (5.2,-2.2) {Biarkan dan pantau\\{\tiny\mdseries INT-04}};
+  \node[rapikan] (t3) at (7.85,-2.2) {Rapikan sambungan\\{\tiny\mdseries INT-01, 02, 08, 09}};
+  \node[font=\tiny, text width=2.15cm, align=center] at (10.6,-1.05) {INT-03, 05, 06, 07};
+
+  \draw[panah] (baris) -- (q1);
+  \draw[panah] (q1) -- node[ket, above=2pt] {ya} (q2);
+  \draw[panah] (q2) -- node[ket, above=2pt] {ya} (q3);
+  \draw[panah] (q3) -- node[ket, above=2pt] {ya} (p);
+  \draw[panah] (q1) -- node[ket] {tidak} (t1);
+  \draw[panah] (q2) -- node[ket] {tidak} (t2);
+  \draw[panah] (q3) -- node[ket] {tidak} (t3);
+\end{tikzpicture}

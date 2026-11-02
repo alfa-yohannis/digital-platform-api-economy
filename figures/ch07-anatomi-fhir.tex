@@ -1,0 +1,25 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000},
+  res/.style={draw, rounded corners, fill=blue!8, text width=2.3cm, minimum height=1.0cm, align=center},
+  inti/.style={res, fill=orange!12},
+  bilah/.style={draw, rounded corners, fill=praditagreen!15, text width=10.9cm, minimum height=0.62cm, align=center},
+  ket/.style={font=\tiny, align=center},
+  panah/.style={-{Stealth[length=2mm]}, thick}
+]
+  \node[res] (kondisi) at (0,1.95) {Condition\\{\tiny\mdseries diagnosis}};
+  \node[res] (dokter) at (4.3,1.95) {Practitioner\\{\tiny\mdseries tenaga kesehatan}};
+  \node[res] (lokasi) at (8.6,1.95) {Location\\{\tiny\mdseries ruang atau poli}};
+  \node[res] (pasien) at (0,0) {Patient\\{\tiny\mdseries data administratif pasien}};
+  \node[inti] (kunjungan) at (4.3,0) {Encounter\\{\tiny\mdseries satu pertemuan layanan}};
+  \node[res] (organisasi) at (8.6,0) {Organization\\{\tiny\mdseries rumah sakit atau klinik}};
+
+  \draw[panah] (kunjungan) -- node[above, ket] {\texttt{subject}} (pasien);
+  \draw[panah] (kunjungan) -- node[above, ket] {\texttt{serviceProvider}} (organisasi);
+  \draw[panah] (kunjungan) -- node[right, ket] {\texttt{participant}} (dokter);
+  \draw[panah] (kunjungan.north west) -- node[above, ket, sloped] {\texttt{diagnosis}} (kondisi.south east);
+  \draw[panah] (kunjungan.north east) -- node[above, ket, sloped] {\texttt{location}} (lokasi.south west);
+
+  \node[bilah] at (4.3,-1.2) {\textbf{Profil} memperketat aturan dasar. Contoh SATUSEHAT: \texttt{Patient.identifier} dan \texttt{Patient.name} wajib};
+  \node[bilah] at (4.3,-2.0) {\textbf{Terminologi} membatasi nilai. Contoh: \texttt{Patient.gender} hanya \texttt{male}, \texttt{female}, \texttt{other}, \texttt{unknown}};
+\end{tikzpicture}

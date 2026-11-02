@@ -6,26 +6,28 @@ Mata kuliah ini membahas cara organisasi membuka layanan dan datanya kepada mitr
 
 Mata kuliah ini satu dari empat mata kuliah yang dijalankan sebagai satu proyek capstone. Tiga lainnya adalah [IT40513 Enterprise Architecture & Digital Blueprint](https://github.com/alfa-yohannis/enterprise-architecture-digital-blueprint), [IT40713 Cloud-Native & Microservices Architecture](https://github.com/alfa-yohannis/cloud-native-microservices-architecture), dan [IT40813 IT Governance, Risk & Compliance](https://github.com/alfa-yohannis/it-governance-risk-compliance). Tiap tim menyusun "Cetak Biru Transformasi Digital" untuk satu organisasi nyata, atau untuk kasus fiktif Medikara Health bila tidak punya akses. Sumbangan mata kuliah ini adalah strategi platform, potret integrasi dan API saat ini, rancangan platform API target, serta tata kelola dan peta jalan platform. Tatap muka hanya hari Sabtu untuk membahas progres proyek. Oleh karena itu modul dan slide disusun agar dapat dipelajari mandiri.
 
+**Berkas siap pakai.** [Modul PDF](module/digital-platform-api-economy.pdf) memuat 14 bab. Slide setiap sesi tersedia melalui kolom Slide pada Peta Pertemuan di bawah. Seluruh PDF dibuat dengan XeLaTeX dan BibTeX dari sumber di repositori ini.
+
 ## Peta Pertemuan
 
-Urutan pertemuan mengikuti empat tonggak capstone. Pertemuan 1 sampai 3 menjawab pertanyaan strategi: perlukah organisasi menjadi platform, dan dengan siapa organisasi itu bekerja sama. Pertemuan 4 sampai 7 memotret integrasi dan API yang berjalan saat ini, lalu hasilnya ditinjau menjelang UTS (Ujian Tengah Semester). Pertemuan 8 sampai 11 merancang platform API target. Pertemuan 12 sampai 14 menutup dengan nilai, tata kelola, dan peta jalan, lalu hasilnya dipresentasikan menjelang UAS (Ujian Akhir Semester). Kolom terakhir menunjukkan luaran yang masuk ke tonggak capstone.
+Urutan pertemuan mengikuti empat tonggak capstone. Pertemuan 1 sampai 3 menjawab pertanyaan strategi: perlukah organisasi menjadi platform, dan dengan siapa organisasi itu bekerja sama. Pertemuan 4 sampai 7 memotret integrasi dan API yang berjalan saat ini, lalu hasilnya ditinjau menjelang UTS (Ujian Tengah Semester). Pertemuan 8 sampai 11 merancang platform API target. Pertemuan 12 sampai 14 menutup dengan nilai, tata kelola, dan peta jalan, lalu hasilnya dipresentasikan menjelang UAS (Ujian Akhir Semester). Kolom Luaran Capstone menunjukkan artefak yang masuk ke tonggak capstone, dan kolom Slide menautkan PDF slide sesi itu.
 
-| # | Pertemuan | Aktivitas | Luaran Capstone |
-| --- | --- | --- | --- |
-| 1 | **Orientasi: Platform, API, dan Capstone** | Membentuk tim campuran, memilih organisasi, dan mendaftar pertukaran data dengan pihak luar | C1: profil organisasi dan daftar pertukaran data |
-| 2 | Model Bisnis Platform dan Efek Jaringan | Mengisi kanvas platform dan memetakan efek jaringan | C1: kanvas platform dan peta efek jaringan |
-| 3 | Ekosistem dan Orkestrasi Mitra | Memetakan ekosistem mitra dan membandingkan opsi strategi platform | C1: peta ekosistem dan catatan keputusan strategi platform |
-| 4 | API sebagai Produk dan Ekonomi API | Menyusun inventaris integrasi dan API yang berjalan | C2: inventaris integrasi dan API |
-| 5 | Gaya API dan Pola Integrasi | Menggambar peta integrasi beserta gaya dan titik masalahnya | C2: peta integrasi saat ini |
-| 6 | Keamanan API: OAuth 2.0 dan OWASP API Security Top 10 | Menilai integrasi yang berjalan dengan daftar periksa OWASP API Security Top 10 | C2: penilaian risiko keamanan API |
-| 7 | Standar API Sektoral: SATUSEHAT, HL7 FHIR, dan SNAP | Menilai kesenjangan integrasi terhadap standar sektor | C2: penilaian kesiapan interoperabilitas, ditinjau menjelang UTS |
-| 8 | Strategi dan Portofolio API | Menurunkan kandidat API dari kebutuhan bisnis, lalu memprioritaskannya | C3: portofolio API target |
-| 9 | Desain Kontrak API dengan OpenAPI | Menyusun dan meninjau kontrak OpenAPI untuk satu API prioritas | C3: kontrak API prioritas |
-| 10 | Manajemen Siklus Hidup API dan API Gateway | Merancang arsitektur manajemen API dan kebijakan versi | C3: rancangan manajemen API |
-| 11 | Developer Experience dan Portal Pengembang | Merancang alur *onboarding* mitra dan kerangka portal pengembang | C3: rancangan portal pengembang dan alur *onboarding* mitra |
-| 12 | Monetisasi API dan Metrik Platform | Memilih model nilai dan harga, lalu menyusun pohon metrik | C4: model monetisasi dan pohon metrik platform |
-| 13 | Tata Kelola API dan Regulasi Platform | Menyusun model tata kelola API dan memeriksa batasan regulasi | C4: model tata kelola API dan daftar batasan regulasi |
-| 14 | API untuk Agen AI dan Peta Jalan Platform | Menilai kesiapan API bagi agen AI, lalu menyusun peta jalan platform | C4: peta jalan platform dan API, dipresentasikan menjelang UAS |
+| # | Pertemuan | Aktivitas | Luaran Capstone | Slide |
+| --- | --- | --- | --- | --- |
+| 1 | **Orientasi: Platform, API, dan Capstone** | Membentuk tim campuran, memilih organisasi, dan mendaftar pertukaran data dengan pihak luar | C1: profil organisasi dan daftar pertukaran data | [PDF](slides/session01/session01.pdf) |
+| 2 | Model Bisnis Platform dan Efek Jaringan | Mengisi kanvas platform dan memetakan efek jaringan | C1: kanvas platform dan peta efek jaringan | [PDF](slides/session02/session02.pdf) |
+| 3 | Ekosistem dan Orkestrasi Mitra | Memetakan ekosistem mitra dan membandingkan opsi strategi platform | C1: peta ekosistem dan catatan keputusan strategi platform | [PDF](slides/session03/session03.pdf) |
+| 4 | API sebagai Produk dan Ekonomi API | Menyusun inventaris integrasi dan API yang berjalan | C2: inventaris integrasi dan API | [PDF](slides/session04/session04.pdf) |
+| 5 | Gaya API dan Pola Integrasi | Menggambar peta integrasi beserta gaya dan titik masalahnya | C2: peta integrasi saat ini | [PDF](slides/session05/session05.pdf) |
+| 6 | Keamanan API: OAuth 2.0 dan OWASP API Security Top 10 | Menilai integrasi yang berjalan dengan daftar periksa OWASP API Security Top 10 | C2: penilaian risiko keamanan API | [PDF](slides/session06/session06.pdf) |
+| 7 | Standar API Sektoral: SATUSEHAT, HL7 FHIR, dan SNAP | Menilai kesenjangan integrasi terhadap standar sektor | C2: penilaian kesiapan interoperabilitas, ditinjau menjelang UTS | [PDF](slides/session07/session07.pdf) |
+| 8 | Strategi dan Portofolio API | Menurunkan kandidat API dari kebutuhan bisnis, lalu memprioritaskannya | C3: portofolio API target | [PDF](slides/session08/session08.pdf) |
+| 9 | Desain Kontrak API dengan OpenAPI | Menyusun dan meninjau kontrak OpenAPI untuk satu API prioritas | C3: kontrak API prioritas | [PDF](slides/session09/session09.pdf) |
+| 10 | Manajemen Siklus Hidup API dan API Gateway | Merancang arsitektur manajemen API dan kebijakan versi | C3: rancangan manajemen API | [PDF](slides/session10/session10.pdf) |
+| 11 | Developer Experience dan Portal Pengembang | Merancang alur *onboarding* mitra dan kerangka portal pengembang | C3: rancangan portal pengembang dan alur *onboarding* mitra | [PDF](slides/session11/session11.pdf) |
+| 12 | Monetisasi API dan Metrik Platform | Memilih model nilai dan harga, lalu menyusun pohon metrik | C4: model monetisasi dan pohon metrik platform | [PDF](slides/session12/session12.pdf) |
+| 13 | Tata Kelola API dan Regulasi Platform | Menyusun model tata kelola API dan memeriksa batasan regulasi | C4: model tata kelola API dan daftar batasan regulasi | [PDF](slides/session13/session13.pdf) |
+| 14 | API untuk Agen AI dan Peta Jalan Platform | Menilai kesiapan API bagi agen AI, lalu menyusun peta jalan platform | C4: peta jalan platform dan API, dipresentasikan menjelang UAS | [PDF](slides/session14/session14.pdf) |
 
 Keempat Bagian sejajar dengan tonggak capstone. **Bagian I** (1 sampai 3) membangun strategi platform lebih dahulu, karena API yang dibuka tanpa strategi hanya menambah integrasi baru yang mahal. **Bagian II** (4 sampai 7) memotret kondisi saat ini. Keamanan API dibahas sebelum standar sektor karena SNAP dan SATUSEHAT memakai token akses dan otorisasi yang konsepnya dibahas di Pertemuan 6. Dengan begitu Pertemuan 7 menjadi rangkuman sebelum tinjauan C2 menjelang UTS. **Bagian III** (8 sampai 11) merancang kondisi target, berurutan dari portofolio, kontrak, manajemen, sampai pengalaman mitra. **Bagian IV** (12 sampai 14) menghubungkan rancangan dengan nilai bisnis, aturan main, dan peta jalan. Bagian ini berakhir dengan presentasi C4 menjelang UAS.
 
@@ -39,7 +41,7 @@ Keempat Bagian sejajar dengan tonggak capstone. **Bagian I** (1 sampai 3) memban
 
 **Tujuan.**
 1. Menjelaskan perbedaan bisnis *pipeline* dan bisnis platform dengan contoh dari sektor yang dikenal.
-2. Menjelaskan cara kerja API dengan bahasa sehari-hari, termasuk *request*, *response*, dan data JSON (*JavaScript Object Notation*).
+2. Menjelaskan cara kerja API (*Application Programming Interface*) dengan bahasa sehari-hari, termasuk *request*, *response*, dan data JSON (*JavaScript Object Notation*).
 3. Mengidentifikasi pertukaran data utama antara organisasi capstone dan pihak luarnya.
 
 **Topik.** Alur mata kuliah dan kaitannya dengan tiga mata kuliah lain. Capstone, tonggak C1 sampai C4, dan cara kerja tim campuran. Bisnis *pipeline* dan bisnis platform. Platform digital sehari-hari: transportasi daring, *marketplace*, dompet digital, dan telekonsultasi. API sebagai loket layanan antarsistem. *Request*, *response*, *endpoint*, dan JSON. Pertukaran data lewat surel, berkas, portal, dan API. Kosakata bersama untuk tim campuran. Pengenalan kasus Medikara Health.
@@ -71,7 +73,7 @@ Keempat Bagian sejajar dengan tonggak capstone. **Bagian I** (1 sampai 3) memban
 
 **Tujuan.**
 1. Memetakan pelaku ekosistem, peran, dan aliran nilai di sekitar organisasi.
-2. Membandingkan opsi strategi platform, yaitu membangun, bergabung, atau bermitra, beserta *trade-off* masing-masing.
+2. Membandingkan opsi strategi platform, yaitu membangun, bergabung, atau bermitra, beserta *tradeoff* masing-masing.
 3. Merumuskan aturan dasar keterbukaan platform bagi mitra.
 
 **Topik.** Ekosistem sebagai struktur kerja sama antara pelaku yang saling melengkapi. Komplementaritas dan modularitas. Peran orkestrator, pelengkap (*complementor*), dan pengguna. Aliran nilai berupa uang, data, layanan, dan reputasi. *Boundary resources*: API, SDK (*Software Development Kit*), dokumentasi, dan aturan. Keterbukaan dan kendali. Tata kelola ekosistem: siapa boleh bergabung, apa aturannya, dan bagaimana nilai dibagi. *Platform envelopment*. Opsi strategi: membangun platform sendiri, bergabung ke platform lain, atau bermitra.
@@ -105,7 +107,7 @@ Keempat Bagian sejajar dengan tonggak capstone. **Bagian I** (1 sampai 3) memban
 
 **Tujuan.**
 1. Membedakan REST (*Representational State Transfer*), GraphQL, *event*, dan *webhook* berdasarkan cara kerja dan kegunaannya.
-2. Menilai kecocokan gaya API untuk suatu kebutuhan bisnis beserta *trade-off*-nya.
+2. Menilai kecocokan gaya API untuk suatu kebutuhan bisnis beserta *tradeoff*-nya.
 3. Memetakan integrasi yang berjalan beserta gaya dan titik masalahnya.
 
 **Topik.** Empat cara sistem bertukar data: berkas, basis data bersama, panggilan langsung, dan pesan. Komunikasi sinkron dan asinkron. REST: sumber daya, metode HTTP, dan kode status. GraphQL untuk kebutuhan data yang beragam. *Event* dan *webhook* untuk pemberitahuan perubahan. gRPC sebagai pembanding singkat. Kriteria memilih gaya API. Arsitektur berbasis *event* hanya disinggung, karena dibahas rinci di IT40713 Cloud-Native & Microservices Architecture.
@@ -294,10 +296,11 @@ PT Medikara Nusa Sehat ("Medikara Health") adalah **organisasi fiktif** yang dip
 
 | Folder | Isi |
 | --- | --- |
-| `figures/` | Gambar bersama untuk modul dan slide, termasuk logo universitas dan foto gedung. |
-| `module/` | Naskah modul LaTeX. Berkas induk `digital-platform-api-economy.tex`, halaman judul `titlepage.tex`, empat belas bab `chapter01.tex` sampai `chapter14.tex`, rujukan inti `references.bib`, dan rujukan khusus bab di `bib/chapterNN.bib`. |
-| `slides/` | Slide Beamer. Pengaturan bersama di `preamble.tex`, sedangkan slide tiap pertemuan disimpan di `slides/sessionNN/`. |
+| `figures/` | Gambar bersama untuk modul dan slide: diagram TikZ `chNN-nama.tex`, diagram konsep PNG dan SVG `chNN-diagram-konsep`, ilustrasi JPG, serta logo universitas dan foto gedung sebagai berkas asli. Daftarnya ada di `figures/README.md`. |
+| `module/` | Naskah modul LaTeX. Berkas induk `digital-platform-api-economy.tex`, halaman judul `titlepage.tex`, empat belas bab `chapter01.tex` sampai `chapter14.tex`, rujukan inti dan rujukan lintas bab `references.bib`, rujukan khusus bab di `bib/chapterNN.bib`, font di `fonts/` sebagai berkas asli, dan PDF siap pakai `digital-platform-api-economy.pdf`. |
+| `slides/` | Slide Beamer. Pengaturan bersama di `preamble.tex` dan tema di `theme/` sebagai berkas asli. Sumber dan PDF siap pakai tiap pertemuan ada di `slides/sessionNN/`. |
 | `sources/` | Berkas pendukung tiap bab di `sources/chapterNN/`: lembar kerja, templat, data kasus, dan berkas teknis opsional yang dirujuk dari naskah modul. |
+| `tools/` | Skrip pembantu: `render-diagrams.py` membangkitkan diagram konsep dari `figures/chapter-diagrams.json`, `build.py` membangun buku dan slide, dan `check-materials.py` memeriksa kelengkapan modul. |
 
 Modul dikompilasi dengan XeLaTeX dari folder `module`:
 
@@ -317,11 +320,11 @@ xelatex session01.tex
 xelatex session01.tex
 ```
 
-**Catatan symlink.** `module/fonts`, `slides/theme`, `figures/logo_universitas.png`, dan `figures/building.png` adalah symlink ke repo advanced-software-engineering. Repo tersebut perlu tersedia di lokasi yang sama agar kompilasi berhasil. Di Windows, symlink hanya terbaca bila Git dikonfigurasi dengan `core.symlinks=true`.
+**Berkas asli.** `module/fonts`, `slides/theme`, `figures/logo_universitas.png`, dan `figures/building.png` adalah berkas asli di repo ini, sehingga modul dan slide dapat dikompilasi di Windows tanpa symlink.
 
 ## Rujukan Utama
 
-Daftar berikut merangkum rujukan inti hasil penelusuran per 30 Oktober 2026. Entri BibTeX-nya ada di `module/references.bib`.
+Daftar berikut merangkum rujukan inti hasil penelusuran per 30 Oktober 2026. Entri BibTeX-nya ada di `module/references.bib`, bersama rujukan yang dipakai lebih dari satu bab. Rujukan khusus satu bab ada di `module/bib/chapterNN.bib`.
 
 **Buku**
 - Parker, G. G., Van Alstyne, M. W., dan Choudary, S. P. (2016). *Platform Revolution*. W. W. Norton. ISBN 978-0-393-24913-2. https://wwnorton.com/books/Platform-Revolution
@@ -356,7 +359,7 @@ Daftar berikut merangkum rujukan inti hasil penelusuran per 30 Oktober 2026. Ent
 - Kementerian Kesehatan. Dokumentasi SATUSEHAT Platform. https://satusehat.kemkes.go.id/platform/docs/id/playbook/
 - Permenkes 24/2022 tentang Rekam Medis. https://peraturan.bpk.go.id/Details/245544/permenkes-no-24-tahun-2022
 - POJK 21/2023 tentang Layanan Digital oleh Bank Umum. https://ojk.go.id/id/regulasi/Pages/Layanan-Digital-oleh-Bank-Umum.aspx
-- UU 27/2022 tentang Pelindungan Data Pribadi. https://peraturan.bpk.go.id/Details/229798/uu-no-27-tahun-2022. Peraturan pelaksananya, PP (Peraturan Pemerintah) 33/2026, ditetapkan 16 Juli 2026 dan menurut pemberitaan mulai berlaku 16 Januari 2027. Teks resminya perlu dicek di JDIH (Jaringan Dokumentasi dan Informasi Hukum) sebelum dirujuk.
+- UU 27/2022 tentang Pelindungan Data Pribadi. https://peraturan.bpk.go.id/Details/229798/uu-no-27-tahun-2022. Peraturan pelaksananya, PP (Peraturan Pemerintah) 33/2026, ditetapkan 16 Juli 2026 dan menurut pemberitaan mulai berlaku 16 Januari 2027. Bab 13 membaca teksnya dari salinan pada situs pihak ketiga, sehingga teks resminya perlu dicek di JDIH (Jaringan Dokumentasi dan Informasi Hukum) sebelum dirujuk.
 - UU 5/1999 tentang Larangan Praktek Monopoli dan Persaingan Usaha Tidak Sehat. https://peraturan.bpk.go.id/Details/45280/uu-no-5-tahun-1999
 - Regulation (EU) 2022/1925, Digital Markets Act. https://eur-lex.europa.eu/eli/reg/2022/1925/oj. Daftar *gatekeeper*: https://digital-markets-act.ec.europa.eu/gatekeepers_en
 
@@ -383,11 +386,23 @@ Daftar berikut merangkum rujukan inti hasil penelusuran per 30 Oktober 2026. Ent
 | --- | --- |
 | A2A | Agent2Agent |
 | AI | Artificial Intelligence |
+| AIP | API Improvement Proposal |
 | API | Application Programming Interface |
+| API-m-FAMM | API Management Focus Area Maturity Model |
 | ASPI | Asosiasi Sistem Pembayaran Indonesia |
+| BMKG | Badan Meteorologi, Klimatologi, dan Geofisika |
+| BOLA | Broken Object Level Authorization |
 | BPJS | Badan Penyelenggara Jaminan Sosial |
+| BPK | Badan Pemeriksa Keuangan |
+| CFR | Code of Federal Regulations |
+| CLI | Command Line Interface |
+| COBIT | Control Objectives for Information and Related Technologies |
 | CS | Computer Science |
+| CSV | Comma-Separated Values |
+| DDD | Domain-Driven Design |
 | DMA | Digital Markets Act |
+| DPoP | Demonstrating Proof of Possession |
+| EBA | European Banking Authority |
 | ERP | Enterprise Resource Planning |
 | FAPI | Financial-grade API |
 | FHIR | Fast Healthcare Interoperability Resources |
@@ -395,28 +410,61 @@ Daftar berikut merangkum rujukan inti hasil penelusuran per 30 Oktober 2026. Ent
 | gRPC | gRPC Remote Procedure Call, *framework* RPC dari Google |
 | HL7 | Health Level Seven |
 | HTTP | HyperText Transfer Protocol |
+| ICD | International Classification of Diseases. ICD-9 CM memakai *Clinical Modification* |
 | IETF | Internet Engineering Task Force |
+| IHS | Nomor identitas di SATUSEHAT. Sumber tidak menjabarkan singkatannya |
+| ISBN | International Standard Book Number |
+| IT | Information Technology |
 | JDIH | Jaringan Dokumentasi dan Informasi Hukum |
 | JSON | JavaScript Object Notation |
+| JSON-RPC | JavaScript Object Notation Remote Procedure Call |
+| JWT | JSON Web Token |
 | KPI | Key Performance Indicator |
 | KPPU | Komisi Pengawas Persaingan Usaha |
+| LLM | Large Language Model |
+| LOINC | Logical Observation Identifiers Names and Codes |
 | MCP | Model Context Protocol |
+| MPI | Master Patient Index |
+| mTLS | Mutual Transport Layer Security |
+| NIK | Nomor Induk Kependudukan |
+| NIST | National Institute of Standards and Technology |
 | OAuth | Open Authorization |
 | OWASP | Open Worldwide Application Security Project |
+| PADG | Peraturan Anggota Dewan Gubernur |
 | PDP | Pelindungan Data Pribadi |
 | Permenkes | Peraturan Menteri Kesehatan |
+| PJP | Penyedia Jasa Pembayaran |
 | PKCE | Proof Key for Code Exchange |
 | POJK | Peraturan Otoritas Jasa Keuangan |
 | PP | Peraturan Pemerintah |
 | PSD2 | Payment Services Directive 2 |
+| PSD3 | Payment Services Directive 3 |
+| PSR | Payment Services Regulation |
+| PT | Perseroan Terbatas |
 | REST | Representational State Transfer |
 | RFC | Request for Comments |
+| RPC | Remote Procedure Call |
+| RT | Rukun Tetangga |
 | SDK | Software Development Kit |
 | SE | Software Engineering |
+| SEP | Surat Eligibilitas Peserta |
 | SIMRS | Sistem Informasi Manajemen Rumah Sakit |
 | SLA | Service Level Agreement |
+| SLI | Service Level Indicator |
+| SLO | Service Level Objective |
+| SMART | Substitutable Medical Applications and Reusable Technologies |
 | SNAP | Standar Nasional Open API Pembayaran |
+| SNOMED CT | Systematized Nomenclature of Medicine Clinical Terms |
+| SP | Special Publication, seri terbitan NIST |
+| SRE | Site Reliability Engineering |
+| SSRF | Server Side Request Forgery |
 | TI | Teknologi Informasi |
+| TOGAF | The Open Group Architecture Framework |
 | UAS | Ujian Akhir Semester |
+| UCB | User Choice Billing |
+| URL | Uniform Resource Locator |
+| UTC | Coordinated Universal Time |
 | UTS | Ujian Tengah Semester |
 | UU | Undang-Undang |
+| WIB | Waktu Indonesia Barat |
+| YAML | YAML Ain't Markup Language |

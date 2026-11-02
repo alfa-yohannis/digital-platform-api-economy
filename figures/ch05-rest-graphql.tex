@@ -1,0 +1,45 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000},
+  layar/.style={draw, rounded corners, fill=praditagreen!15, text width=1.5cm, minimum height=1.1cm, align=center},
+  sumber/.style={draw, rounded corners, fill=blue!8, text width=1.45cm, minimum height=0.55cm, align=center},
+  skema/.style={draw, rounded corners, fill=orange!12, text width=1.2cm, minimum height=1.1cm, align=center},
+  hasil/.style={draw, rounded corners, fill=green!10, text width=5.0cm, minimum height=0.55cm, align=center},
+  masalah/.style={draw, rounded corners, fill=red!22, text width=11.2cm, minimum height=0.55cm, align=center},
+  judul/.style={font=\scriptsize\bfseries, align=center},
+  ket/.style={font=\tiny, align=center},
+  panah/.style={-{Stealth[length=2mm]}, thick}
+]
+  % Panel kiri: tiap sumber daya punya endpoint sendiri dengan jawaban yang sudah ditetapkan.
+  \node[judul] at (2.6,1.75) {REST: satu sumber daya, satu panggilan};
+  \node[layar] (a) at (0.75,0) {Layar Ringkasan Kunjungan};
+  \node[sumber] (a1) at (4.35,1.2) {Kunjungan};
+  \node[sumber] (a2) at (4.35,0.4) {Dokter};
+  \node[sumber] (a3) at (4.35,-0.4) {Lokasi};
+  \node[sumber] (a4) at (4.35,-1.2) {Hasil};
+  \draw[panah] (a.east) -- node[above, ket, sloped] {15 kolom} (a1.west);
+  \draw[panah] (a.east) -- (a2.west);
+  \draw[panah] (a.east) -- (a3.west);
+  \draw[panah] (a.east) -- node[below, ket, sloped] {15 kolom} (a4.west);
+  \node[hasil] at (2.6,-2.0) {4 panggilan, 60 kolom, 30 KB\\{\tiny\mdseries Layar hanya memakai 12 kolom}};
+
+  % Panel kanan: klien memilih bidang, skema memetakan pilihan itu ke sumber data.
+  \begin{scope}[xshift=6.2cm]
+    \node[judul] at (2.75,1.75) {GraphQL: satu \textit{query}, bidang dipilih klien};
+    \node[layar] (b) at (0.75,0) {Layar Ringkasan Kunjungan};
+    \node[skema] (s) at (2.95,0) {Skema bertipe};
+    \node[sumber] (b1) at (4.95,1.2) {Kunjungan};
+    \node[sumber] (b2) at (4.95,0.4) {Dokter};
+    \node[sumber] (b3) at (4.95,-0.4) {Lokasi};
+    \node[sumber] (b4) at (4.95,-1.2) {Hasil};
+    \draw[panah] (b.east) -- node[above, ket] {12\\kolom} (s.west);
+    \draw[panah] (s.east) -- (b1.west);
+    \draw[panah] (s.east) -- (b2.west);
+    \draw[panah] (s.east) -- (b3.west);
+    \draw[panah] (s.east) -- (b4.west);
+    \node[hasil] at (2.75,-2.0) {1 panggilan, 12 kolom, 6 KB\\{\tiny\mdseries Biaya berpindah ke server}};
+  \end{scope}
+
+  % Penanda risiko: satu panggilan tidak selalu murah.
+  \node[masalah] at (5.85,-3.05) {Risiko \textit{query} bersarang: 18 klinik $\times$ 500 pasien $\times$ 5 kunjungan $\times$ 4 hasil\\= 180.000 objek dari satu panggilan};
+\end{tikzpicture}

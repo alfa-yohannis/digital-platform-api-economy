@@ -1,0 +1,25 @@
+# Aturan Spectral opsional Bab 09. Memeriksa kebiasaan tertulis, bukan makna kontrak.
+# Cara pakai: spectral lint kontrak.yaml --ruleset aturan-spectral.yaml
+extends: ["spectral:oas"]
+rules:
+  operasi-punya-ringkasan:
+    description: Setiap operasi punya ringkasan yang dapat dibaca pemilik produk.
+    severity: error
+    given: "$.paths[*][get,post,put,patch,delete]"
+    then:
+      field: summary
+      function: truthy
+  operasi-punya-pengenal:
+    description: Setiap operasi punya operationId untuk uji dan pelacakan.
+    severity: error
+    given: "$.paths[*][get,post,put,patch,delete]"
+    then:
+      field: operationId
+      function: truthy
+  operasi-punya-keamanan:
+    description: Setiap operasi menyebut scope yang dibutuhkan.
+    severity: warn
+    given: "$.paths[*][get,post,put,patch,delete]"
+    then:
+      field: security
+      function: truthy

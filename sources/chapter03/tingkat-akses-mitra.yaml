@@ -1,0 +1,26 @@
+# Contoh tangga keterbukaan Medikara+ (Bab 03). Pakai: salin, sesuaikan, lalu tinjau.
+# Angka dan nama adalah asumsi latihan. Scope mengikuti notasi SMART App Launch 2.2.0.
+versi_aturan: 1
+pemilik: pemilik_kemitraan
+tinjau_ulang_hari: 90
+tingkat:
+  - nama: publik
+    yang_dibuka: [katalog_layanan, jadwal_praktik]
+    scope: []
+    syarat: []
+    kuota_panggilan_per_hari: 1000
+  - nama: terdaftar
+    yang_dibuka: [sandbox_20_pasien_sintetis]
+    scope: [system/Slot.rs, system/Appointment.cru]
+    syarat: [akun, setuju_syarat_penggunaan]
+    kuota_panggilan_per_hari: 100
+  - nama: terverifikasi
+    yang_dibuka: [cari_slot, pesan_janji_temu, ubah_janji_temu]
+    scope: [system/Slot.rs, system/Appointment.cru]
+    syarat: [izin_usaha, kontrak, lulus_enam_skenario_gagal]
+    kuota_panggilan_per_hari: 300
+  - nama: berwenang
+    yang_dibuka: [hasil_pemeriksaan_pasien_yang_dilayani]
+    scope: [patient/DiagnosticReport.rs, patient/Observation.rs]
+    syarat: [hubungan_layanan_aktif, jejak_akses, tinjauan_90_hari]
+    kuota_panggilan_per_hari: 300

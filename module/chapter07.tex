@@ -1,88 +1,979 @@
+% !TeX root = digital-platform-api-economy.tex
+% !TeX encoding = UTF-8
 \chapter{Standar API Sektoral: SATUSEHAT, HL7 FHIR, dan SNAP}
+\label{ch:ch07}
+
+% Kolom rata kiri untuk tabel bab ini: A selebar sisa tabel, B selebar yang ditentukan.
+\newcolumntype{A}{>{\raggedright\arraybackslash}X}
+\newcolumntype{B}[1]{>{\raggedright\arraybackslash}p{#1}}
+\lstdefinestyle{ch07python}{language=Python, basicstyle=\ttfamily\scriptsize, keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape, stringstyle=\color{red}, showstringspaces=false, breaklines=true,
+  frame=lines, numbers=left, numberstyle=\tiny\color{gray}, backgroundcolor=\color{lightgray!10}, tabsize=2,
+  captionpos=b, xleftmargin=8pt}
 
 \section*{Tujuan Pembelajaran}
 \begin{itemize}
   \item Menjelaskan alasan regulator menetapkan standar API sektoral dan dampaknya bagi organisasi.
-  \item Menjelaskan konsep dasar HL7 FHIR (\textit{Health Level Seven Fast Healthcare Interoperability Resources}): \textit{resource}, profil, dan terminologi.
+  \item Menjelaskan konsep dasar HL7 FHIR (\textit{Health Level Seven Fast Healthcare Interoperability Resources}):
+        \textit{resource}, profil, dan terminologi.
   \item Menilai kesenjangan integrasi organisasi terhadap standar sektor yang berlaku.
 \end{itemize}
 
 \section{Pendahuluan}
 
-% TODO
-% Cakupan: Medikara wajib mengirim data rekam medis ke SATUSEHAT dan bertukar data klaim dengan BPJS
-% Kesehatan, tetapi tiap rumah sakit melakukannya dengan cara yang berbeda.
+Lima rumah sakit Medikara mencatat kunjungan dengan format yang berbeda pada Sistem Informasi Manajemen Rumah Sakit
+(SIMRS) masing-masing. Data yang berhasil dikirim lewat \textit{HyperText Transfer Protocol} (HTTP) belum tentu dapat
+dipahami secara klinis atau diterima sistem tujuan. Bab 4 mencatat bahwa 10 dari 20 sambungan aktif mengarah ke dua
+pihak yang tidak dipilih Medikara, yaitu Badan Penyelenggara Jaminan Sosial (BPJS) Kesehatan dan SATUSEHAT. Dengan
+pemisalan Rp45 juta per integrasi dari Bab 1, perawatan kesepuluh sambungan itu berbiaya Rp450 juta per tahun. Sekitar
+4 persen kunjungan klinik belum terkirim ke SATUSEHAT, dan kiriman gagal tanpa pemberitahuan. Pertanyaan kemudian
+muncul: bila format dan aturan ditentukan pihak lain, keputusan apa yang masih tersisa bagi Medikara?
+
+Bab ini menjawabnya lewat pemisahan tiga jalur. Data klinis, data administrasi, dan data pembayaran punya tujuan,
+pemilik, dan aturan yang berbeda. Bahasannya meliputi alasan regulator menetapkan standar \textit{Application
+Programming Interface} (API), HL7 FHIR, SATUSEHAT dan rekam medis elektronik, BPJS Kesehatan, \textit{open banking}
+dan \textit{open finance}, Standar Nasional Open API Pembayaran (SNAP), pelajaran dari Uni Eropa, serta cara menilai
+kesenjangan. Gaya dan kontrak API dibahas di Bab 5 dan Bab 9, sedangkan \textit{Open Authorization} (OAuth) dibahas di
+Bab 6, sehingga di sini cukup dirujuk. Angka tambahan yang diawali kata ``Misalkan'' adalah asumsi latihan. Kesimpulan
+untuk organisasi nyata harus diuji dengan wawancara, dokumen, dan pengukuran yang berizin. Hasil bab ini menjadi
+bagian tonggak C2 dalam cetak biru transformasi digital.
+
+Rujukan utama bab ini dipakai untuk membedakan konsep dan membangun alasan keputusan, bukan untuk menggantikan
+penilaian konteks organisasi. Konsep \textit{resource}, profil, dan terminologi diambil dari spesifikasi HL7 FHIR R4
+\cite{fhir-r4}. Panduan penerapannya di Indonesia diambil dari dokumentasi SATUSEHAT \cite{satusehat}. Kewajiban rekam
+medis elektronik diambil dari Peraturan Menteri Kesehatan (Permenkes) 24/2022 \cite{permenkes24-2022}. Sektor keuangan
+dibaca lewat SNAP \cite{snap-bi}, Peraturan Otoritas Jasa Keuangan (POJK) 21/2023 \cite{pojk21-2023}, dan
+\textit{Payment Services Directive 2} (PSD2) \cite{c07-psd2}.
+
+\IfFileExists{../figures/ch07-diagram-konsep.png}{%
+
+Gambar \ref{fig:ch07-ilustrasi-bab} merangkum hubungan komponen dan konsep utama bab ini.
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=\textwidth]{../figures/ch07-diagram-konsep.png}
+  \caption{Jalur integrasi sektoral mempunyai tujuan berbeda}
+  \label{fig:ch07-ilustrasi-bab}
+\end{figure}
+}{}
 
 \section{Mengapa Regulator Menetapkan Standar API}
 
-% TODO
-% Cakupan: interoperabilitas sebagai infrastruktur bersama; penurunan biaya integrasi di tingkat
-% nasional; persaingan yang lebih sehat karena pendatang baru dapat terhubung; standar wajib dan
-% standar sukarela.
+Setiap rumah sakit Medikara membangun sambungannya sendiri ke dua pihak yang sama, dan kedua pihak itu menerima
+kiriman dari banyak fasilitas lain. Bila setiap pasangan menyepakati format sendiri, beban penyepakatan naik mengikuti
+perkalian jumlah pihak. Pertanyaannya, mengapa pasar tidak membereskan hal ini tanpa regulator?
+
+Standar sektoral mengurangi biaya penyepakatan berulang ketika banyak organisasi perlu berinteraksi. Tiap pihak cukup
+memetakan datanya satu kali ke standar, bukan ke setiap mitra. Pasar sering tidak sampai ke titik itu dengan
+sendirinya. Farrell dan Saloner membahas gejala \textit{excess inertia}, yaitu industri tertahan pada standar lama
+karena tiap pihak menunggu pihak lain pindah lebih dulu \cite{c07-farrell1985}. Regulator memutus penantian itu dengan
+satu acuan dan satu tenggat. Sektor kesehatan juga punya alasan publik. Permenkes 24/2022 Pasal 10 memaknai
+interoperabilitas sebagai kemampuan sistem yang berbeda untuk bekerja terpadu, berkomunikasi atau bertukar data dengan
+standar pertukaran data, dan Pasal 24 mengatur transfer isi rekam medis saat rujukan dilakukan lewat platform yang
+dikelola Kementerian Kesehatan \cite{permenkes24-2022}.
+
+Keseragaman bentuk pesan membantu, tetapi interoperabilitas juga memerlukan makna data, proses, dan tanggung jawab.
+Standar tidak menghapus kebutuhan tata kelola. Organisasi tetap bertanggung jawab atas kebenaran, kelengkapan, dan
+kewenangan pengiriman data.
+
+Analoginya kontainer pengiriman. Ukuran kontainer yang sama memudahkan pemindahan barang antara kapal, truk, dan
+gudang. Isi dan dokumen muatannya tetap diperiksa. Kontainer baku tidak membuat barang yang salah alamat menjadi
+benar.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Misalkan 18 klinik pratama bertukar hasil laboratorium dengan 5 rumah sakit, dan tiap pasangan menyepakati
+        format sendiri. Jumlahnya 18 $\times$ 5, atau 90 kesepakatan. Dengan satu kontrak bersama, tiap pihak cukup
+        membuat satu pemetaan, atau 18 + 5 = 23 pemetaan. Bila satu pekerjaan berbiaya Rp12 juta seperti pada Bab 4,
+        bebannya turun dari Rp1,08 miliar menjadi Rp276 juta. Klinik tidak perlu merundingkan format berbeda dengan
+        setiap rumah sakit.
+  \item Kode diagnosis yang benar secara sintaksis dapat tetap salah secara klinis. Misalkan 1 persen dari 100.000
+        kunjungan per bulan memuat kode yang sah tetapi keliru dipilih. Sebanyak 1.000 rekam lolos pemeriksaan format.
+        Permenkes 24/2022 Pasal 23 menyebut audit mutu berkala oleh tim reviu rekam medis \cite{permenkes24-2022}.
+        Misalkan tim memeriksa 200 rekam sampel per bulan, 6 menit per rekam. Bebannya 20 jam, atau Rp1,2 juta per
+        bulan pada tarif Rp60.000 per jam. Pekerjaan ini memerlukan tenaga yang memahami layanan kesehatan, dan
+        validasi format tidak dapat menggantikannya.
+\end{enumerate}
+
+Contoh kedua memperlihatkan bahwa standar bekerja berlapis. Gambar \ref{fig:ch07-lapis} memisahkan empat lapis yang
+diperiksa pada setiap pertukaran, dan Tabel \ref{tab:ch07-lapis} merangkum kegagalan khas tiap lapis. Pembagian ini
+disusun bab ini untuk keperluan penilaian, bukan istilah resmi dari satu standar. Contoh pada gambar memakai format
+\textit{JavaScript Object Notation} (JSON) dari Bab 1, serta kode \textit{International Classification of Diseases}
+(ICD) yang dibahas pada seksi berikutnya.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch07-lapis-interoperabilitas.tex}
+  \caption{Empat lapis interoperabilitas: status terkirim baru membuktikan lapis paling bawah}
+  \label{fig:ch07-lapis}
+\end{figure}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Empat lapis yang diperiksa pada setiap pertukaran data sektoral}
+  \label{tab:ch07-lapis}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{B{1.9cm}AAB{2.4cm}}
+    \hline
+    \textbf{Lapis} & \textbf{Pertanyaan} & \textbf{Kegagalan khas di Medikara} & \textbf{Pemeriksa} \\ \hline
+    Sintaks & Apakah bentuk pesan dapat dibaca? & Elemen wajib kosong, tanggal salah format & Validator, tim teknis \\ \hline
+    Semantik & Apakah kode dan satuan bermakna sama? & Kode diagnosis lokal, kode lokasi berbeda antar-rumah sakit & Koder, tenaga klinis \\ \hline
+    Proses & Apakah urutan, waktu, dan pemulihan jelas? & Data klinis dikirim sebelum kunjungan terdaftar, kiriman gagal tanpa kabar & Pemilik proses, vendor \\ \hline
+    Tanggung jawab & Siapa menjawab bila isinya salah? & Tidak ada yang menandatangani rekonsiliasi, INT-10 tanpa pemilik & Pemilik bisnis \\ \hline
+  \end{tabularx}
+\end{table}
+
+Dua hal pada bahasan ini sering tertukar, yaitu tersambung dan interoperabel. Pembagiannya begini. Tersambung berarti
+pesan sampai ke tujuan. Interoperabel berarti kedua sistem bekerja terpadu dan paham isi pesan. Sepuluh sambungan
+INT-01 dan INT-02 sudah tersambung, tetapi itu belum menjawab apakah datanya dapat dipakai.
+
+Apa dampaknya bagi organisasi? Tabel \ref{tab:ch07-sumber-kewajiban} membedakan tiga sumber kewajiban, karena tiap
+sumber memberi ruang keputusan yang berbeda.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Tiga sumber kewajiban dan ruang keputusan yang tersisa bagi Medikara}
+  \label{tab:ch07-sumber-kewajiban}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{B{2.0cm}AAA}
+    \hline
+    \textbf{Sumber} & \textbf{Contoh} & \textbf{Akibat bila tidak dipenuhi} & \textbf{Ruang keputusan} \\ \hline
+    Aturan hukum & Permenkes 24/2022: rekam medis elektronik dan sambungan ke platform Kementerian Kesehatan & Sanksi administratif atas pelanggaran Pasal 3: teguran tertulis dan/atau rekomendasi pencabutan atau pencabutan status akreditasi (Pasal 42) & Cara menyambung, bukan apakah tersambung \\ \hline
+    Syarat layanan & Administrasi klaim menurut Peraturan BPJS Kesehatan 7/2018 & Kelengkapan klaim tidak terpenuhi & Alur internal dan pilihan vendor, bukan spesifikasinya \\ \hline
+    Pilihan bisnis & FHIR untuk API hasil ke 40 klinik mitra, API bank pada INT-08 & Tidak ada sanksi, tetapi ada biaya peluang & Bebas, setelah manfaat dan biaya dihitung \\ \hline
+  \end{tabularx}
+\end{table}
+
+Standar wajib punya dua konsekuensi bagi organisasi. Pertama, jadwal biaya mengikuti pihak wajib. Bab 4 memisalkan
+BPJS Kesehatan dan SATUSEHAT masing-masing memperbarui spesifikasi dua kali setahun. Empat pembaruan yang diterapkan
+di lima tempat menjadi 20 pekerjaan, atau Rp240 juta per tahun pada Rp12 juta per pekerjaan. Lewat satu titik,
+jumlahnya 4 pekerjaan, atau Rp48 juta. Kedua, ruang desain menyempit. Bab 6 sudah menunjukkan bahwa Medikara tidak
+dapat memaksakan profil keamanan pilihannya pada kedua pihak itu. Yang tersisa adalah arsitektur di sisi Medikara:
+lima sambungan terpisah, atau satu titik yang menyerap perubahan.
 
 \section{HL7 FHIR: Resource, Profil, dan Terminologi}
 
-% TODO
-% Cakupan: resource sebagai unit data (Patient, Encounter, Observation); profil sebagai penyesuaian
-% nasional; terminologi seperti ICD, LOINC, dan SNOMED CT; FHIR R4 (4.0.1) yang dipakai SATUSEHAT,
-% R5 sebagai rilis terbit terbaru, dan R6 yang masih dalam proses ballot.
-% Pendalaman teknis: membaca contoh resource Patient dan Encounter pada spesifikasi FHIR R4, lalu
-% memetakan kolom data SIMRS ke elemen resource tersebut.
+Sektor kesehatan memakai HL7 FHIR sebagai bahasa bersama. Tiga istilahnya sering muncul sekaligus: \textit{resource},
+profil, dan terminologi. Apa bedanya, dan mengapa ketiganya dibutuhkan?
+
+HL7 FHIR menyusun informasi kesehatan dalam \textit{resource}. Spesifikasi R4 menyebut \textit{resource} sebagai unit
+dasar: semua isi yang dapat dipertukarkan didefinisikan sebagai \textit{resource} \cite{c07-fhir-overview}. Patient
+memuat data pasien yang menerima layanan \cite{c07-fhir-patient}. Encounter memuat interaksi antara pasien dan
+penyedia layanan \cite{c07-fhir-encounter}. Profil mempersempit aturan dasar untuk kebutuhan implementasi. Spesifikasi
+dasar dipakai pada banyak konteks, sehingga profil dapat mengubah jumlah kemunculan elemen, mengikat daftar kode, dan
+menambah ekstensi. Profil tidak boleh melanggar aturan dasar \cite{c07-fhir-profiling}. Terminologi menetapkan nilai
+kode yang sah dan maknanya. FHIR juga dirancang dengan pendekatan \textit{Representational State Transfer} (REST) yang
+sudah dibahas di Bab 5 \cite{c07-bender2013}.
+
+Tinjauan sistematis Ayaz dkk. menyaring 8.181 artikel terbitan Januari 2012 sampai Desember 2019 menjadi 80 artikel.
+Tinjauan itu menilai FHIR berperan penting, sekaligus masih mencatat tantangan dan pertanyaan terbuka pada
+penerapannya \cite{c07-ayaz2021}. Jadi FHIR memberi dasar bersama, bukan jaminan integrasi berhasil.
+
+Analoginya formulir baku. Formulir mempunyai kolom umum, sedangkan aturan instansi menentukan kolom wajib dan daftar
+pilihan yang diizinkan. Formulir yang terisi rapi tetap ditolak bila kolom wajib instansi itu kosong, atau bila
+pilihan yang dicentang tidak ada di daftarnya.
+
+Gambar \ref{fig:ch07-anatomi} memperlihatkan hubungan \textit{resource} pada satu kunjungan rawat jalan. Encounter
+menjadi pusat, karena kunjungan menghubungkan pasien, tenaga kesehatan, tempat, dan fasilitas. Tabel
+\ref{tab:ch07-fhir-unsur} merangkum pertanyaan yang dijawab ketiga istilah tersebut.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch07-anatomi-fhir.tex}
+  \caption{Hubungan \textit{resource} pada satu kunjungan, dengan profil dan terminologi sebagai aturan tambahan}
+  \label{fig:ch07-anatomi}
+\end{figure}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Tiga konsep dasar HL7 FHIR dan cara memeriksanya}
+  \label{tab:ch07-fhir-unsur}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{B{1.8cm}AAA}
+    \hline
+    \textbf{Konsep} & \textbf{Pertanyaan} & \textbf{Contoh} & \textbf{Tanda kegagalan} \\ \hline
+    \textit{Resource} & Objek apa yang dipertukarkan? & Patient dan Encounter adalah objek berbeda & Rekam pasien dibuat ulang setiap kunjungan \\ \hline
+    Profil & Aturan tambahan apa yang berlaku di tujuan? & \texttt{Patient.identifier} boleh kosong pada aturan dasar, tetapi wajib di SATUSEHAT & JSON sah, tetapi ditolak penerima \\ \hline
+    Terminologi & Nilai apa yang sah, dan apa artinya? & \texttt{Patient.gender} hanya menerima empat kode & SIMRS mengirim \texttt{L} dan \texttt{P} tanpa pemetaan \\ \hline
+  \end{tabularx}
+\end{table}
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Patient mewakili informasi administratif pasien, sedangkan Encounter mewakili konteks pertemuan layanan. Satu
+        pasien dapat mempunyai banyak kunjungan. Misalkan 1,2 juta kunjungan per tahun berasal dari 300.000 pasien
+        berbeda, atau rata-rata 4 kunjungan per pasien. Model yang benar menghasilkan 300.000 Patient dan 1,2 juta
+        Encounter. Bila setiap kunjungan membuat Patient baru, ada 900.000 rekam pasien ganda, dan strategi ``Satu
+        Pasien, Satu Rekam Medis'' gagal pada titik paling dasar.
+  \item Misalkan kode lokasi kosong pada 2 persen dari 100.000 kiriman per bulan. Pesan tetap berupa JSON yang sah,
+        tetapi gagal terhadap aturan tujuan. Sebanyak 2.000 kiriman perlu diperbaiki. Pada 5 menit per kiriman,
+        bebannya sekitar 167 jam, atau Rp10 juta per bulan pada tarif Rp60.000 per jam. Memperbaiki pemetaan di sumber
+        dikerjakan satu kali.
+\end{enumerate}
+
+Dua hal pada FHIR sering tertukar, yaitu sah sebagai format dan sesuai dengan profil. Pembagiannya begini. Sah sebagai
+format berarti struktur JSON-nya benar. Sesuai dengan profil berarti aturan tujuan terpenuhi. Pada spesifikasi dasar
+R4, \texttt{Patient.identifier} dan \texttt{Patient.name} berkardinalitas 0..* sehingga boleh kosong
+\cite{c07-fhir-patient}. Panduan SATUSEHAT menandai keduanya dengan asterisk, yang berarti wajib
+\cite{c07-satusehat-patient}. Pesan yang sama dapat sah menurut aturan dasar dan ditolak menurut aturan tujuan.
+Sebaliknya, \texttt{Encounter.status} dan \texttt{Encounter.class} sudah wajib sejak aturan dasar
+\cite{c07-fhir-encounter}.
+
+Terminologi punya tingkat kekuatan sendiri. Spesifikasi R4 mengenal empat kekuatan pengikatan (\textit{binding}).
+\textit{Required} berarti kode wajib berasal dari daftar. \textit{Extensible} berarti kode wajib dari daftar bila ada
+yang cocok. \textit{Preferred} berarti kode dalam daftar dianjurkan. \textit{Example} berarti daftar hanya contoh
+\cite{c07-fhir-terminologi}. Di Indonesia, SATUSEHAT menetapkan ICD-10 sebagai standar diagnosis, ICD-9 CM untuk
+prosedur dan tindakan, \textit{Logical Observation Identifiers Names and Codes} (LOINC) untuk uji laboratorium, dan
+\textit{Systematized Nomenclature of Medicine Clinical Terms} (SNOMED CT) untuk istilah klinis
+\cite{c07-satusehat-terminologi}. Pekerjaan ini milik koder dan tenaga klinis, bukan hanya tim teknis.
+
+\begin{pendalaman}[title={Pendalaman Teknis (opsional): Membaca Patient dan Encounter}]
+Listing \ref{lst:ch07-encounter} memuat contoh sintetis Encounter dalam format JSON. Perhatikan empat hal.
+\texttt{status} dan \texttt{class} wajib pada aturan dasar. \texttt{subject} menunjuk Patient lewat referensi,
+sehingga rekam pasien tidak disalin ke setiap kunjungan. \texttt{period.start} memakai \textit{Coordinated Universal
+Time} (UTC), karena panduan SATUSEHAT meminta waktu dalam UTC+00, sehingga pukul 08.15 Waktu Indonesia Barat (WIB)
+ditulis 01:15 \cite{c07-satusehat-rajal}. \texttt{location} dan \texttt{serviceProvider} menunjuk data induk yang
+harus sudah terdaftar.
+
+\begin{lstlisting}[language=json, xleftmargin=8pt, captionpos=b, caption={Contoh sintetis Encounter, tersedia di \berkas{sources/chapter07/contoh-resource-fhir.md}}, label={lst:ch07-encounter}]
+{
+  "resourceType": "Encounter",
+  "status": "arrived",
+  "class": {
+    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+    "code": "AMB",
+    "display": "ambulatory"
+  },
+  "subject": { "reference": "Patient/P00000000001" },
+  "period": { "start": "2026-11-02T01:15:00+00:00" },
+  "location": [
+    { "location": { "reference": "Location/LOK-SINTETIS-01" } }
+  ],
+  "serviceProvider": { "reference": "Organization/ORG-SINTETIS-01" }
+}
+\end{lstlisting}
+
+Contoh ini tidak diuji pada server SATUSEHAT dan hanya dipakai untuk latihan membaca. Autentikasi dan token mengikuti
+Bab 6.
+\end{pendalaman}
+
+\subsection{Status R4, R5, dan R6}
+
+Rilis baru sudah ada. Apakah Medikara perlu mengikutinya? Tabel \ref{tab:ch07-versi} merangkum statusnya saat
+diperiksa pada 31 Oktober 2026.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Status rilis HL7 FHIR dan artinya bagi Medikara}
+  \label{tab:ch07-versi}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{B{0.9cm}B{1.7cm}AA}
+    \hline
+    \textbf{Rilis} & \textbf{Versi, tahun} & \textbf{Status} & \textbf{Arti bagi Medikara} \\ \hline
+    R4 & 4.0.1, 2019 & Campuran isi normatif dan \textit{trial use}. Patient sudah normatif & Dipakai pada panduan implementasi SATUSEHAT \\ \hline
+    R4B & 4.3.0, 2022 & Rilis antara untuk perubahan pada area tertentu & Tidak diadopsi sebelum tujuan memintanya \\ \hline
+    R5 & 5.0.0, 2023 & Rilis terbaru yang sudah terbit, berlabel \textit{trial use}. Sejumlah \textit{resource} dihapus atau diganti nama & Migrasi bukan sekadar menaikkan nomor versi \\ \hline
+    R6 & 6.0.0, 2026 & Masih tahap balot sebagai standar normatif, belum rilis final & Dipantau, belum dipakai untuk kiriman nyata \\ \hline
+  \end{tabularx}
+\end{table}
+
+Dokumentasi SATUSEHAT merujuk panduan implementasi FHIR R4 dan memakai alamat profil \texttt{fhir.kemkes.go.id/r4}
+\cite{c07-satusehat-patient}. Riwayat rilis mencatat R5 terbit 26 Maret 2023 dan menghapus serta mengganti nama
+beberapa \textit{resource} \cite{c07-fhir-riwayat}. Halaman balot R6 menyatakan seluruh spesifikasi diajukan sebagai
+standar normatif, dan masih akan ada balot lanjutan \cite{c07-fhir-r6}. Keberadaan R5 atau rancangan R6 tidak menjadi
+alasan mengganti versi tanpa memeriksa panduan implementasi tujuan.
+
+Keputusan ini punya dua konsekuensi. Pertama, Medikara tetap pada R4 bukan karena R4 paling baik, melainkan karena
+pihak tujuan memakainya. Misalkan satu migrasi berbiaya Rp12 juta per sambungan. Kelima sambungan INT-02 menghabiskan
+Rp60 juta tanpa kiriman yang lebih diterima. Kedua, pilihan R4 berisiko rendah bagi elemen inti. Halaman balot R6
+menyatakan isi yang normatif pada R4 tidak boleh berubah secara merusak. Jadi Patient lebih stabil daripada elemen
+yang masih \textit{trial use}, dan tim memantau elemen jenis kedua.
 
 \section{SATUSEHAT dan Rekam Medis Elektronik}
 
-% TODO
-% Cakupan: kewajiban rekam medis elektronik dan interoperabilitas dalam Permenkes 24/2022; fungsi
-% SATUSEHAT Platform; alur integrasi dari registrasi, sandbox, sampai produksi; UU 17/2023 tentang
-% Kesehatan disinggung singkat.
-% Kasus Medikara: lima SIMRS dengan versi berbeda yang harus mengirim data dengan standar yang sama.
+FHIR adalah standar global. Siapa yang menjadikannya kewajiban di Indonesia, dan apa isi kewajibannya?
+
+Dokumentasi Kementerian Kesehatan menjelaskan SATUSEHAT Platform sebagai pertukaran data kesehatan yang menghubungkan
+sistem informasi fasilitas, regulator, penjamin, dan penyedia layanan digital \cite{satusehat}. SATUSEHAT memakai HL7
+FHIR untuk model data dan API \cite{c07-satusehat-fhir}. Panduannya dibagi menjadi modul pelayanan, seperti rawat
+jalan, instalasi gawat darurat, rawat inap, dan kefarmasian, serta modul penerapan untuk kasus tertentu
+\cite{satusehat}. Rekam medis elektronik diatur Permenkes 24/2022. Integrasi perlu memeriksa identitas organisasi,
+tenaga kesehatan, pasien, lokasi, dan hubungan \textit{resource}. Batas waktu serta aturan terbaru dibaca dari dokumen
+resmi, bukan disalin dari ingatan atau contoh repositori.
+
+Tabel \ref{tab:ch07-pasal} merangkum pasal yang paling sering dibutuhkan tim. Halaman Badan Pemeriksa Keuangan
+mencatat peraturan ini masih berlaku saat diperiksa \cite{permenkes24-2022}. Pasal 21 menyebut platform yang dikelola
+Kementerian Kesehatan tanpa menyebut nama SATUSEHAT. Bab ini membacanya sebagai SATUSEHAT, dan anggota berlatar hukum
+sebaiknya memastikan penafsiran itu pada organisasinya.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Pasal Permenkes 24/2022 dan artinya bagi Medikara}
+  \label{tab:ch07-pasal}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{B{1.15cm}AA}
+    \hline
+    \textbf{Pasal} & \textbf{Isi pokok} & \textbf{Arti bagi Medikara} \\ \hline
+    3 & Setiap fasilitas wajib menyelenggarakan rekam medis elektronik, termasuk klinik, rumah sakit, apotek, dan laboratorium kesehatan & 5 rumah sakit, 18 klinik, 1 laboratorium, dan 12 apotek masuk cakupan \\ \hline
+    10 & Sistem harus punya kemampuan kompatibilitas dan/atau interoperabilitas, mengacu pada standar Kementerian Kesehatan & Vendor SIMRS tidak bebas memilih format kiriman \\ \hline
+    21 & Rekam medis elektronik yang disimpan harus terhubung dengan platform yang dikelola Kementerian Kesehatan & INT-02 tidak dapat dihapus, hanya dapat dirapikan \\ \hline
+    24 & Transfer isi rekam medis saat rujukan dilakukan lewat platform tersebut & Rujukan antarfasilitas ikut bergantung pada kualitas data \\ \hline
+    28 & Fasilitas harus membuka akses seluruh isi rekam medis elektronik ke Kementerian Kesehatan & Dasarnya kewajiban, bukan persetujuan per kiriman \\ \hline
+    34 & Pembukaan isi rekam medis untuk administrasi dan jaminan pembiayaan dilakukan atas persetujuan pasien, tertulis dan/atau elektronik, saat registrasi & Alur registrasi 55.000 kunjungan BPJS Kesehatan per bulan perlu diperiksa \\ \hline
+    42 & Sanksi atas pelanggaran Pasal 3: teguran tertulis dan/atau rekomendasi pencabutan atau pencabutan status akreditasi & Risikonya menyentuh akreditasi \\ \hline
+    45 & Seluruh fasilitas harus menyelenggarakan paling lambat 31 Desember 2023 & Tenggat sudah lewat, sehingga kesenjangan adalah pekerjaan tertunda \\ \hline
+  \end{tabularx}
+\end{table}
+
+Analoginya pengiriman dokumen ke instansi. Pengiriman itu memerlukan formulir yang benar sekaligus nomor rujukan yang
+dapat dikenali. Formulir sempurna tanpa nomor rujukan tidak dapat ditempatkan pada berkas yang tepat. Loket juga tidak
+menerima lampiran sebelum berkas induknya terdaftar.
+
+Apa yang dikerjakan sebelum data pertama terkirim? Panduan rawat jalan menyebut empat langkah persiapan: autentikasi,
+registrasi struktur organisasi, registrasi struktur lokasi, dan penyimpanan nomor IHS tenaga kesehatan. Nomor IHS
+adalah nomor identitas di SATUSEHAT. Nomor IHS pasien diperoleh dari \textit{Master Patient Index} (MPI) Kementerian
+Kesehatan. Sesudah itu kunjungan didaftarkan sebagai Encounter, lalu menyusul data anamnesis dan pemeriksaan.
+Rangkaian rawat jalan sampai ke langkah 29, yaitu Composition untuk resume medis \cite{c07-satusehat-rajal}. Gambar
+\ref{fig:ch07-alur} menyederhanakan rangkaian itu dan menandai titik gagalnya. Langkah 6 pada gambar adalah usulan Bab
+5, bukan bagian dari panduan.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch07-alur-satusehat.tex}
+  \caption{Alur kiriman ke SATUSEHAT yang disederhanakan dari panduan rawat jalan, dengan titik gagal di tiap tahap}
+  \label{fig:ch07-alur}
+\end{figure}
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Misalkan pengiriman kunjungan ditolak karena referensi pasien belum dikenali, sebanyak 1.800 kiriman per
+        bulan. Tim memperbaiki urutan serta pencocokan identitas, bukan hanya mengirim ulang. Mengirim ulang 1.800
+        kali menghasilkan 1.800 penolakan yang sama.
+  \item Misalkan dua rumah sakit memakai kode lokasi yang berbeda untuk tempat sama. Pemetaan induk harus disepakati
+        sebelum menilai keberhasilan integrasi. Misalkan tiap rumah sakit punya 40 poli, sehingga ada 200 lokasi. Pada
+        15 menit per lokasi, pendaftarannya 50 jam, atau Rp3 juta, dan dikerjakan satu kali. Bila dibiarkan dan 1.000
+        kiriman per bulan gagal, perbaikan 5 menit per kiriman menghabiskan sekitar Rp5 juta setiap bulan.
+\end{enumerate}
+
+\begin{kasus}[title={Kasus Medikara Health: Kiriman INT-02 yang Gagal Senyap}]
+Inventaris Bab 4 mencatat INT-02 berjalan lewat 5 sambungan, dengan sekitar 100.000 kunjungan per bulan. Sekitar 4
+persen kunjungan klinik belum terkirim, dan kiriman gagal tanpa pemberitahuan. Inventaris mencatat 0 jam manual per
+bulan. Misalkan angka itu berarti belum ada yang memperbaikinya. Biayanya tidak terlihat, bukan tidak ada.
+
+Inventaris tidak memecah 100.000 kunjungan menurut jenis fasilitas. Misalkan 4 persen itu berlaku pada seluruh
+kiriman, sehingga jumlahnya 4.000 kiriman per bulan. Tabel \ref{tab:ch07-penyebab} memisalkan penyebabnya. Seluruh
+rincian ini adalah data latihan.
+
+\begin{table}[H]
+  \centering
+  \caption{Pemisalan penyebab 4.000 kiriman INT-02 yang gagal per bulan}
+  \label{tab:ch07-penyebab}
+  \footnotesize
+  \begin{tabularx}{\linewidth}{AB{1.2cm}B{1.45cm}A}
+    \hline
+    \textbf{Penyebab} & \textbf{Kiriman} & \textbf{Lapis} & \textbf{Yang menyelesaikan} \\ \hline
+    Identitas pasien belum cocok dengan MPI & 1.800 & Semantik & Pencocokan saat registrasi \\ \hline
+    Kode lokasi atau organisasi salah & 1.000 & Semantik & Pendaftaran data induk \\ \hline
+    Kode diagnosis lokal & 600 & Semantik & Peta kode oleh koder \\ \hline
+    Koneksi, token, atau waktu habis & 600 & Sintaks dan proses & Antrean kirim ulang \\ \hline
+    \textbf{Jumlah} & \textbf{4.000} & & \\ \hline
+  \end{tabularx}
+\end{table}
+
+Keputusan membaca angka ini punya dua konsekuensi.
+\begin{enumerate}
+  \item Antrean kirim ulang dari Bab 5 tetap perlu, tetapi hanya menyelesaikan 600 dari 4.000 kiriman, atau 15 persen.
+        Sisanya menuntut perbaikan data di sumber.
+  \item Tanpa rekonsiliasi, tumpukan bertambah 48.000 kiriman per tahun. Pada 5 menit per kiriman, membersihkannya
+        butuh 4.000 jam, atau Rp240 juta pada tarif Rp60.000 per jam.
+\end{enumerate}
+
+Inventaris juga menyimpan satu pertanyaan. Sumber INT-02 ditulis SIMRS 5 rumah sakit, sementara 100.000 kunjungan per
+bulan setara seluruh 1,2 juta kunjungan per tahun. Bagaimana kunjungan dari 18 klinik pratama masuk, belum tertulis.
+Temuan ini berstatus belum terverifikasi dan ikut dinilai pada seksi penilaian.
+\end{kasus}
 
 \section{Integrasi dengan BPJS Kesehatan}
 
-% TODO
-% Cakupan: layanan bridging BPJS Kesehatan untuk klaim dan antrean; kredensial dan lingkungan uji;
-% tantangan ketika SIMRS berbeda versi; hubungan antrean daring dengan pengalaman pasien.
-% Kasus Medikara: antrean layanan yang panjang dan integrasi point-to-point tiap rumah sakit.
+Sambungan kedua menuju pihak yang sama pentingnya, tetapi tujuannya lain. Apakah BPJS Kesehatan cukup memakai data
+yang sudah dikirim ke SATUSEHAT?
+
+Integrasi BPJS Kesehatan mengikuti layanan dan dokumentasi yang relevan, misalnya verifikasi kepesertaan atau
+pertukaran informasi pelayanan. Pada Medikara, INT-01 membawa status kepesertaan, surat eligibilitas peserta (SEP),
+dan klaim. Peraturan BPJS Kesehatan 7/2018 menjadikan lembar SEP bagian dari kelengkapan klaim rawat jalan tingkat
+lanjutan (Pasal 19). Peraturan yang sama mengizinkan BPJS Kesehatan meminta dokumen dalam bentuk \textit{softcopy}
+dan/atau lewat transaksi data elektronik (Pasal 28) \cite{c07-perban7-2018}. Proses administratif pembiayaan tidak
+identik dengan pertukaran klinis SATUSEHAT. Kontrak, kredensial, dan akses dokumentasi dapat dibatasi kepada mitra.
+Contoh kelas menggunakan skenario dan data sintetis tanpa menganggap \textit{endpoint} latihan sebagai
+\textit{endpoint} produksi.
+
+Analoginya tiket perjalanan dan kuitansi pembayaran. Keduanya berkaitan, tetapi menjawab pertanyaan yang berbeda.
+Tiket menjawab siapa berangkat ke mana. Kuitansi menjawab siapa membayar berapa. Kuitansi yang benar tidak membuktikan
+penumpangnya orang yang tepat.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Verifikasi kepesertaan membantu proses administrasi, tetapi hasilnya tidak menggantikan identitas pasien dan
+        rekam medis yang benar. Dari 100.000 kunjungan per bulan, 55.000 juga melewati INT-01, atau 55 persen.
+        Misalkan 1 persen di antaranya punya data diri yang berbeda antara kartu dan SIMRS. Sebanyak 550 kunjungan per
+        bulan perlu dicocokkan. Pada 5 menit per kunjungan, biayanya sekitar Rp2,75 juta per bulan pada tarif Rp60.000
+        per jam.
+  \item Jika layanan eksternal tidak tersedia, prosedur sementara perlu menjaga layanan pasien sekaligus memastikan
+        rekonsiliasi administratif setelah pulih. Misalkan 55.000 kunjungan per bulan tersebar pada 25 hari dan 10 jam
+        layanan per hari, atau 220 kunjungan per jam. Gangguan 2 jam menyisakan 440 kunjungan untuk diperiksa ulang.
+        Pada 5 menit per kunjungan, bebannya sekitar 37 jam, atau sekitar Rp2,2 juta.
+\end{enumerate}
+
+Dua hal pada bahasan ini sering tertukar, yaitu pemeriksaan kepesertaan dan pembukaan isi rekam medis. Pembagiannya
+begini. Pemeriksaan kepesertaan bertanya apakah seseorang peserta aktif. Bab 6 sudah menjelaskan bahwa pertanyaan ini
+tidak terselesaikan dengan layar persetujuan tambahan. Klaim berbeda, karena klaim dapat membuka isi rekam medis.
+Permenkes 24/2022 Pasal 34 ayat (7) meminta persetujuan pasien untuk keperluan administrasi dan jaminan pembiayaan, tertulis
+dan/atau lewat sistem elektronik, saat registrasi \cite{permenkes24-2022}. Alur registrasi perlu memuat butir ini,
+bukan layar baru pada setiap panggilan API.
+
+Tabel \ref{tab:ch07-tiga-jalur} merinci tiga jalur pada Gambar \ref{fig:ch07-ilustrasi-bab}. Ketiganya dipisahkan
+menurut tujuan. SNAP bukan protokol BPJS, dan SATUSEHAT bukan alat bayar.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Tiga jalur integrasi sektoral pada Medikara}
+  \label{tab:ch07-tiga-jalur}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{B{1.75cm}AAB{2.35cm}B{1.7cm}}
+    \hline
+    \textbf{Jalur} & \textbf{Data} & \textbf{Acuan} & \textbf{Penerima} & \textbf{Baris} \\ \hline
+    Klinis & Identitas dan kunjungan, diagnosis, tindakan & FHIR R4, profil dan terminologi SATUSEHAT & SATUSEHAT & INT-02, Manajer Rekam Medis \\ \hline
+    Administrasi & Kepesertaan, SEP, dan klaim & Aturan dan spesifikasi BPJS Kesehatan & BPJS Kesehatan & INT-01, Manajer Klaim \\ \hline
+    Pembayaran & Mutasi dan kebutuhan transaksi & SNAP bila relevan, kontrak bank & Mitra pembayaran & INT-08, Manajer Keuangan \\ \hline
+  \end{tabularx}
+\end{table}
+
+Apakah jalur klinis dan administrasi akan tetap terpisah? Keduanya mulai bertemu. Dokumentasi SATUSEHAT memuat modul
+klaim BPJS Kesehatan yang mensyaratkan fasilitas terintegrasi ke SATUSEHAT lebih dahulu dan memvalidasi klaim dengan
+ID Encounter. Modul itu masih dalam pengembangan dan baru tersedia di lingkungan \textit{sandbox} saat diperiksa
+\cite{c07-satusehat-klaim}. Misalkan modul itu berlaku, dan 4 persen kegagalan INT-02 juga mengenai kunjungan BPJS
+Kesehatan. Sebanyak 2.200 klaim per bulan akan kehilangan ID Encounter yang sah. Kegagalan pada jalur klinis berpindah
+menjadi masalah arus kas. Tim klaim sebaiknya ikut memantau INT-02 sejak sekarang.
 
 \section{Open Banking, Open Finance, dan SNAP}
 
-% TODO
-% Cakupan: konsep open banking dan open finance; SNAP dari Bank Indonesia beserta standar teknis
-% dan keamanan, standar data, dan pedoman tata kelola; pengelolaan oleh ASPI sejak 1 September
-% 2023 dan revisi standar ke versi 1.0.2 pada September 2024; layanan digital bank bersama mitra
-% menurut POJK 21/2023; PSD2 dan rencana PSD3 di Uni Eropa sebagai pembanding.
-% Kasus Medikara: pembayaran layanan dan klaim asuransi yang melibatkan bank atau dompet digital.
+Sektor keuangan menempuh jalan yang berbeda. Lima istilah sering dipakai bergantian, padahal jenisnya tidak sama.
+Tabel \ref{tab:ch07-tertukar} memisahkannya.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lima istilah sektor keuangan yang sering tertukar}
+  \label{tab:ch07-tertukar}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{B{2.05cm}B{2.1cm}A}
+    \hline
+    \textbf{Istilah} & \textbf{Jenis} & \textbf{Yang dijawab} \\ \hline
+    \textit{Open banking} & Konsep & Pemakaian bersama data nasabah yang diizinkan, dari bank ke pengembang dan perusahaan pihak ketiga \cite{c07-bcbs2019} \\ \hline
+    \textit{Open finance} & Konsep lebih luas & Ekosistem keuangan yang lebih luas, dengan API terstandar untuk interoperabilitas antarpeserta \cite{c07-bis2020} \\ \hline
+    SNAP & Standar teknis nasional & Bentuk API pembayaran: protokol, autentikasi, enkripsi, dan struktur data \cite{snap-bi} \\ \hline
+    POJK 21/2023 & Aturan bagi bank & Layanan digital oleh bank, sendiri atau bersama mitra \cite{pojk21-2023} \\ \hline
+    PSD2 & Hukum Uni Eropa & Hak pengguna memakai layanan inisiasi pembayaran dan informasi rekening \cite{c07-psd2} \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textit{Open banking} membuka kemampuan perbankan melalui akses yang diatur, sedangkan \textit{open finance}
+memperluas cakupannya. SNAP adalah standar untuk Open API Pembayaran di Indonesia. Bank Indonesia menetapkannya lewat
+Surat Keputusan Gubernur No.~23/10/KEP.GBI/2021 tanggal 16 Agustus 2021. Isinya menyeragamkan protokol komunikasi,
+arsitektur API, autentikasi, enkripsi, dan struktur data, serta memuat pedoman tata kelola \cite{snap-bi}. Peraturan
+Anggota Dewan Gubernur (PADG) \mbox{23/15/PADG/2021} mewajibkan Penyedia Layanan dan Penyedia Jasa Pembayaran (PJP)
+Pengguna Layanan menerapkannya, dengan tenggat bertahap dari 30 Juni 2022 sampai 30 Juni 2025 \cite{c07-padg2021}.
+Sejak 1 September 2023 pengelolaannya beralih ke Asosiasi Sistem Pembayaran Indonesia (ASPI), termasuk
+\textit{developer site}, verifikasi dan rekomendasi penerapan, serta publikasi \cite{c07-bi-aspi2023}. Spesifikasinya
+direvisi menjadi versi 1.0.2 pada September 2024, dengan layanan seperti Registrasi, Informasi Saldo, Riwayat
+Transaksi, Transfer Kredit, dan Transfer Debit \cite{snap-devsite}. Standar pembayaran berbeda dari seluruh
+layanan data keuangan.
+
+POJK 21/2023 berlaku sejak 22 Desember 2023 dan mengatur sisi lain. Bank menyelenggarakan layanan digital sendiri atau
+bersama mitra berdasarkan perjanjian kerja sama. Bank wajib memiliki kebijakan penentuan mitra dan perjanjian
+tertulis. Akses data nasabah kepada mitra dibuka berdasarkan persetujuan, dan nasabah diberi fitur untuk mengelola hak
+akses mitra secara mandiri \cite{pojk21-2023}. Pengelolaan standar, pengujian, dan persyaratan peserta tetap perlu
+diperiksa pada Bank Indonesia serta ASPI, karena aturan dapat berubah.
+
+Analoginya standar colokan listrik. Standar itu memudahkan penyambungan, tetapi izin pemakaian listrik dan pengaman
+tetap mempunyai aturan sendiri. Colokan yang pas tidak memberi hak memakai listrik tetangga.
+
+Gambar \ref{fig:ch07-rantai} memperlihatkan dua rel yang sering dicampur. Rel pertama mengatur bentuk API pembayaran.
+Rel kedua mengatur hubungan bank dan mitranya. Medikara berada di ujung keduanya sebagai mitra, sehingga kewajibannya
+datang lewat kontrak.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch07-rantai-snap.tex}
+  \caption{Dua rel aturan sektor keuangan yang bertemu pada Medikara sebagai mitra}
+  \label{fig:ch07-rantai}
+\end{figure}
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Perusahaan klien dapat memakai layanan pembayaran mitra sesuai standar yang berlaku. Hal itu tidak memberi
+        akses otomatis ke seluruh rekening pengguna. Misalkan bank mitra menawarkan cicilan biaya rawat inap lewat
+        Medikara+ kepada 1.000 pasien. Tiap pasien tetap memberi persetujuan, dan tetap dapat mencabut akses Medikara
+        lewat fitur bank. Medikara menyiapkan 1.000 catatan dasar akses, bukan satu izin umum.
+  \item Misalkan API pembayaran lolos pemeriksaan bentuk pesan tetapi tidak menangani transaksi ganda. Pengujian alur
+        bisnis tetap dibutuhkan. Misalkan 12.000 pembayaran digital per bulan, dan 0,1 persen terkirim dua kali.
+        Sebanyak 12 pasien tertagih ganda. Pada 30 menit per penanganan, biayanya Rp360.000 per bulan, belum termasuk
+        kepercayaan pasien. Kunci idempotensi dari Bab 5 menjawab masalah ini, dan standar bentuk pesan tidak
+        menjawabnya.
+\end{enumerate}
+
+\begin{kasus}[title={Kasus Medikara Health: Apakah SNAP Berlaku bagi Medikara?}]
+Medikara adalah jaringan layanan kesehatan, bukan PJP. PADG \mbox{23/15/PADG/2021} mewajibkan Penyedia Layanan dan PJP
+Pengguna Layanan, sedangkan pihak non-PJP terhubung sebagai mitra \cite{c07-padg2021}. Jadi kewajiban SNAP tidak jatuh
+langsung kepada Medikara. Bagian ini adalah penalaran bab ini, bukan pendapat hukum.
+
+SNAP tetap relevan pada INT-08, yaitu mutasi pembayaran pasien dari portal 2 bank mitra ke sistem \textit{Enterprise
+Resource Planning} (ERP) keuangan. Rekonsiliasinya manual, 50 jam per bulan. Layanan Riwayat Transaksi mendekati
+kebutuhan ini. Apakah layak?
+\begin{enumerate}
+  \item Biaya sekarang: 50 jam $\times$ Rp60.000 $\times$ 12 bulan, atau Rp36 juta per tahun.
+  \item Dua antarmuka bank pada Rp45 juta per tahun menjadi Rp90 juta per tahun. Bila kedua bank memakai spesifikasi
+        yang sama dan cukup satu antarmuka, biayanya Rp45 juta per tahun.
+\end{enumerate}
+
+Bila dihitung dari jam kerja saja, API belum menang: satu antarmuka masih lebih mahal Rp9 juta per tahun. Keputusan
+Bab 4, yaitu rapikan, tetap masuk akal. Keputusan dapat berubah bila keterlambatan rekonsiliasi terbukti menghambat
+penutupan keuangan, atau bila kedua bank menyatakan portal unduhannya akan dihentikan.
+\end{kasus}
 
 \section{Pelajaran Lintas Sektor}
 
-% TODO
-% Cakupan: perbandingan sektor kesehatan dan keuangan (wajib atau sukarela, pengelola standar,
-% sertifikasi, sanksi); dampak standar sektoral terhadap strategi platform; standar sebagai
-% boundary resource bersama.
+Uni Eropa sering dijadikan acuan. Apa yang layak ditiru, dan apa yang tidak boleh disalin?
+
+Pelajaran lintas sektor dipakai pada prinsip, bukan dengan menyalin kewajiban hukum. PSD2 dan SNAP sama-sama mendorong
+interoperabilitas pembayaran, tetapi mempunyai cakupan, pihak, dan kerangka hukum berbeda. PSD2 berlaku sejak 13
+Januari 2018 (Pasal 115). Pasal 66 dan Pasal 67 memberi pengguna hak memakai layanan inisiasi pembayaran dan layanan
+informasi rekening, selama rekeningnya dapat diakses daring. Layanan itu berdasarkan persetujuan eksplisit pengguna,
+dan tidak boleh bergantung pada hubungan kontraktual antara penyedia layanan dan bank pemegang rekening
+\cite{c07-psd2}. PSD2 tidak menetapkan satu format API. Pasal 98 menugasi \textit{European Banking Authority} (EBA)
+menyusun standar teknis, dan Regulasi 2018/389 Pasal 30 meminta bank menyediakan paling sedikit satu antarmuka,
+mengikuti standar komunikasi dari lembaga standardisasi internasional atau Eropa, serta mendokumentasikan
+spesifikasinya \cite{c07-psd2, rts2018}.
+
+Kerangka itu masih bergerak. Siaran pers Parlemen Eropa pada 27 November 2025 mengumumkan kesepakatan paket layanan
+pembayaran yang mengurangi hambatan bagi layanan \textit{open banking} dan memberi pengguna \textit{dashboard} untuk
+memantau izin datanya. Kesepakatan itu masih memerlukan pengesahan formal saat siaran pers terbit
+\cite{c07-ep-psr2025}. Mahasiswa memeriksa status terbaru paket \textit{Payment Services Regulation} (PSR) dan
+\textit{Payment Services Directive 3} (PSD3) pada sumber resmi sebelum mengutipnya.
+
+Analoginya pedoman keselamatan penerbangan. Pedoman itu dapat mengilhami disiplin rumah sakit, misalnya daftar periksa
+sebelum tindakan, tanpa menjadikan rumah sakit tunduk pada aturan pesawat. Yang ditiru adalah kebiasaannya, bukan
+pasalnya.
+
+Tabel \ref{tab:ch07-eropa} memisahkan persamaan dan perbedaan kedua kerangka. Tabel \ref{tab:ch07-pelajaran}
+menurunkan prinsip yang dapat dipakai Medikara.
+
+\begin{table}[!htb]
+  \centering
+  \caption{SNAP dan POJK 21/2023 dibandingkan dengan PSD2}
+  \label{tab:ch07-eropa}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{B{1.95cm}AAB{1.65cm}}
+    \hline
+    \textbf{Aspek} & \textbf{Indonesia} & \textbf{Uni Eropa} & \textbf{Hasil} \\ \hline
+    Tujuan & Interoperabilitas Open API Pembayaran & Akses terkelola ke rekening daring dan persaingan layanan & Persamaan \\ \hline
+    Dasar pengguna & Akses mitra berdasarkan persetujuan (POJK 21/2023) & Persetujuan eksplisit (PSD2 Pasal 66 dan 67) & Persamaan \\ \hline
+    Bentuk & Standar teknis yang ditetapkan otoritas & Hak hukum, ditambah syarat antarmuka bagi bank & Perbedaan \\ \hline
+    Hubungan pihak ketiga & Layanan bersama mitra berdasarkan perjanjian kerja sama & Tidak boleh bergantung pada hubungan kontraktual & Perbedaan \\ \hline
+  \end{tabularx}
+\end{table}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Prinsip yang ditiru dan batasnya}
+  \label{tab:ch07-pelajaran}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{AAA}
+    \hline
+    \textbf{Prinsip dan asalnya} & \textbf{Tiruan di Medikara} & \textbf{Batas} \\ \hline
+    Pengguna mengelola izin sendiri: POJK 21/2023, kesepakatan paket pembayaran Uni Eropa & Layar izin aplikasi mitra pada Medikara+ & Dasar akses tetap mengikuti aturan kesehatan \\ \hline
+    Spesifikasi terdokumentasi dan tersedia: Regulasi 2018/389 Pasal 30 & Portal mitra pada Bab 11 & Tidak memberi hak akses kepada siapa pun \\ \hline
+    Verifikasi penerapan oleh pihak ketiga: peran ASPI & Uji kesesuaian sebelum klinik mitra terhubung & Medikara menguji mitranya sendiri, bukan regulator \\ \hline
+  \end{tabularx}
+\end{table}
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Misalkan Medikara mengadopsi pencatatan persetujuan dan pengujian kesesuaian dari praktik sektor lain. Dasar
+        hukum kesehatan tetap dinilai tersendiri. Bab 4 memisalkan salah nama kolom pada kontrak: 2 jam kerja bila
+        ditemukan saat ditinjau, dan 160 jam bila ditemukan sesudah 40 klinik mitra terhubung. Pada tarif Rp60.000 per
+        jam, biayanya Rp120.000 dan Rp9,6 juta. Uji kesesuaian sebelum terhubung layak ditiru karena hitungannya
+        berlaku di sektor apa pun.
+  \item Misalkan tim menyalin prinsip ``tanpa kontrak'' dari PSD2 ke INT-05, dan menuntut 9 asuransi swasta membuka
+        API. Tanpa dasar hukum yang sama, kesembilan asuransi itu tidak terikat. INT-05 tetap membutuhkan perundingan
+        kontrak pada Bab 9, walaupun 468 klaim ditolak per bulan karena format.
+\end{enumerate}
+
+\section{Menilai Kesenjangan terhadap Standar Sektor}
+
+Seluruh bahasan tadi bermuara pada satu pertanyaan: seberapa jauh organisasi dari standar yang berlaku, dan apa
+buktinya?
+
+Penilaian kesiapan menghubungkan kewajiban yang berlaku dengan kesenjangan proses, data, teknologi, dan bukti
+pengujian. Penilaian ini berjalan per baris inventaris, sehingga memakai ID yang sama dengan Bab 4 sampai Bab 6.
+Penilaian ini bukan audit kepatuhan dan bukan pendapat hukum. Fungsinya memperlihatkan pekerjaan yang tersisa,
+pemiliknya, dan bukti yang belum ada. Tabel \ref{tab:ch07-skala} memuat skalanya. Skala ini disusun bab ini, bukan
+skala resmi dari regulator.
+
+Analoginya uji kelaikan kendaraan. Petugas mencocokkan kendaraan dengan daftar syarat, lalu mencatat butir yang lulus,
+butir yang perlu diperbaiki, dan butir yang belum diperiksa. Kendaraan yang remnya belum diperiksa tidak dianggap
+lulus.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Skala penilaian kesenjangan}
+  \label{tab:ch07-skala}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{B{2.1cm}B{1.3cm}A}
+    \hline
+    \textbf{Tingkat} & \textbf{Skor} & \textbf{Syarat} \\ \hline
+    Terpenuhi & 2 & Ada bukti terverifikasi bahwa kewajiban berjalan \\ \hline
+    Sebagian & 1 & Berjalan pada sebagian lingkup, atau penyebab kegagalannya masih hipotesis \\ \hline
+    Belum & 0 & Tidak berjalan, atau belum diperiksa \\ \hline
+    Tidak berlaku & Tidak dihitung & Ada alasan tertulis mengapa kewajiban ini tidak mengenai organisasi \\ \hline
+  \end{tabularx}
+\end{table}
+
+Gambar \ref{fig:ch07-keputusan} merangkai pokok keputusan dalam bab ini. Urutan pembahasan membantu penelusuran
+alasan, dan penerapannya tetap dapat berulang bila bukti berubah.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch07-peta-keputusan.tex}
+  \caption{Peta keputusan untuk menilai satu pertukaran data terhadap standar sektor}
+  \label{fig:ch07-keputusan}
+\end{figure}
+
+Dua contoh berangka memakai Tabel \ref{tab:ch07-kesenjangan} berikut:
+\begin{enumerate}
+  \item Tujuh baris berlaku bernilai maksimum 14. Skor Medikara 5, atau sekitar 36 persen. Bila hanya tiga baris
+        berstatus terverifikasi yang dihitung, skornya 3 dari 6, atau 50 persen. Selisih itu datang dari baris yang
+        belum diperiksa dan baris yang masih hipotesis. Jadi angka ini menilai sekaligus kondisi dan pengetahuan
+        organisasi tentang kondisinya.
+  \item Misalkan rekonsiliasi harian KI-02 butuh 1 jam per hari pada 25 hari kerja per bulan. Biayanya Rp1,5 juta per
+        bulan, atau Rp18 juta per tahun. Bila dibiarkan, tumpukan 48.000 kiriman per tahun membutuhkan sekitar Rp240
+        juta untuk dibersihkan. Baris dengan skor sama tidak selalu sama mendesak.
+\end{enumerate}
+
+\begin{kasus}[title={Kasus Medikara Health: Penilaian Kesiapan Interoperabilitas}]
+Tim menilai delapan baris pada Tabel \ref{tab:ch07-kesenjangan}. Data lengkapnya tersedia di
+\berkas{sources/chapter07/contoh-kesenjangan-medikara.csv}. Seluruh isinya adalah data latihan. Kode KI berarti
+kesenjangan interoperabilitas, berbeda dari kode K pada register kewajiban IT40813 Bab 3.
+
+\begin{table}[H]
+  \centering
+  \caption{Contoh penilaian kesenjangan Medikara terhadap standar sektor}
+  \label{tab:ch07-kesenjangan}
+  \scriptsize
+  \begin{tabularx}{\linewidth}{B{0.72cm}B{0.92cm}AAB{1.12cm}B{1.5cm}}
+    \hline
+    \textbf{ID} & \textbf{Baris} & \textbf{Kewajiban atau standar} & \textbf{Kondisi saat ini} & \textbf{Tingkat} & \textbf{Bukti} \\ \hline
+    KI-01 & INT-02 & Kiriman ke platform Kementerian Kesehatan lengkap & Sekitar 4 persen kunjungan klinik belum terkirim & Sebagian & Terverifikasi \\ \hline
+    KI-02 & INT-02 & Status tiap kiriman dapat ditelusuri & Kiriman gagal tanpa pemberitahuan & Belum & Terverifikasi \\ \hline
+    KI-03 & INT-02 & Patient, Practitioner, Organization, dan Location cocok & Misalkan 2.800 kiriman gagal per bulan & Sebagian & Hipotesis \\ \hline
+    KI-04 & INT-02 & Kode memakai terminologi yang ditetapkan & Misalkan 600 kiriman gagal per bulan & Sebagian & Hipotesis \\ \hline
+    KI-05 & INT-09, INT-10 & 18 klinik, 1 laboratorium, dan 12 apotek terhubung & Jalurnya belum tercatat di inventaris & Belum & Belum terverifikasi \\ \hline
+    KI-06 & INT-01 & Kepesertaan, SEP, dan klaim berjalan & 5 sambungan berjalan, tiap pembaruan diterapkan lima kali & Terpenuhi & Terverifikasi \\ \hline
+    KI-07 & INT-01 & Persetujuan pembukaan isi rekam medis dicatat saat registrasi & Belum diperiksa & Belum & Belum terverifikasi \\ \hline
+    KI-08 & INT-08 & Open API Pembayaran berbasis SNAP & Medikara bukan PJP & Tidak berlaku & Terverifikasi \\ \hline
+  \end{tabularx}
+\end{table}
+
+Pilihan dinilai dari akibat pada perjalanan pasien, kemampuan tim, dan batas yang berlaku. Tim mengusulkan tiga
+prioritas.
+\begin{enumerate}
+  \item KI-02 lebih dahulu. Biayanya kecil, dan tanpa status kiriman baris lain tidak dapat diukur.
+  \item KI-05 dan KI-07 menyusul sebagai pemeriksaan, karena keduanya baru berstatus belum terverifikasi. INT-10 sudah
+        tercatat tanpa pemilik sejak Bab 4.
+  \item KI-03 dan KI-04 diuji lewat pengambilan sampel kiriman gagal, karena rincian penyebabnya masih pemisalan.
+\end{enumerate}
+
+Sebuah usulan belum menjadi keputusan sebelum pemilik menerima konsekuensinya. Catatan tim menyebut bukti yang belum
+tersedia dan kondisi yang dapat mengubah keputusan, misalnya modul klaim BPJS Kesehatan yang keluar dari tahap
+\textit{sandbox}.
+\end{kasus}
+
+Keputusan memakai skala ini punya dua konsekuensi. Pertama, baris tanpa bukti turun nilainya, sehingga tim terdorong
+memeriksa, bukan mengira-ngira. Kedua, skor tunggal mudah disalahpakai sebagai nilai kepatuhan. Karena itu angka
+selalu disajikan bersama daftar barisnya.
+
+\begin{pendalaman}[title={Pendalaman Teknis (opsional): Menghitung Skor dari Lembar Kesenjangan}]
+Listing \ref{lst:ch07-skor} memuat dua fungsi dari skrip penilaian. Fungsi pertama menjumlahkan skor tanpa menghitung
+baris yang tidak berlaku. Fungsi kedua menandai klaim terpenuhi yang buktinya lemah. Skrip juga menghitung cakupan
+pemetaan kolom SIMRS: dari 13 kolom contoh, 4 kolom siap, 2 perlu konversi, 4 perlu peta kode, dan 3 perlu pencocokan,
+atau sekitar 31 persen siap.
+
+\begin{lstlisting}[style=ch07python, caption={Menghitung skor kesiapan, tersedia di \berkas{sources/chapter07/hitung-kesiapan-interoperabilitas.py}}, label={lst:ch07-skor}]
+def hitung_skor(baris_penilaian):
+  """Menjumlahkan skor; baris tidak berlaku tidak menambah penyebut."""
+  baris_berlaku = [
+    baris for baris in baris_penilaian
+    if baris["tingkat"] != TINGKAT_DIKECUALIKAN
+  ]
+  skor = sum(SKOR_TINGKAT[baris["tingkat"]] for baris in baris_berlaku)
+  maksimum = len(baris_berlaku) * SKOR_MAKSIMUM_PER_BARIS
+  return skor, maksimum, round(100 * skor / maksimum, 1)
+
+
+def cari_klaim_lemah(baris_penilaian):
+  """Menandai Terpenuhi berbukti lemah, karena klaim itu masih diragukan."""
+  return [
+    baris["id"] for baris in baris_penilaian
+    if baris["tingkat"] == "Terpenuhi"
+    and baris["status_bukti"] in BUKTI_LEMAH
+  ]
+\end{lstlisting}
+
+Skrip hanya membaca berkas \textit{Comma-Separated Values} (CSV) lokal dan tidak memanggil server. Tidak ada uji beban
+atau pemindaian yang dijalankan pada sistem pihak lain.
+\end{pendalaman}
 
 \section{Aktivitas: Penilaian Kesiapan Interoperabilitas}
 
-% TODO
-% Tujuan aktivitas: mengetahui jarak antara integrasi saat ini dan standar sektor yang berlaku.
-% Peran dalam tim: anggota berlatar kesehatan, hukum, atau keuangan membaca kewajiban regulasi
-% beserta tenggatnya; anggota berlatar teknis membandingkan data yang dikirim saat ini dengan
-% resource atau spesifikasi standar.
-% Langkah: tentukan standar yang relevan (SATUSEHAT dan BPJS Kesehatan untuk Medikara, SNAP untuk
-% organisasi keuangan); daftar kewajiban; nilai status tiap integrasi; tandai kesenjangan proses,
-% data, dan teknologi; rangkum bersama luaran Bab 4 sampai 6.
-% Luaran dan tonggak capstone: penilaian kesiapan interoperabilitas, melengkapi C2 yang ditinjau
-% menjelang UTS.
-% Berkas sources yang direncanakan: sources/chapter07/penilaian-kesiapan-interoperabilitas.md,
-% sources/chapter07/contoh-patient-encounter-r4.json, sources/chapter07/pemetaan-simrs-fhir.csv
+\textbf{Tujuan.} Tim menilai kesenjangan integrasi organisasi terhadap standar sektor yang relevan, lalu menghasilkan
+artefak C2 yang dapat ditelusuri dari persoalan layanan sampai keputusan tim. Organisasi nyata digunakan dengan izin
+dan anonimisasi. Medikara menjadi alternatif bila akses tidak tersedia. Untuk Medikara, fokusnya SATUSEHAT dan BPJS
+Kesehatan. Untuk organisasi keuangan, fokusnya SNAP.
+
+\textbf{Pembagian peran.}
+\begin{itemize}
+  \item Anggota berlatar kesehatan, hukum, atau keuangan membaca kewajiban regulasi beserta tenggatnya, lalu mencatat
+        pasal dan status berlakunya.
+  \item Anggota berlatar teknis membandingkan data yang dikirim saat ini dengan \textit{resource} atau spesifikasi
+        standar.
+  \item Anggota berlatar bisnis atau akuntansi menghitung dampak layanan dan biaya, serta memastikan pemilik proses
+        menerima temuan.
+  \item Koordinator mencatat keputusan dan memastikan kedua kelompok menyepakati istilah.
+  \item Penelaah menantang asumsi tanpa mengganti bukti dengan pendapat.
+\end{itemize}
+
+\textbf{Langkah kerja.}
+\begin{enumerate}
+  \item Salin \berkas{sources/chapter07/penilaian-kesiapan-interoperabilitas.md}. Pilih satu sampai tiga baris
+        inventaris Bab 4, lalu tandai jalurnya: klinis, administrasi, atau pembayaran.
+  \item Pilih standar yang benar-benar berlaku bagi layanan organisasi. Tulis pasal atau dokumen dasarnya, yang dibaca
+        langsung dari Jaringan Dokumentasi dan Informasi Hukum (JDIH) atau situs resmi.
+  \item Petakan satu alur data dari kolom sumber ke \textit{resource} dan profil tujuan, atau ke spesifikasi yang
+        setara pada sektor lain.
+  \item Catat kesenjangan proses, identitas, terminologi, serta teknologi, dengan memakai empat lapis pada Gambar
+        \ref{fig:ch07-lapis}.
+  \item Beri tingkat dan status bukti pada tiap baris. Bandingkan skor seluruh baris dengan skor baris terverifikasi.
+  \item Tetapkan pemilik, tindakan, dan tanggal tinjau. Rangkum kesiapan interoperabilitas, lalu gabungkan bukti Bab 4
+        sampai Bab 7 menjadi C2.
+\end{enumerate}
+
+\textbf{Luaran.} Tim menyerahkan lembar penilaian terisi, ringkasan satu halaman bagi pemilik proses, catatan
+alternatif yang ditolak, dan tautan bukti.
+
+\textbf{Kaitan dengan capstone.} Bersama luaran Bab 4 sampai Bab 6, penilaian ini melengkapi tonggak C2 Kondisi Saat
+Ini yang ditinjau menjelang Ujian Tengah Semester (UTS). ID dan versi artefak dipertahankan saat dipakai bab
+berikutnya. Kesenjangan yang masih terbuka menjadi masukan bagi portofolio API pada Bab 8.
+
+\textbf{Kriteria penilaian.} Penilaian mencakup ketepatan konsep 25 persen, keterlacakan bukti 30 persen, alasan
+keputusan dan pengorbanan 30 persen, serta keterbacaan artefak 15 persen.
+
+\textbf{Berkas pendukung.} Daftar lengkap tersedia pada \berkas{sources/chapter07/README.md}. Templat tidak
+menggantikan percakapan dengan pemilik proses, dan ketidakpastian dicatat secara terbuka. Data pribadi pasien atau
+karyawan tidak boleh dipakai. Data organisasi nyata dipakai dengan izin dan dianonimkan.
+
+\begin{pendalaman}[title={Pendalaman Teknis (opsional): Memetakan Kolom SIMRS}]
+Baca contoh \textit{resource} Patient dan Encounter pada spesifikasi FHIR R4
+\cite{c07-fhir-patient, c07-fhir-encounter}, lalu bandingkan dengan \berkas{sources/chapter07/contoh-resource-fhir.md}.
+Petakan kolom data SIMRS ke elemen \textit{resource} tersebut dengan
+\berkas{sources/chapter07/pemetaan-simrs-fhir.csv}, lalu jalankan
+\berkas{sources/chapter07/hitung-kesiapan-interoperabilitas.py}. Latihan ini cukup memakai data sintetis. Kiriman ke
+lingkungan uji SATUSEHAT hanya dilakukan dengan kredensial resmi organisasi.
+\end{pendalaman}
 
 \section{Ringkasan}
 
-% TODO
+Standar sektoral mengurangi biaya penyepakatan berulang ketika banyak organisasi perlu berinteraksi. Regulator
+menetapkannya karena pasar sering tertahan, dan karena data kesehatan serta pembayaran menyangkut kepentingan publik.
+Standar tidak menghapus tata kelola. Status terkirim hanya membuktikan lapis sintaks, sedangkan semantik, proses, dan
+tanggung jawab tetap menjadi pekerjaan organisasi. Sumber kewajibannya perlu dibedakan, karena aturan hukum, syarat
+layanan, dan pilihan bisnis memberi ruang keputusan yang berbeda.
+
+HL7 FHIR menyusun informasi kesehatan dalam \textit{resource}, misalnya Patient dan Encounter. Profil memperketat
+aturan dasar untuk konteks tertentu, dan terminologi menetapkan nilai yang sah. Karena itu JSON yang sah dapat tetap
+ditolak penerima. Medikara tetap memakai R4 karena pihak tujuan memakainya, bukan karena R5 atau rancangan R6 belum
+dikenal.
+
+SATUSEHAT menerapkan interoperabilitas kesehatan menggunakan FHIR dan panduan per kasus penggunaan, sedangkan
+Permenkes 24/2022 memberi dasar kewajibannya. Pada INT-02, antrean kirim ulang hanya menyelesaikan sebagian kecil
+kegagalan bila penyebabnya data di sumber. Integrasi BPJS Kesehatan mengikuti tujuan lain, yaitu kepesertaan dan
+klaim. Kedua jalur dipisahkan menurut tujuan, tetapi mulai bertemu lewat modul klaim yang masih dalam pengembangan.
+
+\textit{Open banking} membuka kemampuan perbankan melalui akses yang diatur, dan \textit{open finance} memperluas
+cakupannya. SNAP mengatur bentuk API pembayaran, sedangkan POJK 21/2023 mengatur hubungan bank dan mitra. Medikara
+bukan PJP, sehingga SNAP menjadi pilihan bisnis, dan hitungan INT-08 belum memihak API. Pelajaran lintas sektor
+dipakai pada prinsip, bukan dengan menyalin kewajiban hukum, karena PSD2 memberi hak tanpa kontrak yang tidak dimiliki
+Medikara di Indonesia.
+
+Pesan utama bab ini adalah mempertahankan hubungan antara masalah layanan, pilihan yang dipertimbangkan, dan bukti
+keputusan. Skor kesiapan Medikara sekitar 36 persen bukan nilai kepatuhan, melainkan peta pekerjaan dan peta
+ketidaktahuan. Artefak C2 perlu menyebut pemilik serta pemicu peninjauan. Keputusan yang baik menjelaskan manfaat yang
+diharapkan sekaligus akibat yang harus ditanggung organisasi.
 
 \section{Latihan}
 
+\subsection*{Latihan 1: Menilai Manfaat Standar Terbuka}
+
+Jelaskan mengapa SATUSEHAT memakai standar terbuka seperti HL7 FHIR, bukan format buatan sendiri. Latihan ini
+membuktikan bahwa manfaat standar dapat dihitung, dan batasnya dapat ditunjukkan.
 \begin{enumerate}
-  \item Jelaskan mengapa SATUSEHAT memakai standar terbuka seperti HL7 FHIR, bukan format buatan sendiri.
-  \item Bandingkan cara Indonesia melalui SNAP (Standar Nasional Open API Pembayaran) dan Uni Eropa melalui PSD2 (\textit{Payment Services Directive 2}) mendorong \textit{open banking}. Sebutkan satu persamaan dan satu perbedaan.
-  \item Misalkan data kunjungan pasien dari dua rumah sakit Medikara belum terkirim ke SATUSEHAT. Uraikan tiga kemungkinan penyebab dari sisi proses, data, dan teknologi.
+  \item Pilih satu pertukaran data klinis.
+  \item Bandingkan format lokal dengan FHIR pada empat lapis di Gambar \ref{fig:ch07-lapis}.
+  \item Hitung jumlah pemetaan pada kedua pilihan, dengan satuan biaya yang sama.
+  \item Jelaskan manfaat dan batas standardisasi.
+\end{enumerate}
+
+Tabel \ref{tab:ch07-lat1-contoh} merupakan contoh alasan, bukan satu-satunya jawaban yang benar. Angkanya mengikuti
+pemisalan pada bab ini.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 1: pertukaran hasil laboratorium antara 18 klinik dan 5 rumah sakit}
+  \label{tab:ch07-lat1-contoh}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{B{1.9cm}AAA}
+    \hline
+    \textbf{Aspek} & \textbf{Format buatan sendiri} & \textbf{HL7 FHIR} & \textbf{Dasar penilaian} \\ \hline
+    Biaya pemetaan & 90 kesepakatan, Rp1,08 miliar & 23 pemetaan, Rp276 juta & Rp12 juta per pekerjaan \\ \hline
+    Vendor & Pengetahuan melekat pada satu vendor & Spesifikasi terbuka dan sama bagi vendor mana pun & Biaya berpindah turun \\ \hline
+    Makna lokal & Kode fasilitas lokal & Tetap dipetakan ke terminologi tujuan & Standar tidak menghapus pemetaan \\ \hline
+    Batas & Bebas dirancang & Mengikuti jadwal dan profil pihak tujuan & Ruang desain menyempit \\ \hline
+  \end{tabularx}
+\end{table}
+
+Isi hasil tim pada Tabel \ref{tab:ch07-lat1-hasil}, lalu tambahkan rujukan bukti dalam catatan kerja.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 1}
+  \label{tab:ch07-lat1-hasil}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{B{1.9cm}AAA}
+    \hline
+    \textbf{Aspek} & \textbf{Format buatan sendiri} & \textbf{HL7 FHIR} & \textbf{Dasar penilaian} \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textbf{Pertanyaan analisis.}
+\begin{enumerate}
+  \item Bila satu sisi hanya punya 2 pihak, mulai berapa pihak di sisi lain standar bersama lebih hemat daripada
+        kesepakatan berpasangan? Pakai cara hitung pada Tabel \ref{tab:ch07-lat1-contoh}.
+  \item Mengapa JSON sah belum membuktikan interoperabilitas? Tunjukkan dengan satu baris dari Tabel
+        \ref{tab:ch07-penyebab}.
+  \item Siapa memvalidasi makna klinis pada organisasi tim, dan berapa jam per bulan yang dibutuhkan?
+\end{enumerate}
+
+\subsection*{Latihan 2: Membandingkan SNAP dan PSD2}
+
+Bandingkan cara Indonesia melalui SNAP dan Uni Eropa melalui PSD2 mendorong \textit{open banking}. Sebutkan satu
+persamaan dan satu perbedaan. Latihan ini membuktikan kemampuan memisahkan persamaan prinsip dari perbedaan hukum.
+\begin{enumerate}
+  \item Tentukan cakupan dan pihak setiap kerangka.
+  \item Cari sumber resmi mengenai kewajibannya, lalu catat nomor pasal.
+  \item Pisahkan persamaan prinsip dari perbedaan hukum.
+  \item Tentukan satu standar yang relevan bagi organisasi tim, dan alasannya.
+\end{enumerate}
+
+Tabel \ref{tab:ch07-lat2-contoh} merupakan contoh alasan, bukan satu-satunya jawaban yang benar.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 2: satu persamaan dan satu perbedaan}
+  \label{tab:ch07-lat2-contoh}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{B{1.7cm}AAA}
+    \hline
+    \textbf{Hasil} & \textbf{SNAP dan aturan terkait} & \textbf{PSD2} & \textbf{Akibat bagi Medikara} \\ \hline
+    Persamaan & Akses data nasabah kepada mitra berdasarkan persetujuan (POJK 21/2023) & Layanan berdasarkan persetujuan eksplisit (Pasal 66 dan 67) & Catatan persetujuan dibutuhkan pada 1.000 pasien cicilan yang dimisalkan \\ \hline
+    Perbedaan & Layanan bersama mitra berdasarkan perjanjian kerja sama & Tidak boleh bergantung pada hubungan kontraktual (Pasal 66 dan 67) & INT-08 tetap memerlukan kontrak dengan 2 bank mitra \\ \hline
+  \end{tabularx}
+\end{table}
+
+Isi hasil tim pada Tabel \ref{tab:ch07-lat2-hasil}, lalu tambahkan rujukan bukti dalam catatan kerja.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 2}
+  \label{tab:ch07-lat2-hasil}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{B{1.7cm}AAA}
+    \hline
+    \textbf{Hasil} & \textbf{SNAP dan aturan terkait} & \textbf{PSD2} & \textbf{Akibat bagi organisasi} \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textbf{Pertanyaan analisis.}
+\begin{enumerate}
+  \item Asumsi apa yang berbahaya bila praktik Eropa disalin langsung? Hitung dampaknya pada satu baris inventaris
+        tim.
+  \item Standar mana relevan untuk organisasi pilihan tim, dan apakah sifatnya wajib atau pilihan bisnis?
+  \item Pada INT-08, berapa jam manual per bulan yang membuat satu antarmuka Rp45 juta per tahun impas pada tarif
+        Rp60.000 per jam?
+\end{enumerate}
+
+\subsection*{Latihan 3: Mendiagnosis Pengiriman yang Gagal}
+
+Misalkan data kunjungan pasien dari dua rumah sakit Medikara belum terkirim ke SATUSEHAT. Uraikan tiga kemungkinan
+penyebab dari sisi proses, data, dan teknologi. Latihan ini membuktikan kemampuan menguji dugaan dengan bukti sebelum
+menyimpulkan.
+\begin{enumerate}
+  \item Pilih dua rumah sakit pada skenario. Contoh memisalkan Bogor dan Bandung, dengan 30.000 kunjungan per bulan,
+        atau 1.000 kunjungan per hari, yang belum terkirim selama 14 hari. Jumlahnya 14.000 kiriman.
+  \item Ajukan sebab proses, data, dan teknologi.
+  \item Tentukan bukti untuk menguji setiap dugaan.
+  \item Tentukan dugaan yang diperiksa paling dahulu, lalu tentukan bukti keberhasilan perbaikan.
+\end{enumerate}
+
+Tabel \ref{tab:ch07-lat3-contoh} merupakan contoh alasan, bukan satu-satunya jawaban yang benar.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 3: dua rumah sakit, 14.000 kiriman belum terkirim}
+  \label{tab:ch07-lat3-contoh}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{B{1.55cm}AAB{2.5cm}}
+    \hline
+    \textbf{Sisi} & \textbf{Dugaan} & \textbf{Bukti yang diperiksa} & \textbf{Biaya uji} \\ \hline
+    Proses & Belum ada petugas yang memantau kiriman sesudah pergantian vendor & Penugasan, jadwal rekonsiliasi, dan catatan serah terima & 2 jam wawancara, Rp120.000 \\ \hline
+    Data & Referensi pasien salah karena nomor IHS belum tercocokkan & Sampel 100 kiriman, cocokkan dengan MPI, 3 menit per kiriman & 5 jam, Rp300.000 \\ \hline
+    Teknologi & Konfigurasi akses kedaluwarsa, sehingga semua kiriman ditolak & Status kiriman dan catatan jawaban server & 1 jam, Rp60.000 \\ \hline
+  \end{tabularx}
+\end{table}
+
+Isi hasil tim pada Tabel \ref{tab:ch07-lat3-hasil}, lalu tambahkan rujukan bukti dalam catatan kerja.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 3}
+  \label{tab:ch07-lat3-hasil}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{B{1.55cm}AAB{2.5cm}}
+    \hline
+    \textbf{Sisi} & \textbf{Dugaan} & \textbf{Bukti yang diperiksa} & \textbf{Biaya uji} \\ \hline
+    Proses & \dots & \dots & \dots \\ \hline
+    Data & \dots & \dots & \dots \\ \hline
+    Teknologi & \dots & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textbf{Pertanyaan analisis.}
+\begin{enumerate}
+  \item Dugaan mana diperiksa paling dahulu menurut Tabel \ref{tab:ch07-lat3-contoh}, dan mengapa? Pertimbangkan biaya
+        uji dan pola kegagalan yang menyeluruh pada dua rumah sakit.
+  \item Bagaimana membuktikan bahwa perbaikan telah berhasil? Sebutkan angka target dan sumber datanya.
+  \item Bila 14.000 kiriman itu ternyata gagal karena sebab data, berapa jam kerja dibutuhkan pada 5 menit per
+        kiriman, dan apa akibatnya pada Tabel \ref{tab:ch07-kesenjangan}?
 \end{enumerate}

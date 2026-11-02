@@ -1,0 +1,41 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000},
+  tanya/.style={draw, rounded corners, fill=blue!8, text width=3.2cm, minimum height=1.15cm, align=center},
+  tekan/.style={tanya, fill=orange!12},
+  akhir/.style={tanya, fill=green!10},
+  jawab/.style={draw, rounded corners, fill=praditagreen!15, text width=3.2cm, minimum height=1.3cm, align=center, font=\tiny},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  putus/.style={-{Stealth[length=2mm]}, thin, dashed}
+]
+  \node[tanya] (a) at (0,0) {\textbf{1. Pengguna}\\Siapa yang mengerjakan tugas apa?};
+  \node[tanya] (b) at (3.9,0) {\textbf{2. Ukuran}\\Di mana garis mulai dan garis akhirnya?};
+  \node[tanya] (c) at (7.8,0) {\textbf{3. Sarana}\\Dokumen, \textit{sandbox}, atau SDK?};
+
+  \node[jawab] (ja) at (0,-1.45) {28 klinik lewat 3 vendor, 12 klinik punya teknisi sendiri, ditambah pemilik kemitraan};
+  \node[jawab] (jb) at (3.9,-1.45) {Panggilan pertama dari 42,5 ke 6,5 jam, lalu tugas utuh dan 6 skenario gagal};
+  \node[jawab] (jc) at (7.8,-1.45) {Referensi dari kontrak, 20 pasien sintetis, koleksi contoh. SDK ditunda};
+
+  \node[tekan] (d) at (7.8,-3.15) {\textbf{4. Lingkup portal}\\Seberapa besar yang muat?};
+  \node[tanya] (e) at (3.9,-3.15) {\textbf{5. Gerbang}\\Bukti apa untuk tiap perpindahan?};
+  \node[akhir] (f) at (0,-3.15) {\textbf{6. Janji}\\Apa yang disanggupi, dan apa akibatnya?};
+
+  \node[jawab] (jd) at (7.8,-4.6) {P2 Rp87,6 juta dalam ruang Rp91,2 juta, bersyarat tiket 1 per klinik per bulan};
+  \node[jawab] (je) at (3.9,-4.6) {Tujuh tahap, kredensial terpisah, persetujuan pemilik, rencana penghentian};
+  \node[jawab] (jf) at (0,-4.6) {SLA 99,0 persen, target internal 99,4 persen, kredit 10 persen, empat prioritas};
+
+  \draw[panah] (a) -- (b);
+  \draw[panah] (b) -- (c);
+  \draw[panah] (jc) -- (d);
+  \draw[panah] (d) -- (e);
+  \draw[panah] (e) -- (f);
+  \draw[putus] (a) -- (ja);
+  \draw[putus] (b) -- (jb);
+  \draw[putus] (c) -- (jc);
+  \draw[putus] (d) -- (jd);
+  \draw[putus] (e) -- (je);
+  \draw[putus] (f) -- (jf);
+
+  \node[font=\tiny, align=center, text width=11cm] at (3.9,-5.6)
+    {Bukti baru dapat membuka kembali keputusan sebelumnya. Contoh: tiket 2 per klinik per bulan mengembalikan pilihan ke P1};
+\end{tikzpicture}

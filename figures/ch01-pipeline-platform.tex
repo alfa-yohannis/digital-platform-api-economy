@@ -1,0 +1,36 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  kotak/.style={draw, rounded corners, text width=2.3cm, minimum height=0.7cm,
+                align=center, font=\scriptsize},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  duaarah/.style={{Stealth[length=2mm]}-{Stealth[length=2mm]}, thick}
+]
+  % Bisnis pipeline: nilai mengalir satu arah di dalam satu organisasi.
+  \node[font=\scriptsize\bfseries] at (0,2.6) {Bisnis pipeline};
+  \node[kotak, fill=blue!8] (p1) at (0,1.7) {Bahan dan pemasok};
+  \node[kotak, fill=blue!8] (p2) at (0,0.55) {Produksi oleh organisasi};
+  \node[kotak, fill=blue!8] (p3) at (0,-0.6) {Pemasaran dan penjualan};
+  \node[kotak, fill=green!10] (p4) at (0,-1.75) {Pelanggan};
+  \draw[panah] (p1) -- (p2);
+  \draw[panah] (p2) -- (p3);
+  \draw[panah] (p3) -- (p4);
+  \node[font=\tiny, gray, anchor=north] at (p4.south) {nilai mengalir satu arah};
+
+  \draw[gray, dashed] (2.05,2.75) -- (2.05,-2.4);
+
+  % Bisnis platform: pihak luar dipertemukan, platform mengatur interaksinya.
+  \node[font=\scriptsize\bfseries] at (6.6,2.6) {Bisnis platform};
+  \node[kotak, fill=blue!8, text width=2.0cm] (penyedia) at (4.0,0)
+    {Penyedia\\{\tiny pengemudi, penjual, dokter}};
+  \node[kotak, fill=praditagreen!15, text width=1.6cm, minimum height=1.5cm,
+        font=\scriptsize\bfseries] (hub) at (6.6,0) {Platform};
+  \node[kotak, fill=blue!8, text width=2.0cm] (pengguna) at (9.2,0)
+    {Pengguna\\{\tiny penumpang, pembeli, pasien}};
+  \draw[duaarah] (penyedia) -- (hub);
+  \draw[duaarah] (hub) -- (pengguna);
+  \draw[duaarah, dashed, orange!70!black] (penyedia.north) to[bend left=32]
+    node[midway, above, font=\tiny, text=black]
+    {interaksi inti: perjalanan, jual beli, konsultasi} (pengguna.north);
+  \node[font=\tiny, align=center, anchor=north] at (hub.south)
+    {aturan main, pencocokan,\\pembayaran, reputasi};
+\end{tikzpicture}

@@ -1,0 +1,62 @@
+# Kontrak contoh Bab 13 yang sengaja melanggar panduan gaya, data sintetis.
+# Cara pakai: python periksa-panduan-gaya.py contoh-kontrak-melanggar.yaml
+openapi: 3.2.0
+info:
+  title: API jadwal lokal rumah sakit contoh
+  summary: Kontrak buatan tim lokal sebelum panduan gaya berlaku.
+  version: 0.9.0
+servers:
+  - url: https://rs-contoh.medikara.example
+    description: Alamat fiktif untuk latihan.
+paths:
+  /getJadwalDokter:
+    get:
+      summary: Mengambil seluruh jadwal dokter.
+      parameters:
+        - name: tanggal
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Daftar jadwal.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "500":
+          description: Galat umum.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /janji_temu:
+    post:
+      operationId: buatJanji
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                slot:
+                  type: string
+                pasien:
+                  type: string
+      responses:
+        "200":
+          description: Janji tersimpan.
+        "400":
+          description: Masukan salah.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pesan:
+                    type: string

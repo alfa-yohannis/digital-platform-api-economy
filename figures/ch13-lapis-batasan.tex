@@ -1,0 +1,30 @@
+\begin{tikzpicture}[
+  kotak/.style={draw, rounded corners, text width=3.6cm, minimum height=0.95cm,
+    align=flush center, font=\scriptsize},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  saran/.style={-{Stealth[length=2mm]}, thick, dashed, gray}
+]
+  \node[kotak, fill=blue!8] (u1) at (0,1.8)
+    {\textbf{UU 5/1999}\\{\tiny\mdseries persaingan usaha, KPPU}};
+  \node[kotak, fill=blue!8] (u2) at (0,0.6)
+    {\textbf{UU 27/2022}\\{\tiny\mdseries PP 33/2026 dipantau, berlaku 16 Januari 2027}};
+  \node[kotak, fill=blue!8] (u3) at (0,-0.6)
+    {\textbf{Permenkes 24/2022}\\{\tiny\mdseries rekam medis, sektor kesehatan}};
+  \node[kotak, draw=gray, dashed] (u4) at (0,-1.8)
+    {\textbf{DMA Uni Eropa}\\{\tiny\mdseries tidak berlaku, hanya pembanding}};
+  \node[kotak, fill=orange!12, text width=2.9cm, minimum height=1.5cm] (daftar) at (4.5,0)
+    {\textbf{Daftar batasan regulasi}\\{\tiny\mdseries pasal, tanggal berlaku, status verifikasi, pemilik}};
+  \node[kotak, fill=praditagreen!15, text width=2.1cm, minimum height=1.5cm] (forum) at (8.6,0)
+    {\textbf{Forum bersama}\\{\tiny\mdseries menetapkan batas}};
+  \node[kotak, fill=green!10, text width=2.1cm] (h1) at (11.5,1.5) {Panduan gaya};
+  \node[kotak, fill=green!10, text width=2.1cm] (h2) at (11.5,0) {Kelas perubahan};
+  \node[kotak, fill=green!10, text width=2.1cm] (h3) at (11.5,-1.5) {Syarat penggunaan};
+  \draw[panah] (u1.east) -- (daftar.west |- 0,0.45);
+  \draw[panah] (u2.east) -- (daftar.west |- 0,0.15);
+  \draw[panah] (u3.east) -- (daftar.west |- 0,-0.15);
+  \draw[saran] (u4.east) -- (daftar.west |- 0,-0.45);
+  \draw[panah] (daftar) -- node[above=1pt, font=\tiny] {batas wajib} (forum);
+  \draw[panah] (forum) -- (h1);
+  \draw[panah] (forum) -- (h2);
+  \draw[panah] (forum) -- (h3);
+\end{tikzpicture}

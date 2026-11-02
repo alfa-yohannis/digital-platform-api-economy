@@ -1,0 +1,64 @@
+# Kontrak AsyncAPI pemberitahuan hasil tersedia, contoh Bab 09, data sintetis.
+# Cara pakai: baca sebagai pembanding kontrak OpenAPI. Pesan tidak memuat isi hasil.
+asyncapi: 3.1.0
+info:
+  title: Pemberitahuan Hasil Pemeriksaan
+  version: 1.0.0
+  description: >-
+    Medikara memberi tahu klinik mitra bahwa hasil tersedia. Klinik mengambil
+    isi hasil lewat GET dengan otorisasi. Kiriman dapat berulang, sehingga
+    penerima wajib memeriksa pengenal kejadian.
+  contact:
+    name: Manajer Laboratorium
+    email: api-02@medikara.example
+channels:
+  hasilTersedia:
+    address: hasil.tersedia
+    description: Kejadian saat hasil pemeriksaan siap diambil.
+    messages:
+      hasilTersedia:
+        $ref: '#/components/messages/HasilTersedia'
+operations:
+  kirimHasilTersedia:
+    action: send
+    summary: Medikara mengirim pemberitahuan saat hasil tersedia.
+    channel:
+      $ref: '#/channels/hasilTersedia'
+    messages:
+      - $ref: '#/channels/hasilTersedia/messages/hasilTersedia'
+components:
+  messages:
+    HasilTersedia:
+      name: hasilTersedia
+      title: Hasil pemeriksaan tersedia
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/PemberitahuanHasil'
+      examples:
+        - name: contohSintetis
+          payload:
+            idKejadian: EVT-20261102-08150031
+            jenis: hasil.tersedia
+            versi: 1
+            idHasil: HSL-77120
+            waktu: '2026-11-02T08:15:00+07:00'
+  schemas:
+    PemberitahuanHasil:
+      type: object
+      required: [idKejadian, jenis, versi, idHasil, waktu]
+      properties:
+        idKejadian:
+          type: string
+          description: Tetap sama pada setiap pengulangan.
+        jenis:
+          type: string
+          const: hasil.tersedia
+        versi:
+          type: integer
+          description: Versi bentuk pesan.
+        idHasil:
+          type: string
+          description: Pengenal hasil, bukan isi hasil.
+        waktu:
+          type: string
+          format: date-time

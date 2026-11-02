@@ -1,0 +1,38 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  pihak/.style={draw, rounded corners, fill=blue!8, text width=2.1cm,
+                minimum height=0.75cm, align=center, font=\scriptsize},
+  rencana/.style={draw, dashed, rounded corners, fill=white, text width=2.1cm,
+                  minimum height=0.75cm, align=center, font=\scriptsize,
+                  text=gray!80!black},
+  cara/.style={midway, fill=white, font=\tiny, inner sep=1pt, align=center},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  duaarah/.style={{Stealth[length=2mm]}-{Stealth[length=2mm]}, thick}
+]
+  \node[draw, rounded corners, fill=praditagreen!15, text width=2.9cm,
+        minimum height=1.3cm, align=center, font=\scriptsize\bfseries]
+    (medikara) at (0,0)
+    {Medikara Health\\{\tiny\mdseries 5 rumah sakit, 18 klinik pratama,\\
+     1 laboratorium rujukan, 12 apotek}};
+
+  \node[pihak] (bpjs) at (90:4.4 and 2.45) {BPJS Kesehatan};
+  \node[pihak] (satusehat) at (50:4.4 and 2.45) {SATUSEHAT};
+  \node[pihak] (asuransi) at (10:4.4 and 2.45) {Asuransi swasta\\{\tiny 9 perusahaan}};
+  \node[pihak] (lab) at (-30:4.4 and 2.45) {Laboratorium mitra\\{\tiny 3 laboratorium}};
+  \node[pihak] (bank) at (-70:4.4 and 2.45) {Bank mitra\\{\tiny 2 bank}};
+  \node[pihak] (klien) at (-110:4.4 and 2.45) {Perusahaan klien\\{\tiny 36 perusahaan}};
+  \node[pihak, fill=red!22] (vendor) at (-150:4.4 and 2.45) {Vendor Medikara+};
+  \node[rencana] (klinik) at (170:4.4 and 2.45) {Klinik mitra\\{\tiny rencana}};
+  \node[rencana] (apotek) at (130:4.4 and 2.45) {Apotek daring\\{\tiny rencana}};
+
+  \draw[duaarah] (medikara) -- node[cara] {API per\\rumah sakit} (bpjs);
+  \draw[panah] (medikara) -- node[cara] {API per\\rumah sakit} (satusehat);
+  \draw[duaarah] (medikara) -- node[cara] {portal dan\\berkas} (asuransi);
+  \draw[duaarah] (medikara) -- node[cara] {surel dan\\pindaian} (lab);
+  \draw[panah] (bank) -- node[cara] {unduh\\berkas} (medikara);
+  \draw[duaarah] (medikara) -- node[cara] {surel dan\\spreadsheet} (klien);
+  \draw[duaarah, red!60!black] (medikara) -- node[cara, text=red!60!black]
+    {akses langsung\\basis data} (vendor);
+  \draw[gray, dashed] (medikara) -- (klinik);
+  \draw[gray, dashed] (medikara) -- (apotek);
+\end{tikzpicture}

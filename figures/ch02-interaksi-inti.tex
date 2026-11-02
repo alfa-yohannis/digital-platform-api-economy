@@ -1,0 +1,41 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  kotak/.style={draw, rounded corners, minimum height=1.25cm, text width=2.15cm,
+                align=center, font=\scriptsize\bfseries},
+  fungsi/.style={draw, rounded corners, minimum height=0.6cm, minimum width=2.0cm,
+                 align=center, fill=praditagreen!15, font=\scriptsize\bfseries},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  garis/.style={dashed, gray!70!black}
+]
+  \node[kotak, fill=blue!8] (produsen) at (0,0)
+    {Produsen\\{\tiny\mdseries dokter yang membuka jadwal}};
+  \node[kotak, fill=blue!8] (unit) at (2.9,0)
+    {Unit nilai\\{\tiny\mdseries slot jadwal, profil, tarif}};
+  \node[kotak, fill=orange!12] (filter) at (5.8,0)
+    {Filter\\{\tiny\mdseries spesialisasi, lokasi, penjamin}};
+  \node[kotak, fill=blue!8] (konsumen) at (8.7,0)
+    {Konsumen\\{\tiny\mdseries pasien yang mencari}};
+  \node[kotak, fill=green!10, text width=3.2cm] (interaksi) at (7.25,-2.1)
+    {Interaksi terjadi\\{\tiny\mdseries janji temu atau konsultasi}};
+
+  \draw[panah] (produsen) -- (unit);
+  \draw[panah] (unit) -- (filter);
+  \draw[panah] (filter) -- (konsumen);
+  % Kedua panah tegak lurus terhadap kotak interaksi, supaya tidak masuk ke dalam kotak.
+  \draw[panah] (konsumen.south) -- (konsumen.south |- interaksi.north);
+  \draw[panah] (filter.south |- interaksi.north) --
+    node[font=\tiny, align=right, midway, left]
+    {ulasan dan data kunjungan\\memperbaiki filter} (filter.south);
+
+  \node[fungsi] (tarik) at (1.45,1.55) {Menarik};
+  \node[fungsi] (mudah) at (4.35,1.55) {Memudahkan};
+  \node[fungsi] (cocok) at (7.25,1.55) {Mencocokkan};
+  \draw[garis] (tarik.south) -- (produsen.north);
+  \draw[garis] (tarik.south) -- (unit.north);
+  \draw[garis] (mudah.south) -- (unit.north);
+  \draw[garis] (mudah.south) -- (filter.north);
+  \draw[garis] (cocok.south) -- (filter.north);
+  \draw[garis] (cocok.south) -- (konsumen.north);
+  \node[font=\tiny, text=gray!60!black, anchor=south] at (4.35,1.95)
+    {tiga fungsi platform};
+\end{tikzpicture}

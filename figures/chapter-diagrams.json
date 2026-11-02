@@ -1,0 +1,1598 @@
+{
+  "code": "IT40613",
+  "format_version": 1,
+  "description": "Diagram konsep orisinal, disusun dari naskah bab; kotak generik, tanpa TikZ.",
+  "chapters": [
+    {
+      "caption": "Dari rantai layanan ke interaksi platform",
+      "nodes": [
+        {
+          "id": "pasien",
+          "text": "Pasien|membutuhkan layanan",
+          "role": "actor",
+          "column": -0.15,
+          "row": 0
+        },
+        {
+          "id": "rs",
+          "text": "Rumah sakit|menjalankan layanan",
+          "role": "service",
+          "column": 1.0,
+          "row": 0
+        },
+        {
+          "id": "hasil",
+          "text": "Hasil klinis|nilai bagi pasien",
+          "role": "outcome",
+          "column": 2.15,
+          "row": 0
+        },
+        {
+          "id": "mitra",
+          "text": "Klinik mitra|pengguna API",
+          "role": "actor",
+          "column": -0.15,
+          "row": 1
+        },
+        {
+          "id": "platform",
+          "text": "Platform Medikara|aturan dan pencocokan",
+          "role": "control",
+          "column": 1.0,
+          "row": 1
+        },
+        {
+          "id": "penyedia",
+          "text": "Penyedia layanan|kapasitas dan jadwal",
+          "role": "service",
+          "column": 2.15,
+          "row": 1
+        }
+      ],
+      "edges": [
+        {
+          "source": "pasien",
+          "target": "rs",
+          "label": "meminta layanan",
+          "dashed": false
+        },
+        {
+          "source": "rs",
+          "target": "hasil",
+          "label": "melayani",
+          "dashed": false
+        },
+        {
+          "source": "mitra",
+          "target": "platform",
+          "label": "permintaan API",
+          "dashed": false
+        },
+        {
+          "source": "penyedia",
+          "target": "platform",
+          "label": "penawaran",
+          "dashed": false
+        },
+        {
+          "source": "platform",
+          "target": "rs",
+          "label": "mempertemukan pihak",
+          "dashed": false
+        }
+      ],
+      "note": "Atas: pipeline layanan. Bawah: platform mengatur interaksi antarpihak; API menyediakan kontrak pertukaran.",
+      "basis": "Definisi pipeline dan platform, afiliasi pihak luar, serta kontrak request/response pada pendahuluan dan materi API.",
+      "number": 1,
+      "filename": "ch01-diagram-konsep.png",
+      "source": "module/chapter01.tex",
+      "chapter_title": "Orientasi: Platform, API, dan Capstone",
+      "sections": [
+        "Pendahuluan",
+        "Peta Mata Kuliah dan Capstone Bersama",
+        "Bisnis Pipeline dan Bisnis Platform",
+        "API dalam Bahasa Sehari-hari",
+        "Cara Organisasi Bertukar Data",
+        "Kosakata Bersama untuk Tim Campuran",
+        "Kasus Berjalan Medikara Health",
+        "Aktivitas: Membentuk Tim dan Memetakan Pertukaran Data",
+        "Ringkasan",
+        "Latihan"
+      ]
+    },
+    {
+      "caption": "Efek jaringan dan mutu interaksi",
+      "nodes": [
+        {
+          "id": "pasien",
+          "text": "Sisi pasien|lebih banyak permintaan",
+          "role": "actor",
+          "column": -0.15,
+          "row": 0
+        },
+        {
+          "id": "cocok",
+          "text": "Interaksi inti|pasien, dokter, slot",
+          "role": "service",
+          "column": 1.0,
+          "row": 0
+        },
+        {
+          "id": "dokter",
+          "text": "Sisi penyedia|lebih banyak pilihan",
+          "role": "actor",
+          "column": 2.15,
+          "row": 0
+        },
+        {
+          "id": "subsidi",
+          "text": "Subsidi awal|batas biaya dan waktu",
+          "role": "control",
+          "column": -0.15,
+          "row": 1
+        },
+        {
+          "id": "mutu",
+          "text": "Mutu pencocokan|slot relevan dan tersedia",
+          "role": "outcome",
+          "column": 1.0,
+          "row": 1
+        },
+        {
+          "id": "padat",
+          "text": "Efek negatif|persaingan dan kepadatan",
+          "role": "risk",
+          "column": 2.15,
+          "row": 1
+        }
+      ],
+      "edges": [
+        {
+          "source": "pasien",
+          "target": "cocok",
+          "label": "permintaan",
+          "dashed": false
+        },
+        {
+          "source": "dokter",
+          "target": "cocok",
+          "label": "kapasitas",
+          "dashed": false
+        },
+        {
+          "source": "cocok",
+          "target": "mutu",
+          "label": "hasil interaksi",
+          "dashed": false
+        },
+        {
+          "source": "subsidi",
+          "target": "pasien",
+          "label": "menarik partisipasi",
+          "dashed": false
+        },
+        {
+          "source": "pasien",
+          "target": "dokter",
+          "label": "peluang lintas sisi",
+          "dashed": true,
+          "source_port": "t",
+          "target_port": "t"
+        },
+        {
+          "source": "dokter",
+          "target": "padat",
+          "label": "kompetisi sesisi",
+          "dashed": false
+        },
+        {
+          "source": "padat",
+          "target": "mutu",
+          "label": "perlu kurasi",
+          "dashed": true
+        }
+      ],
+      "note": "Efek lintas sisi dapat menambah nilai. Penambahan peserta juga dapat menambah kompetisi atau waktu tunggu.",
+      "basis": "Interaksi inti, efek jaringan sesisi/lintas sisi, efek negatif, dan strategi peluncuran mikropasar.",
+      "number": 2,
+      "filename": "ch02-diagram-konsep.png",
+      "source": "module/chapter02.tex",
+      "chapter_title": "Model Bisnis Platform dan Efek Jaringan",
+      "sections": [
+        "Pendahuluan",
+        "Pasar Dua Sisi dan Pasar Multi-Sisi",
+        "Interaksi Inti: Partisipan, Unit Nilai, dan Filter",
+        "Efek Jaringan",
+        "Masalah Ayam dan Telur dan Strategi Peluncuran",
+        "Strategi Harga Lintas Sisi",
+        "Multi-Homing, Biaya Berpindah, dan Batas Model Platform",
+        "Aktivitas: Kanvas Platform dan Peta Efek Jaringan",
+        "Ringkasan",
+        "Latihan"
+      ]
+    },
+    {
+      "caption": "Ekosistem dan batas kerja sama mitra",
+      "nodes": [
+        {
+          "id": "klien",
+          "text": "Perusahaan klien|pembeli paket layanan",
+          "role": "actor",
+          "column": -0.15,
+          "row": 1
+        },
+        {
+          "id": "ork",
+          "text": "Medikara|orkestrator ekosistem",
+          "role": "control",
+          "column": 1,
+          "row": 1
+        },
+        {
+          "id": "mitra",
+          "text": "Klinik dan laboratorium|layanan pelengkap",
+          "role": "actor",
+          "column": 2.15,
+          "row": 1
+        },
+        {
+          "id": "pasien",
+          "text": "Pasien|pengguna layanan",
+          "role": "outcome",
+          "column": 2.15,
+          "row": 0
+        },
+        {
+          "id": "batas",
+          "text": "Boundary resources|API, sandbox, syarat",
+          "role": "control",
+          "column": 1,
+          "row": 2
+        },
+        {
+          "id": "pilihan",
+          "text": "Pilihan peran|bangun, gabung, mitra",
+          "role": "control",
+          "column": 1,
+          "row": 0
+        }
+      ],
+      "edges": [
+        {
+          "source": "klien",
+          "target": "ork",
+          "label": "pembayaran",
+          "dashed": false,
+          "source_port": "r",
+          "target_port": "l"
+        },
+        {
+          "source": "ork",
+          "target": "mitra",
+          "label": "koordinasi",
+          "dashed": false,
+          "source_port": "r",
+          "target_port": "l"
+        },
+        {
+          "source": "ork",
+          "target": "batas",
+          "label": "menetapkan",
+          "dashed": false,
+          "source_port": "b",
+          "target_port": "t"
+        },
+        {
+          "source": "batas",
+          "target": "mitra",
+          "label": "akses dan batas",
+          "dashed": false,
+          "source_port": "r",
+          "target_port": "b"
+        },
+        {
+          "source": "mitra",
+          "target": "pasien",
+          "label": "layanan pasien",
+          "dashed": false,
+          "source_port": "t",
+          "target_port": "b"
+        },
+        {
+          "source": "pilihan",
+          "target": "ork",
+          "label": "arah kendali",
+          "dashed": false,
+          "source_port": "b",
+          "target_port": "t"
+        }
+      ],
+      "note": "API dan dokumentasi membuka akses; syarat serta tata kelola membatasi penggunaan kemampuan bersama.",
+      "basis": "Peran orkestrator/komplementor/pengguna, aliran nilai, boundary resources, dan pilihan strategi ekosistem.",
+      "number": 3,
+      "filename": "ch03-diagram-konsep.png",
+      "source": "module/chapter03.tex",
+      "chapter_title": "Ekosistem dan Orkestrasi Mitra",
+      "sections": [
+        "Pendahuluan",
+        "Ekosistem sebagai Struktur Kerja Sama",
+        "Peran dalam Ekosistem: Orkestrator, Pelengkap, dan Pengguna",
+        "Boundary Resources: Jembatan antara Platform dan Mitra",
+        "Keterbukaan dan Kendali",
+        "Tata Kelola Ekosistem",
+        "Opsi Strategi: Membangun, Bergabung, atau Bermitra",
+        "Aktivitas: Peta Ekosistem dan Keputusan Strategi Platform",
+        "Ringkasan",
+        "Latihan"
+      ]
+    },
+    {
+      "caption": "API sebagai produk yang terus dipelihara",
+      "nodes": [
+        {
+          "id": "pengguna",
+          "text": "Pengguna API|masalah dan tugas",
+          "role": "actor",
+          "column": 1.0,
+          "row": 0
+        },
+        {
+          "id": "api",
+          "text": "Produk API|kontrak kemampuan",
+          "role": "service",
+          "column": 1.0,
+          "row": 1
+        },
+        {
+          "id": "sistem",
+          "text": "Sistem penyedia|aturan dan data",
+          "role": "data",
+          "column": 2.15,
+          "row": 1
+        },
+        {
+          "id": "pemilik",
+          "text": "Pemilik produk|prioritas dan anggaran",
+          "role": "control",
+          "column": -0.15,
+          "row": 2
+        },
+        {
+          "id": "operasi",
+          "text": "Operasi dan dukungan|mutu sepanjang siklus",
+          "role": "control",
+          "column": 1.0,
+          "row": 2
+        },
+        {
+          "id": "nilai",
+          "text": "Hasil bisnis|pendapatan, layanan, efisiensi",
+          "role": "outcome",
+          "column": 2.15,
+          "row": 2
+        }
+      ],
+      "edges": [
+        {
+          "source": "pengguna",
+          "target": "api",
+          "label": "menggunakan",
+          "dashed": false,
+          "source_port": "b",
+          "target_port": "t"
+        },
+        {
+          "source": "pemilik",
+          "target": "api",
+          "label": "arah produk",
+          "dashed": false,
+          "source_port": "t",
+          "target_port": "l"
+        },
+        {
+          "source": "api",
+          "target": "sistem",
+          "label": "mengakses",
+          "dashed": false,
+          "source_port": "r",
+          "target_port": "l"
+        },
+        {
+          "source": "operasi",
+          "target": "api",
+          "label": "memelihara",
+          "dashed": false,
+          "source_port": "t",
+          "target_port": "b"
+        },
+        {
+          "source": "sistem",
+          "target": "nilai",
+          "label": "mendukung layanan",
+          "dashed": false,
+          "source_port": "b",
+          "target_port": "t"
+        },
+        {
+          "source": "nilai",
+          "target": "pemilik",
+          "label": "bukti manfaat",
+          "dashed": true,
+          "source_port": "b",
+          "target_port": "b"
+        }
+      ],
+      "note": "Kepemilikan, operasi, dan pengukuran nilai berlanjut setelah integrasi pertama selesai.",
+      "basis": "API product versus integration project, konsumen, pemilik, inventaris, biaya, dan nilai.",
+      "number": 4,
+      "filename": "ch04-diagram-konsep.png",
+      "source": "module/chapter04.tex",
+      "chapter_title": "API sebagai Produk dan Ekonomi API",
+      "sections": [
+        "Pendahuluan",
+        "Ekonomi API",
+        "API sebagai Produk",
+        "Audiens API: Privat, Mitra, dan Publik",
+        "Integrasi Point-to-Point dan Utang Integrasi",
+        "Model Bisnis Berbasis API",
+        "Menyusun Inventaris Integrasi dan API",
+        "Aktivitas: Inventaris Integrasi dan API Saat Ini",
+        "Ringkasan",
+        "Latihan"
+      ]
+    },
+    {
+      "caption": "Komunikasi sinkron dan pemberitahuan asinkron",
+      "nodes": [
+        {
+          "id": "klien",
+          "text": "Klien mitra|kebutuhan data",
+          "role": "actor",
+          "column": -0.15,
+          "row": 0
+        },
+        {
+          "id": "api",
+          "text": "REST / GraphQL|resource atau query",
+          "role": "control",
+          "column": 1.0,
+          "row": 0
+        },
+        {
+          "id": "layanan",
+          "text": "Layanan bisnis|aturan dan perubahan",
+          "role": "service",
+          "column": 2.15,
+          "row": 0
+        },
+        {
+          "id": "hook",
+          "text": "Endpoint webhook|sistem penerima",
+          "role": "service",
+          "column": -0.15,
+          "row": 1
+        },
+        {
+          "id": "kirim",
+          "text": "Pengirim notifikasi|retry dan rekonsiliasi",
+          "role": "control",
+          "column": 1.0,
+          "row": 1
+        },
+        {
+          "id": "event",
+          "text": "Event bisnis|fakta yang telah terjadi",
+          "role": "data",
+          "column": 2.15,
+          "row": 1
+        }
+      ],
+      "edges": [
+        {
+          "source": "klien",
+          "target": "api",
+          "label": "request/response",
+          "dashed": false
+        },
+        {
+          "source": "api",
+          "target": "layanan",
+          "label": "operasi / hasil",
+          "dashed": false
+        },
+        {
+          "source": "layanan",
+          "target": "event",
+          "label": "mencatat kejadian",
+          "dashed": false
+        },
+        {
+          "source": "event",
+          "target": "kirim",
+          "label": "memicu",
+          "dashed": false
+        },
+        {
+          "source": "kirim",
+          "target": "hook",
+          "label": "payload notifikasi",
+          "dashed": false
+        },
+        {
+          "source": "hook",
+          "target": "klien",
+          "label": "perbarui status",
+          "dashed": true
+        }
+      ],
+      "note": "Event adalah fakta bisnis; webhook adalah cara mengirim pemberitahuan. Penerimaan awal belum selalu berarti tugas selesai.",
+      "basis": "REST, GraphQL, event, webhook, sinkron/asinkron, kegagalan pengiriman dan rekonsiliasi.",
+      "number": 5,
+      "filename": "ch05-diagram-konsep.png",
+      "source": "module/chapter05.tex",
+      "chapter_title": "Gaya API dan Pola Integrasi",
+      "sections": [
+        "Pendahuluan",
+        "Empat Cara Sistem Bertukar Data",
+        "Komunikasi Sinkron dan Asinkron",
+        "REST: Sumber Daya, Metode, dan Kode Status",
+        "GraphQL",
+        "Event dan Webhook",
+        "Memilih Gaya API",
+        "Aktivitas: Peta Integrasi Saat Ini",
+        "Ringkasan",
+        "Latihan"
+      ]
+    },
+    {
+      "caption": "Token valid tetap memerlukan izin atas objek",
+      "nodes": [
+        {
+          "id": "klien",
+          "text": "Klien mitra|identitas aplikasi",
+          "role": "actor",
+          "column": -0.15,
+          "row": 0
+        },
+        {
+          "id": "auth",
+          "text": "Server otorisasi|memberikan token akses",
+          "role": "control",
+          "column": 1.0,
+          "row": 0
+        },
+        {
+          "id": "token",
+          "text": "Token|audience dan scope",
+          "role": "data",
+          "column": 2.15,
+          "row": 0
+        },
+        {
+          "id": "gateway",
+          "text": "API gateway|token dan kuota",
+          "role": "control",
+          "column": -0.15,
+          "row": 1
+        },
+        {
+          "id": "izin",
+          "text": "Layanan bisnis|hak pasien, fasilitas, aksi",
+          "role": "control",
+          "column": 1.0,
+          "row": 1
+        },
+        {
+          "id": "objek",
+          "text": "Data pasien|akses sesuai hubungan",
+          "role": "data",
+          "column": 2.15,
+          "row": 1
+        },
+        {
+          "id": "tolak",
+          "text": "Akses ditolak|catat audit minimum",
+          "role": "risk",
+          "column": 1.0,
+          "row": 2
+        }
+      ],
+      "edges": [
+        {
+          "source": "klien",
+          "target": "auth",
+          "label": "meminta akses",
+          "dashed": false
+        },
+        {
+          "source": "auth",
+          "target": "token",
+          "label": "izin terbatas",
+          "dashed": false
+        },
+        {
+          "source": "klien",
+          "target": "gateway",
+          "label": "request + token",
+          "dashed": false
+        },
+        {
+          "source": "gateway",
+          "target": "izin",
+          "label": "token valid",
+          "dashed": false
+        },
+        {
+          "source": "izin",
+          "target": "objek",
+          "label": "hak sesuai",
+          "dashed": false
+        },
+        {
+          "source": "izin",
+          "target": "tolak",
+          "label": "hak tidak sesuai",
+          "dashed": false
+        }
+      ],
+      "note": "Gateway memeriksa akses umum. Layanan wajib memeriksa otorisasi objek dan tindakan pada setiap permintaan.",
+      "basis": "OAuth/OIDC, scope, BOLA, pemeriksaan objek, rate limit, dan minimisasi audit.",
+      "number": 6,
+      "filename": "ch06-diagram-konsep.png",
+      "source": "module/chapter06.tex",
+      "chapter_title": "Keamanan API: OAuth 2.0 dan OWASP API Security Top 10",
+      "sections": [
+        "Pendahuluan",
+        "Pola Insiden Keamanan API",
+        "Autentikasi, Otorisasi, dan Token",
+        "OAuth 2.0 dan OpenID Connect pada Tingkat Konsep",
+        "Profil Keamanan untuk Data Berisiko Tinggi",
+        "OWASP API Security Top 10 Edisi 2023",
+        "Pembatasan Konsumsi dan Pemantauan",
+        "Aktivitas: Penilaian Risiko Keamanan API",
+        "Ringkasan",
+        "Latihan"
+      ]
+    },
+    {
+      "caption": "Jalur integrasi sektoral mempunyai tujuan berbeda",
+      "nodes": [
+        {
+          "id": "klinis",
+          "text": "Data klinis SIMRS|identitas dan kunjungan",
+          "role": "data",
+          "column": -0.15,
+          "row": 0
+        },
+        {
+          "id": "fhir",
+          "text": "FHIR R4 + profil|Patient, Encounter, kode",
+          "role": "control",
+          "column": 1.05,
+          "row": 0
+        },
+        {
+          "id": "satu",
+          "text": "SATUSEHAT|interoperabilitas klinis",
+          "role": "actor",
+          "column": 2.15,
+          "row": 0
+        },
+        {
+          "id": "admin",
+          "text": "Data administrasi|kepesertaan dan klaim",
+          "role": "data",
+          "column": -0.15,
+          "row": 1
+        },
+        {
+          "id": "bpjsapi",
+          "text": "Integrasi BPJS|aturan administrasi",
+          "role": "control",
+          "column": 1.05,
+          "row": 1
+        },
+        {
+          "id": "bpjs",
+          "text": "BPJS Kesehatan|proses pembiayaan",
+          "role": "actor",
+          "column": 2.15,
+          "row": 1
+        },
+        {
+          "id": "bayar",
+          "text": "Data pembayaran|kebutuhan transaksi",
+          "role": "data",
+          "column": -0.15,
+          "row": 2
+        },
+        {
+          "id": "snap",
+          "text": "SNAP bila relevan|standar sektor pembayaran",
+          "role": "control",
+          "column": 1.05,
+          "row": 2
+        },
+        {
+          "id": "bank",
+          "text": "Mitra pembayaran|layanan keuangan",
+          "role": "actor",
+          "column": 2.15,
+          "row": 2
+        }
+      ],
+      "edges": [
+        {
+          "source": "klinis",
+          "target": "fhir",
+          "label": "pemetaan + validasi",
+          "dashed": false
+        },
+        {
+          "source": "fhir",
+          "target": "satu",
+          "label": "resource klinis",
+          "dashed": false
+        },
+        {
+          "source": "admin",
+          "target": "bpjsapi",
+          "label": "proses administrasi",
+          "dashed": false
+        },
+        {
+          "source": "bpjsapi",
+          "target": "bpjs",
+          "label": "kepesertaan",
+          "dashed": false
+        },
+        {
+          "source": "bayar",
+          "target": "snap",
+          "label": "kontrak pembayaran",
+          "dashed": false
+        },
+        {
+          "source": "snap",
+          "target": "bank",
+          "label": "transaksi",
+          "dashed": false
+        }
+      ],
+      "note": "Ketiga jalur dipisahkan menurut tujuan. SNAP bukan protokol BPJS; FHIR memerlukan profil dan terminologi.",
+      "basis": "FHIR dan SATUSEHAT, proses BPJS, serta SNAP sebagai pembanding standar sektoral.",
+      "number": 7,
+      "filename": "ch07-diagram-konsep.png",
+      "source": "module/chapter07.tex",
+      "chapter_title": "Standar API Sektoral: SATUSEHAT, HL7 FHIR, dan SNAP",
+      "sections": [
+        "Pendahuluan",
+        "Mengapa Regulator Menetapkan Standar API",
+        "HL7 FHIR: Resource, Profil, dan Terminologi",
+        "SATUSEHAT dan Rekam Medis Elektronik",
+        "Integrasi dengan BPJS Kesehatan",
+        "Open Banking, Open Finance, dan SNAP",
+        "Pelajaran Lintas Sektor",
+        "Aktivitas: Penilaian Kesiapan Interoperabilitas",
+        "Ringkasan",
+        "Latihan"
+      ]
+    },
+    {
+      "caption": "Menurunkan strategi menjadi portofolio API",
+      "nodes": [
+        {
+          "id": "strategi",
+          "text": "Tujuan strategis|hasil yang diperlukan",
+          "role": "control",
+          "column": -0.15,
+          "row": 0
+        },
+        {
+          "id": "kap",
+          "text": "Kapabilitas dan nilai|kebutuhan lintas batas",
+          "role": "service",
+          "column": 1.0,
+          "row": 0
+        },
+        {
+          "id": "kandidat",
+          "text": "Kandidat API|pengguna dan pemilik",
+          "role": "service",
+          "column": 2.15,
+          "row": 0
+        },
+        {
+          "id": "pilih",
+          "text": "Portofolio terpilih|urutan sesuai kapasitas",
+          "role": "outcome",
+          "column": -0.15,
+          "row": 1
+        },
+        {
+          "id": "nilai",
+          "text": "Penilaian prioritas|nilai, usaha, risiko",
+          "role": "control",
+          "column": 1.0,
+          "row": 1
+        },
+        {
+          "id": "kanvas",
+          "text": "Kanvas produk|hipotesis dan bukti nilai",
+          "role": "data",
+          "column": 2.15,
+          "row": 1
+        },
+        {
+          "id": "batas",
+          "text": "Prasyarat dan kewajiban|dependensi dan kapasitas",
+          "role": "control",
+          "column": 1.0,
+          "row": 2
+        }
+      ],
+      "edges": [
+        {
+          "source": "strategi",
+          "target": "kap",
+          "label": "mengarahkan",
+          "dashed": false
+        },
+        {
+          "source": "kap",
+          "target": "kandidat",
+          "label": "menurunkan",
+          "dashed": false
+        },
+        {
+          "source": "kandidat",
+          "target": "kanvas",
+          "label": "menguji kebutuhan",
+          "dashed": false
+        },
+        {
+          "source": "kanvas",
+          "target": "nilai",
+          "label": "bukti nilai",
+          "dashed": false
+        },
+        {
+          "source": "batas",
+          "target": "nilai",
+          "label": "batas keputusan",
+          "dashed": false
+        },
+        {
+          "source": "nilai",
+          "target": "pilih",
+          "label": "memilih urutan",
+          "dashed": false
+        }
+      ],
+      "note": "API dipilih untuk mendukung hasil organisasi. Skor tinggi tetap harus memenuhi prasyarat dan batas kapasitas.",
+      "basis": "Strategi, capability/value stream, candidate API, canvas, dan evaluasi portofolio.",
+      "number": 8,
+      "filename": "ch08-diagram-konsep.png",
+      "source": "module/chapter08.tex",
+      "chapter_title": "Strategi dan Portofolio API",
+      "sections": [
+        "Pendahuluan",
+        "Dari Strategi Platform ke Strategi API",
+        "Menurunkan Kandidat API dari Kapabilitas Bisnis",
+        "Batas Domain dan Lapisan API",
+        "Lanskap API",
+        "Kanvas Produk API",
+        "Prioritisasi Portofolio",
+        "Aktivitas: Portofolio API Target",
+        "Ringkasan",
+        "Latihan"
+      ]
+    },
+    {
+      "caption": "Kontrak sebagai acuan bersama penyedia dan konsumen",
+      "nodes": [
+        {
+          "id": "bisnis",
+          "text": "Pemilik proses|normal, gagal, hak akses",
+          "role": "actor",
+          "column": -0.15,
+          "row": 0
+        },
+        {
+          "id": "kontrak",
+          "text": "Kontrak OpenAPI|operasi, schema, status",
+          "role": "control",
+          "column": 1.0,
+          "row": 0
+        },
+        {
+          "id": "mock",
+          "text": "Mock server|respons sintetis",
+          "role": "service",
+          "column": 2.15,
+          "row": 0
+        },
+        {
+          "id": "implementasi",
+          "text": "Implementasi API|aturan bisnis dan izin",
+          "role": "service",
+          "column": -0.15,
+          "row": 1
+        },
+        {
+          "id": "uji",
+          "text": "Validasi dan pengujian|struktur serta perilaku",
+          "role": "control",
+          "column": 1.0,
+          "row": 1
+        },
+        {
+          "id": "mitra",
+          "text": "Konsumen API|tugas dan kasus gagal",
+          "role": "actor",
+          "column": 2.15,
+          "row": 1
+        }
+      ],
+      "edges": [
+        {
+          "source": "bisnis",
+          "target": "kontrak",
+          "label": "menyepakati",
+          "dashed": false
+        },
+        {
+          "source": "kontrak",
+          "target": "mock",
+          "label": "menghasilkan contoh",
+          "dashed": false
+        },
+        {
+          "source": "kontrak",
+          "target": "implementasi",
+          "label": "acuan pembangunan",
+          "dashed": false,
+          "source_port": "b",
+          "target_port": "t"
+        },
+        {
+          "source": "implementasi",
+          "target": "uji",
+          "label": "bukti kesesuaian",
+          "dashed": false
+        },
+        {
+          "source": "mock",
+          "target": "mitra",
+          "label": "mencoba skenario",
+          "dashed": false
+        },
+        {
+          "source": "mitra",
+          "target": "uji",
+          "label": "umpan balik",
+          "dashed": false
+        },
+        {
+          "source": "kontrak",
+          "target": "uji",
+          "label": "acuan kontrak",
+          "dashed": false
+        }
+      ],
+      "note": "Validasi schema tidak menggantikan uji perilaku, keamanan, dan kompatibilitas. HTTP 202 belum menjamin konfirmasi bisnis.",
+      "basis": "Contract-first, OpenAPI, mock, schema/status, pengujian kontrak dan perubahan versi.",
+      "number": 9,
+      "filename": "ch09-diagram-konsep.png",
+      "source": "module/chapter09.tex",
+      "chapter_title": "Desain Kontrak API dengan OpenAPI",
+      "sections": [
+        "Pendahuluan",
+        "Kontrak API dan Pendekatan Contract-First",
+        "Pemodelan Sumber Daya dan Penamaan",
+        "Model Galat, Pagination, dan Penyaringan",
+        "Kompatibilitas dan Perubahan yang Merusak",
+        "Struktur OpenAPI 3.2",
+        "AsyncAPI untuk API Berbasis Event",
+        "Tinjauan Desain dan Mock Server",
+        "Aktivitas: Kontrak OpenAPI untuk API Prioritas",
+        "Ringkasan",
+        "Latihan"
+      ]
+    },
+    {
+      "caption": "Gateway dan pengelolaan siklus hidup API",
+      "nodes": [
+        {
+          "id": "mitra",
+          "text": "Mitra pengguna|klien terdaftar",
+          "role": "actor",
+          "column": -0.15,
+          "row": 1
+        },
+        {
+          "id": "gateway",
+          "text": "API gateway|routing, token, kuota",
+          "role": "control",
+          "column": 1.0,
+          "row": 1
+        },
+        {
+          "id": "service",
+          "text": "Layanan bisnis|otorisasi objek",
+          "role": "service",
+          "column": 2.1,
+          "row": 1
+        },
+        {
+          "id": "portal",
+          "text": "Portal dan katalog|panduan, versi, akses",
+          "role": "service",
+          "column": -0.15,
+          "row": 0
+        },
+        {
+          "id": "siklus",
+          "text": "Siklus hidup API|desain sampai pensiun",
+          "role": "control",
+          "column": 1.0,
+          "row": 0
+        },
+        {
+          "id": "metrik",
+          "text": "Analitik dan dukungan|penggunaan dan insiden",
+          "role": "data",
+          "column": 2.1,
+          "row": 2
+        }
+      ],
+      "edges": [
+        {
+          "source": "mitra",
+          "target": "gateway",
+          "label": "permintaan",
+          "dashed": false,
+          "source_port": "r",
+          "target_port": "l"
+        },
+        {
+          "source": "gateway",
+          "target": "service",
+          "label": "diteruskan",
+          "dashed": false,
+          "source_port": "r",
+          "target_port": "l"
+        },
+        {
+          "source": "portal",
+          "target": "mitra",
+          "label": "memandu pemakaian",
+          "dashed": false,
+          "source_port": "b",
+          "target_port": "t"
+        },
+        {
+          "source": "siklus",
+          "target": "gateway",
+          "label": "kebijakan disetujui",
+          "dashed": false,
+          "source_port": "b",
+          "target_port": "t"
+        },
+        {
+          "source": "siklus",
+          "target": "portal",
+          "label": "versi dan tenggat",
+          "dashed": false,
+          "source_port": "l",
+          "target_port": "r"
+        },
+        {
+          "source": "service",
+          "target": "metrik",
+          "label": "telemetri minimum",
+          "dashed": false,
+          "source_port": "b",
+          "target_port": "t"
+        },
+        {
+          "source": "gateway",
+          "target": "metrik",
+          "label": "telemetri minimum",
+          "dashed": false,
+          "source_port": "b",
+          "target_port": "l"
+        },
+        {
+          "source": "metrik",
+          "target": "siklus",
+          "label": "bukti perubahan",
+          "dashed": true,
+          "source_port": "r",
+          "target_port": "t"
+        }
+      ],
+      "note": "Portal mendukung pengguna; gateway menjalankan kebijakan lalu lintas; pemilik API mengelola perubahan dan migrasi versi.",
+      "basis": "Komponen API management, gateway, portal/catalog, analytics, version/deprecation.",
+      "number": 10,
+      "filename": "ch10-diagram-konsep.png",
+      "source": "module/chapter10.tex",
+      "chapter_title": "Manajemen Siklus Hidup API dan API Gateway",
+      "sections": [
+        "Pendahuluan",
+        "Siklus Hidup API",
+        "Versi dan Deprecation",
+        "API Gateway",
+        "Platform Manajemen API",
+        "Memilih Platform Manajemen API",
+        "API Gateway dan Service Mesh",
+        "Aktivitas: Rancangan Manajemen API",
+        "Ringkasan",
+        "Latihan"
+      ]
+    },
+    {
+      "caption": "Gerbang onboarding dari pendaftaran sampai produksi",
+      "nodes": [
+        {
+          "id": "daftar",
+          "text": "Pendaftaran mitra|identitas organisasi",
+          "role": "actor",
+          "column": -0.15,
+          "row": 0
+        },
+        {
+          "id": "cek",
+          "text": "Verifikasi|kewenangan dan syarat",
+          "role": "control",
+          "column": 1.0,
+          "row": 0
+        },
+        {
+          "id": "sandbox",
+          "text": "Sandbox|kredensial dan data uji",
+          "role": "service",
+          "column": 2.15,
+          "row": 0
+        },
+        {
+          "id": "produksi",
+          "text": "Akses produksi|kredensial terpisah",
+          "role": "outcome",
+          "column": -0.15,
+          "row": 1
+        },
+        {
+          "id": "setuju",
+          "text": "Persetujuan pemilik|cakupan akses terbatas",
+          "role": "control",
+          "column": 1.0,
+          "row": 1
+        },
+        {
+          "id": "uji",
+          "text": "Uji integrasi|normal, gagal, keamanan",
+          "role": "control",
+          "column": 2.15,
+          "row": 1
+        },
+        {
+          "id": "dukung",
+          "text": "Dukungan berlanjut|status dan eskalasi",
+          "role": "service",
+          "column": -0.15,
+          "row": 2
+        }
+      ],
+      "edges": [
+        {
+          "source": "daftar",
+          "target": "cek",
+          "label": "permohonan",
+          "dashed": false
+        },
+        {
+          "source": "cek",
+          "target": "sandbox",
+          "label": "lolos",
+          "dashed": false
+        },
+        {
+          "source": "sandbox",
+          "target": "uji",
+          "label": "uji tugas utuh",
+          "dashed": false
+        },
+        {
+          "source": "uji",
+          "target": "setuju",
+          "label": "bukti lulus",
+          "dashed": false
+        },
+        {
+          "source": "setuju",
+          "target": "produksi",
+          "label": "izin produksi",
+          "dashed": false
+        },
+        {
+          "source": "produksi",
+          "target": "dukung",
+          "label": "operasi mitra",
+          "dashed": false
+        }
+      ],
+      "note": "Panggilan pertama yang berhasil belum membuktikan integrasi siap produksi. Akses uji dan produksi dipisahkan.",
+      "basis": "Developer journey, TTFC, sandbox, kriteria promosi produksi, dukungan dan offboarding.",
+      "number": 11,
+      "filename": "ch11-diagram-konsep.png",
+      "source": "module/chapter11.tex",
+      "chapter_title": "Developer Experience dan Portal Pengembang",
+      "sections": [
+        "Pendahuluan",
+        "Mitra sebagai Pengguna API",
+        "Developer Experience dan Waktu sampai Panggilan Pertama",
+        "Dokumentasi, Sandbox, dan SDK",
+        "Portal Pengembang dan Katalog API",
+        "Alur Onboarding dan Verifikasi Mitra",
+        "Syarat Penggunaan, Tingkat Layanan, dan Dukungan",
+        "Aktivitas: Rancangan Portal Pengembang dan Onboarding Mitra",
+        "Ringkasan",
+        "Latihan"
+      ]
+    },
+    {
+      "caption": "Keberlanjutan ekonomi dan nilai yang dirasakan pengguna",
+      "nodes": [
+        {
+          "id": "biaya",
+          "text": "Biaya API|tetap dan variabel",
+          "role": "data",
+          "column": -0.15,
+          "row": 0
+        },
+        {
+          "id": "harga",
+          "text": "Harga dan unit tagihan|retry dan galat jelas",
+          "role": "control",
+          "column": 0.93,
+          "row": 0
+        },
+        {
+          "id": "impas",
+          "text": "Margin dan titik impas|asumsi volume",
+          "role": "outcome",
+          "column": 2.15,
+          "row": 0
+        },
+        {
+          "id": "mutu",
+          "text": "Mutu operasi|galat dan latensi",
+          "role": "data",
+          "column": -0.15,
+          "row": 1
+        },
+        {
+          "id": "interaksi",
+          "text": "Interaksi unik selesai|rujukan atau janji temu",
+          "role": "service",
+          "column": 2.15,
+          "row": 1
+        },
+        {
+          "id": "nilai",
+          "text": "Nilai layanan|waktu dan hasil pengguna",
+          "role": "outcome",
+          "column": 0.93,
+          "row": 1
+        }
+      ],
+      "edges": [
+        {
+          "source": "biaya",
+          "target": "harga",
+          "label": "dasar biaya",
+          "dashed": false
+        },
+        {
+          "source": "harga",
+          "target": "impas",
+          "label": "pendapatan per unit",
+          "dashed": false
+        },
+        {
+          "source": "mutu",
+          "target": "nilai",
+          "label": "mendukung",
+          "dashed": false
+        },
+        {
+          "source": "interaksi",
+          "target": "nilai",
+          "label": "hasil terukur",
+          "dashed": false
+        },
+        {
+          "source": "nilai",
+          "target": "harga",
+          "label": "uji nilai dan insentif",
+          "dashed": true
+        },
+        {
+          "source": "interaksi",
+          "target": "impas",
+          "label": "volume unit bernilai",
+          "dashed": true
+        }
+      ],
+      "note": "Jumlah panggilan bukan ukuran nilai utama. Jam kerja yang dibebaskan juga belum tentu menjadi penghematan kas.",
+      "basis": "Monetisasi langsung/tidak langsung, unit economics, titik impas, metrik interaksi bernilai.",
+      "number": 12,
+      "filename": "ch12-diagram-konsep.png",
+      "source": "module/chapter12.tex",
+      "chapter_title": "Monetisasi API dan Metrik Platform",
+      "sections": [
+        "Pendahuluan",
+        "Nilai API Langsung dan Tidak Langsung",
+        "Model Harga API",
+        "Harga dalam Pasar Multi-Sisi",
+        "Biaya dan Titik Impas API",
+        "Metrik Platform dan Metrik API",
+        "North Star Metric dan Pohon Metrik",
+        "Aktivitas: Model Monetisasi dan Pohon Metrik",
+        "Ringkasan",
+        "Latihan"
+      ]
+    },
+    {
+      "caption": "Tata kelola federasi: standar bersama dan keputusan lokal",
+      "nodes": [
+        {
+          "id": "aturan",
+          "text": "Kewajiban dan prinsip|data serta persaingan",
+          "role": "control",
+          "column": -0.15,
+          "row": 0
+        },
+        {
+          "id": "forum",
+          "text": "Forum bersama|standar dan delegasi",
+          "role": "control",
+          "column": 1.0,
+          "row": 0
+        },
+        {
+          "id": "domain",
+          "text": "Tim produk / domain|keputusan lokal",
+          "role": "actor",
+          "column": 2.1,
+          "row": 0
+        },
+        {
+          "id": "bukti",
+          "text": "Katalog dan bukti|pemilik, versi, hasil",
+          "role": "data",
+          "column": -0.15,
+          "row": 1
+        },
+        {
+          "id": "cek",
+          "text": "Lint dan tinjauan|struktur serta makna",
+          "role": "control",
+          "column": 2.1,
+          "row": 1
+        },
+        {
+          "id": "rilis",
+          "text": "Rilis API|memenuhi batas bersama",
+          "role": "outcome",
+          "column": 1.0,
+          "row": 1
+        },
+        {
+          "id": "eksepsi",
+          "text": "Pengecualian|alasan, pemilik, tenggat",
+          "role": "risk",
+          "column": 1.0,
+          "row": 2
+        }
+      ],
+      "edges": [
+        {
+          "source": "aturan",
+          "target": "forum",
+          "label": "batas wajib",
+          "dashed": false,
+          "source_port": "r",
+          "target_port": "l"
+        },
+        {
+          "source": "forum",
+          "target": "domain",
+          "label": "delegasi",
+          "dashed": false,
+          "source_port": "r",
+          "target_port": "l"
+        },
+        {
+          "source": "domain",
+          "target": "cek",
+          "label": "usulan kontrak",
+          "dashed": false,
+          "source_port": "b",
+          "target_port": "t"
+        },
+        {
+          "source": "cek",
+          "target": "rilis",
+          "label": "lulus",
+          "dashed": false,
+          "source_port": "l",
+          "target_port": "r"
+        },
+        {
+          "source": "cek",
+          "target": "forum",
+          "label": "kelas C ke forum",
+          "dashed": false,
+          "source_port": "r",
+          "target_port": "t"
+        },
+        {
+          "source": "cek",
+          "target": "eksepsi",
+          "label": "perlu pengecualian",
+          "dashed": false,
+          "source_port": "b",
+          "target_port": "r"
+        },
+        {
+          "source": "eksepsi",
+          "target": "bukti",
+          "label": "masuk register",
+          "dashed": false,
+          "source_port": "l",
+          "target_port": "b"
+        },
+        {
+          "source": "rilis",
+          "target": "bukti",
+          "label": "catatan hasil",
+          "dashed": false,
+          "source_port": "l",
+          "target_port": "r"
+        },
+        {
+          "source": "bukti",
+          "target": "forum",
+          "label": "pemantauan",
+          "dashed": true,
+          "source_port": "t",
+          "target_port": "b"
+        }
+      ],
+      "note": "Pemetaan kewajiban mempertimbangkan cakupan hukum. Pengecualian memiliki batas waktu dan pihak penerima risiko.",
+      "basis": "Federasi, automated checks/manual review, pengecualian, privasi dan hukum persaingan.",
+      "number": 13,
+      "filename": "ch13-diagram-konsep.png",
+      "source": "module/chapter13.tex",
+      "chapter_title": "Tata Kelola API dan Regulasi Platform",
+      "sections": [
+        "Pendahuluan",
+        "Tata Kelola API sebagai Pemungkin",
+        "Model Tata Kelola: Terpusat, Terdistribusi, dan Federasi",
+        "Panduan Gaya, Tinjauan Desain, dan Pemeriksaan Otomatis",
+        "Tata Kelola Ekosistem Mitra",
+        "Persaingan Usaha pada Platform",
+        "Regulasi Platform di Uni Eropa",
+        "Batas Pemakaian Data",
+        "Aktivitas: Model Tata Kelola API dan Batasan Regulasi",
+        "Ringkasan",
+        "Latihan"
+      ]
+    },
+    {
+      "caption": "Demo MCP: pencarian dan pratinjau slot tanpa transaksi",
+      "nodes": [
+        {
+          "id": "orang",
+          "text": "Pengguna|tujuan pencarian",
+          "role": "actor",
+          "column": -0.15,
+          "row": 0
+        },
+        {
+          "id": "host",
+          "text": "Host / agen + client|memilih panggilan tool",
+          "role": "service",
+          "column": 1.0,
+          "row": 0
+        },
+        {
+          "id": "server",
+          "text": "Server MCP demo|cari_slot, tinjau_slot",
+          "role": "control",
+          "column": 2.15,
+          "row": 0
+        },
+        {
+          "id": "review",
+          "text": "Tinjauan manusia|periksa hasil dan batas",
+          "role": "control",
+          "column": -0.15,
+          "row": 1
+        },
+        {
+          "id": "preview",
+          "text": "Hasil pratinjau|belum membuat janji",
+          "role": "data",
+          "column": 1.0,
+          "row": 1
+        },
+        {
+          "id": "slot",
+          "text": "Slot sintetis|data demo tanpa pasien",
+          "role": "data",
+          "column": 2.15,
+          "row": 1
+        }
+      ],
+      "edges": [
+        {
+          "source": "orang",
+          "target": "host",
+          "label": "memberi tugas",
+          "dashed": false
+        },
+        {
+          "source": "host",
+          "target": "server",
+          "label": "panggilan tool",
+          "dashed": false
+        },
+        {
+          "source": "server",
+          "target": "slot",
+          "label": "membaca data demo",
+          "dashed": false
+        },
+        {
+          "source": "slot",
+          "target": "preview",
+          "label": "hasil terstruktur",
+          "dashed": false
+        },
+        {
+          "source": "preview",
+          "target": "review",
+          "label": "untuk dinilai",
+          "dashed": false
+        },
+        {
+          "source": "review",
+          "target": "orang",
+          "label": "hasil dan penjelasan",
+          "dashed": true
+        }
+      ],
+      "note": "Demo hanya baca dan pratinjau. Produksi memerlukan autentikasi, izin objek, kuota, serta konfirmasi untuk aksi berisiko.",
+      "basis": "Host/client/server MCP, tool, batas kepercayaan dan sumber demo cari_slot/tinjau_slot yang tidak membuat appointment.",
+      "number": 14,
+      "filename": "ch14-diagram-konsep.png",
+      "source": "module/chapter14.tex",
+      "chapter_title": "API untuk Agen AI dan Peta Jalan Platform",
+      "sections": [
+        "Pendahuluan",
+        "Agen AI sebagai Pengguna API",
+        "Model Context Protocol",
+        "Protokol Agen Lainnya",
+        "Merancang API yang Siap Dipakai Agen",
+        "Risiko dan Kendali",
+        "Menyusun Peta Jalan Platform dan API",
+        "Aktivitas: Kesiapan Agen AI dan Peta Jalan Platform",
+        "Ringkasan",
+        "Latihan"
+      ]
+    }
+  ]
+}

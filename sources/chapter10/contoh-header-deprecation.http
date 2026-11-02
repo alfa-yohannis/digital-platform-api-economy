@@ -1,0 +1,6 @@
+# Kegunaan: contoh jawaban API-01 versi 1 selama masa transisi pada Bab 10. Cara pakai: baca sebagai pembanding; baris komentar ini bukan bagian jawaban HTTP.
+HTTP/1.1 200 OK
+Content-Type: application/json
+Deprecation: @1846022400
+Sunset: Sun, 31 Dec 2028 23:59:59 GMT
+Link: <https://api.medikara.example/migrasi-v2>; rel="deprecation"

@@ -1,0 +1,7 @@
+# Kegunaan: pemisalan biaya tiga alternatif pada Tabel Biaya Bab 10, dalam juta rupiah atau jam. Cara pakai: salin, ganti dengan harga bersumber dan bertanggal, lalu jalankan hitung-matriks-platform.py.
+id,komponen,jenis,a_cloud_terkelola,b_open_source_sendiri,c_komersial_sendiri,sumber,status_bukti
+B10-1,Lisensi atau langganan,juta_per_tahun,180,0,96,Bukan harga produk,Asumsi latihan
+B10-2,Infrastruktur dan penyimpanan log,juta_per_tahun,12,48,48,Bukan harga produk,Asumsi latihan
+B10-3,Kesiagaan di luar jam kerja,juta_per_tahun,12,24,12,Bukan harga produk,Asumsi latihan
+B10-4,Jam operasi,jam_per_tahun,960,3840,1920,"0,5 staf; 2 staf; 1 staf pada 160 jam per bulan",Asumsi latihan
+B10-5,Jam penyiapan oleh pelaksana luar,jam_sekali,400,1200,800,Tarif Rp60.000 per jam,Asumsi latihan

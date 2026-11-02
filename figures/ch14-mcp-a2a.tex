@@ -1,0 +1,31 @@
+\begin{tikzpicture}[
+  kotak/.style={draw, rounded corners, text width=3.5cm, minimum height=1.0cm,
+    align=flush center, font=\scriptsize},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  label/.style={font=\tiny, fill=white, inner sep=1pt}
+]
+  \node[kotak, fill=praditagreen!15] (agen1) at (0,0)
+    {\textbf{Agen perusahaan klien}\\{\tiny\mdseries mewakili karyawan}};
+  \node[kotak, fill=praditagreen!15] (agen2) at (8,0)
+    {\textbf{Agen penjadwalan Medikara}\\{\tiny\mdseries isi internalnya tidak dibuka}};
+  \node[kotak, fill=blue!8] (mcp1) at (0,-1.95)
+    {\textbf{Server MCP perusahaan}\\{\tiny\mdseries kalender kerja karyawan}};
+  \node[kotak, fill=blue!8] (mcp2) at (8,-1.95)
+    {\textbf{Server MCP Jadwal}\\{\tiny\mdseries \textit{tool} cari dan pratinjau}};
+  \node[kotak, fill=blue!8] (sistem1) at (0,-3.9)
+    {\textbf{Sistem SDM perusahaan}\\{\tiny\mdseries data karyawan}};
+  \node[kotak, fill=green!10] (sistem2) at (8,-3.9)
+    {\textbf{API-01 dan API-06}\\{\tiny\mdseries identitas dan otorisasi tetap di sini}};
+
+  \draw[panah, <->, >={Stealth[length=2mm]}] (agen1.east) --
+    node[label, above=3pt, align=center] {A2A: tugas, pesan, artefak\\horizontal, lintas organisasi} (agen2.west);
+  \draw[panah, <->, >={Stealth[length=2mm]}] (agen1) -- node[label] {MCP, vertikal} (mcp1);
+  \draw[panah, <->, >={Stealth[length=2mm]}] (agen2) -- node[label] {MCP, vertikal} (mcp2);
+  \draw[panah, <->, >={Stealth[length=2mm]}] (mcp1) -- node[label] {API perusahaan} (sistem1);
+  \draw[panah, <->, >={Stealth[length=2mm]}] (mcp2) -- node[label] {kontrak Bab 9} (sistem2);
+
+  % Penanda keputusan bab: A2A ditunda sampai pemicunya terpenuhi.
+  \node[draw, rounded corners, fill=orange!12, font=\scriptsize, text width=3.4cm,
+    align=flush center] at (4,-1.95)
+    {\textbf{Keputusan Medikara}\\{\tiny\mdseries A2A ditunda sampai 12 dari 36 perusahaan memintanya}};
+\end{tikzpicture}

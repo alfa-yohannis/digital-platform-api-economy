@@ -1,0 +1,42 @@
+\begin{tikzpicture}[
+  induk/.style={draw, rounded corners, text width=2.9cm, minimum height=0.8cm,
+    align=flush center, font=\scriptsize},
+  rs/.style={draw, rounded corners, minimum width=0.62cm, minimum height=0.55cm,
+    inner sep=1pt, font=\tiny, fill=blue!8},
+  hasil/.style={draw, rounded corners, text width=3.3cm, minimum height=0.95cm,
+    align=flush center, font=\scriptsize},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  saran/.style={-{Stealth[length=1.5mm]}, dashed, gray}
+]
+  % Panel terpusat
+  \node[font=\scriptsize\bfseries] at (0,1.35) {Terpusat};
+  \node[induk, fill=praditagreen!15] (p) at (0,0.6) {Satu tim memutuskan semua};
+  \foreach \nama/\x in {JKT/-1.4, BKS/-0.7, DPK/0, BGR/0.7, BDG/1.4} {
+    \node[rs] (p\nama) at (\x,-1) {\nama};
+    \draw[panah] (p.south -| p\nama) -- (p\nama.north);
+  }
+  \node[hasil, fill=red!22] at (0,-2.2)
+    {Antrean\\{\tiny\mdseries 480 hari-usulan, 120 jam, Rp7,2 juta}};
+
+  % Panel terdistribusi
+  \node[font=\scriptsize\bfseries] at (4,1.35) {Terdistribusi};
+  \foreach \nama/\x in {JKT/2.6, BKS/3.3, DPK/4, BGR/4.7, BDG/5.4} {
+    \node[rs] (d\nama) at (\x,-1) {\nama};
+    \node[draw, circle, inner sep=0.8pt, font=\tiny, fill=orange!12] (k\nama) at (\x,0.25) {K};
+    \draw[panah] (k\nama) -- (d\nama);
+  }
+  \node[font=\tiny, align=center] at (4,0.85) {Tiap tim memutuskan sendiri (K)};
+  \node[hasil, fill=red!22] at (4,-2.2)
+    {Fragmentasi\\{\tiny\mdseries 48 hari-usulan, 24 jam, Rp1,44 juta, ditambah 640 jam di klinik}};
+
+  % Panel federasi
+  \node[font=\scriptsize\bfseries] at (8,1.35) {Federasi};
+  \node[induk, fill=orange!12] (f) at (8,0.6) {Forum bersama: batas wajib dan delegasi};
+  \foreach \nama/\x in {JKT/6.6, BKS/7.3, DPK/8, BGR/8.7, BDG/9.4} {
+    \node[rs] (f\nama) at (\x,-1) {\nama};
+    \draw[panah] ([xshift=-1.5pt]f.south -| f\nama) -- ([xshift=-1.5pt]f\nama.north);
+    \draw[saran] ([xshift=2.5pt]f\nama.north) -- ([xshift=2.5pt]f.south -| f\nama);
+  }
+  \node[hasil, fill=green!10] at (8,-2.2)
+    {Batas bersama, keputusan lokal\\{\tiny\mdseries 112 hari-usulan, 163 jam, Rp9,78 juta}};
+\end{tikzpicture}

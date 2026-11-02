@@ -1,0 +1,39 @@
+\begin{tikzpicture}[
+  font=\scriptsize,
+  tanya/.style={draw, rounded corners, text width=4.5cm, minimum height=1.0cm,
+                align=center, font=\scriptsize},
+  hasil/.style={draw, rounded corners, text width=2.55cm, minimum height=1.2cm,
+                align=center, font=\scriptsize\bfseries, fill=green!10},
+  panah/.style={-{Stealth[length=2mm]}, thick},
+  ket/.style={font=\tiny, align=center, fill=white, inner sep=1.5pt}
+]
+  \node[tanya, fill=orange!12, text width=7.0cm] (q1) at (0,0)
+    {Apakah lapisan layanan ini memegang data sensitif atau hubungan inti dengan pasien?};
+  \node[tanya, fill=blue!8] (q2) at (-3.05,-1.75)
+    {Apakah tim dan anggaran sanggup menjalankannya sendiri selama tiga tahun?};
+  \node[tanya, fill=blue!8] (q3) at (3.05,-1.75)
+    {Apakah pihak lain sudah punya pengguna yang sulit dijangkau sendiri?};
+
+  \node[hasil] (bangun) at (-4.55,-3.6)
+    {Membangun\\{\tiny\mdseries kendali penuh, biaya terbesar}};
+  \node[hasil] (mitrakontrak) at (-1.5,-3.6)
+    {Bermitra\\{\tiny\mdseries kontrak dan batas akses ketat}};
+  \node[hasil] (gabung) at (1.5,-3.6)
+    {Bergabung\\{\tiny\mdseries tidak eksklusif, ada hak keluar}};
+  \node[hasil] (mitrauji) at (4.55,-3.6)
+    {Bermitra\\{\tiny\mdseries uji kecil lebih dahulu}};
+
+  \draw[panah] (q1.south -| q2.north) -- node[ket, right=1pt] {ya} (q2.north);
+  \draw[panah] (q1.south -| q3.north) -- node[ket, left=1pt] {tidak} (q3.north);
+  \draw[panah] (q2.south -| bangun.north) -- node[ket, right=1pt] {ya} (bangun.north);
+  \draw[panah] (q2.south -| mitrakontrak.north) --
+    node[ket, left=1pt] {tidak} (mitrakontrak.north);
+  \draw[panah] (q3.south -| gabung.north) -- node[ket, right=1pt] {ya} (gabung.north);
+  \draw[panah] (q3.south -| mitrauji.north) --
+    node[ket, left=1pt] {tidak} (mitrauji.north);
+
+  \node[draw, rounded corners, fill=gray!35, text width=11.4cm, align=center,
+        font=\tiny] at (0,-4.75)
+    {Setiap hasil dicatat bersama asumsi, pemilik keputusan, dan pemicu tinjau.
+     Jawaban dapat berbeda untuk setiap lapisan layanan.};
+\end{tikzpicture}

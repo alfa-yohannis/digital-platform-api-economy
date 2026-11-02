@@ -1,0 +1,15 @@
+# Contoh pemetaan kolom SIMRS ke elemen HL7 FHIR R4 Bab 7: data latihan, salin lalu ganti dengan kolom SIMRS tim; jangan isi data pasien nyata.
+id,kolom_simrs,contoh_nilai_sintetis,resource,elemen_fhir,terminologi_atau_format,status,tindakan,bukti
+M-01,nik_pasien,3200000000000001,Patient,Patient.identifier (sistem NIK),Format 16 digit,Siap,Tidak ada,Asumsi latihan
+M-02,no_ihs_pasien,P00000000001,Patient,Patient.identifier (sistem IHS) dan Encounter.subject,Nomor dari Master Patient Index,Perlu pencocokan,Cari nomor IHS lewat MPI saat registrasi,Asumsi latihan
+M-03,nama_pasien,Pasien Sintetis,Patient,Patient.name,Teks,Siap,Tidak ada,Asumsi latihan
+M-04,tanggal_lahir,02/11/1985,Patient,Patient.birthDate,YYYY-MM-DD,Perlu konversi,Ubah format tanggal,Asumsi latihan
+M-05,jenis_kelamin,L,Patient,Patient.gender,"male, female, other, unknown",Perlu peta kode,Petakan L ke male dan P ke female,Asumsi latihan
+M-06,no_kunjungan,KJG-1042,Encounter,Encounter.identifier,Teks,Siap,Tidak ada,Asumsi latihan
+M-07,status_kunjungan,Selesai,Encounter,Encounter.status,"arrived, in-progress, finished",Perlu peta kode,Petakan status lokal,Asumsi latihan
+M-08,jenis_layanan,Rawat Jalan,Encounter,Encounter.class,Kode kelas kunjungan,Perlu peta kode,Petakan Rawat Jalan ke AMB,Asumsi latihan
+M-09,waktu_masuk,02/11/2026 08:15,Encounter,Encounter.period.start,UTC+00,Perlu konversi,Kurangi 7 jam dari WIB,Asumsi latihan
+M-10,kode_dokter,DR-77,Encounter,Encounter.participant.individual,Nomor IHS tenaga kesehatan,Perlu pencocokan,Simpan nomor IHS per dokter,Asumsi latihan
+M-11,kode_poli,POLI-JTG,Encounter,Encounter.location.location,ID Location terdaftar,Perlu pencocokan,Daftarkan struktur lokasi,Asumsi latihan
+M-12,kode_rumah_sakit,RS-BKS,Encounter,Encounter.serviceProvider,ID Organization terdaftar,Siap,Tidak ada,Asumsi latihan
+M-13,diagnosis_utama,DX-LOKAL-019,Encounter dan Condition,Encounter.diagnosis.condition dan Condition.code,ICD-10,Perlu peta kode,Petakan kode lokal ke ICD-10 oleh koder,Asumsi latihan

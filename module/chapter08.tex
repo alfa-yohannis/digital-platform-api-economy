@@ -1,4 +1,15 @@
+% !TeX root = digital-platform-api-economy.tex
+% !TeX encoding = UTF-8
 \chapter{Strategi dan Portofolio API}
+\label{ch:ch08}
+
+% Kolom rata kiri untuk tabel bab ini: E selebar sisa tabel, F selebar yang ditentukan.
+\newcolumntype{E}{>{\raggedright\arraybackslash}X}
+\newcolumntype{F}[1]{>{\raggedright\arraybackslash}p{#1}}
+\lstdefinestyle{ch08python}{language=Python, basicstyle=\ttfamily\scriptsize, keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape, stringstyle=\color{red}, showstringspaces=false, breaklines=true,
+  frame=lines, numbers=left, numberstyle=\tiny\color{gray}, backgroundcolor=\color{lightgray!10}, tabsize=2,
+  captionpos=b, xleftmargin=8pt}
 
 \section*{Tujuan Pembelajaran}
 \begin{itemize}
@@ -9,75 +20,955 @@
 
 \section{Pendahuluan}
 
-% TODO
-% Cakupan: setelah kondisi saat ini terpetakan, Medikara harus memutuskan API mana yang dibangun
-% lebih dulu dengan anggaran terbatas, dan siapa yang bertanggung jawab atasnya.
+Permintaan \textit{Application Programming Interface} (API) baru datang dari vendor, perusahaan asuransi, dan unit rumah
+sakit secara bersamaan. Anggaran tidak cukup untuk semuanya. Tonggak C2 sudah memperlihatkan keadaan saat ini. Sepuluh
+baris inventaris mewakili 100 sambungan. Sebanyak 20 sambungan aktif dari Sistem Informasi Manajemen Rumah Sakit (SIMRS)
+menelan Rp900 juta per tahun pada Rp45 juta per antarmuka. Kerja manual lima baris lain berjumlah 357 jam per bulan, atau
+Rp257,04 juta per tahun pada tarif Rp60.000 per jam. Medikara belum punya satu pun API mitra. Misalkan direksi hanya
+menyediakan anggaran untuk tiga API tahun depan, sedangkan daftar permintaan berisi delapan. Pertanyaan kemudian muncul:
+API mana yang dikerjakan lebih dahulu, dan siapa yang berhak memutuskannya?
+
+Bab ini menjawabnya dengan menurunkan portofolio API dari tujuan dan perjalanan pengguna, sehingga urutan pekerjaan tidak
+ditentukan oleh pihak yang paling keras meminta. Bab ini membuka tonggak C3 Kondisi Target. Inventaris Bab 4, peta
+integrasi Bab 5, penilaian keamanan Bab 6, dan penilaian kesiapan Bab 7 menjadi masukan. \textit{Capability map} dan
+\textit{value stream} diambil dari IT40513 Enterprise Architecture \& Digital Blueprint. Kontrak API dibahas di Bab 9,
+\textit{API gateway} di Bab 10, portal pengembang di Bab 11, dan monetisasi di Bab 12, sehingga di sini cukup dirujuk.
+Angka tambahan yang diawali kata ``Misalkan'' adalah asumsi latihan. Kesimpulan untuk organisasi nyata harus diuji dengan
+wawancara, dokumen, dan pengukuran yang berizin. Hasil bab ini menjadi bagian C3 dalam cetak biru transformasi digital.
+
+Rujukan utama bab ini dipakai untuk membedakan konsep dan membangun alasan keputusan, bukan untuk menggantikan penilaian
+konteks organisasi. Delapan aspek lanskap dan cara memandang API sebagai produk diambil dari Medjaoui dkk.
+\cite{medjaoui2021continuous}. Tingkat keterlihatan API diambil dari Zimmermann dkk. \cite{zimmermann2022patterns}.
+Interaksi inti diambil dari Parker dkk. \cite{parker2016platform}. Kapabilitas dan \textit{value stream} mengikuti panduan
+TOGAF \cite{c08-togaf-g211, c08-togaf-g178}. Penilaian portofolio bersandar pada studi Cooper dkk. \cite{c08-cooper1999}.
+
+\IfFileExists{../figures/ch08-diagram-konsep.png}{%
+
+Gambar \ref{fig:ch08-ilustrasi-bab} merangkum hubungan komponen dan konsep utama bab ini.
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=\textwidth]{../figures/ch08-diagram-konsep.png}
+  \caption{Menurunkan strategi menjadi portofolio API}
+  \label{fig:ch08-ilustrasi-bab}
+\end{figure}
+}{}
 
 \section{Dari Strategi Platform ke Strategi API}
 
-% TODO
-% Cakupan: hubungan keputusan strategi platform (C1) dengan pilihan API; tujuan strategi API;
-% prinsip API-first sebagai kebijakan organisasi; kesalahan umum berupa membuka API tanpa tujuan.
-% Kasus Medikara: turunan strategi "Satu Pasien, Satu Rekam Medis" menjadi tujuan API.
+Bab 2 dan Bab 3 sudah menetapkan arah platform Medikara. Janji temu menjadi interaksi inti, klinik mitra membayar
+langganan, dan asuransi membayar verifikasi penjaminan. Arah itu belum menjawab pertanyaan yang diajukan vendor setiap
+minggu: kemampuan mana yang dibuka lewat API?
+
+Strategi API menerjemahkan tujuan platform menjadi kemampuan yang dapat dikonsumsi pihak tertentu. Tujuan menyebut hasil
+organisasi, pengguna yang dilayani, dan perubahan perilakunya. Jumlah API bukan strategi. Kandidat harus mempunyai hubungan
+yang dapat ditelusuri ke masalah serta ukuran hasil, termasuk keputusan untuk tidak membuka suatu kemampuan. Parker dkk.
+menempatkan interaksi inti sebagai pusat rancangan platform \cite{parker2016platform}, sehingga API yang tidak
+memperlancar interaksi itu memerlukan alasan lain, misalnya kewajiban atau penghematan.
+
+Analoginya daftar menu. Daftar menu mengikuti kebutuhan pelanggan dan kemampuan dapur, bukan daftar seluruh bahan yang
+tersedia. Dapur yang menyimpan lima puluh bahan tidak otomatis menawarkan lima puluh hidangan, dan sebagian bahan memang
+tidak pernah dijual mentah.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Tujuan mempercepat pemesanan dari klinik mitra melahirkan tiga kemampuan: pencarian layanan, verifikasi syarat, dan
+        pemesanan. Ketiganya dinilai sebagai satu perjalanan. Bab 3 menghitung satu klinik melayani 60 kunjungan per hari,
+        dan satu pemesanan butuh tiga panggilan, atau 180 panggilan per klinik. Untuk 40 klinik mitra, kebutuhannya 7.200
+        panggilan per hari, atau 60 persen dari kapasitas 12.000 panggilan pada kuota 300 per hari per klinik. Ukuran
+        keberhasilannya adalah janji terkonfirmasi, bukan jumlah \textit{endpoint}.
+  \item Misalkan vendor analitik mengusulkan API untuk mengunduh seluruh data pasien, atau sekitar 1,2 juta kunjungan per
+        tahun. Usulan ini ditolak bila tidak ada tujuan sah dan kebutuhan pengguna yang teruji. Insiden 2025 pada Bab 6
+        melibatkan 1.240 rekam, atau sekitar 0,1 persen dari jumlah itu, dan biaya langsungnya pada pemisalan Bab 6 sudah
+        Rp23,7 juta. Keputusan tidak membuka sebuah kemampuan juga bagian dari strategi, sehingga dicatat beserta
+        alasannya.
+\end{enumerate}
+
+Apakah bukti empiris mendukung pembukaan API seluas mungkin? Tiga sumber perlu dibaca bersama. Benzell dkk. menemukan
+perusahaan terbuka yang mengadopsi API publik tumbuh tambahan 38,7 persen selama 16 tahun dibanding perusahaan serupa.
+Pemakaian API untuk produktivitas internal saja tidak menunjukkan efek signifikan, dan risiko kebocoran data ikut naik
+\cite{benzell2024apis}. Wulf dan Blohm mensurvei 152 manajer produk API. Mereka menemukan bahwa strategi penciptaan nilai
+memoderasi hubungan antara rancangan API dan dua hasil, yaitu laba atas investasi dan penyebaran \cite{c08-wulf2020}.
+Laporan Postman mencatat 65 persen organisasi memperoleh pendapatan dari program API, sementara 34 persen tidak dapat
+menemukan API yang sudah ada \cite{postman2025}.
+
+Ketiganya tidak berarti Medikara harus membuka API publik. Benzell dkk. meneliti perusahaan tercatat di bursa, Wulf dan
+Blohm meneliti API publik, dan Postman menjual alat API. Yang dapat diambil lebih sempit: rancangan API perlu selaras dengan
+tujuan bisnis, dan jumlah API tanpa keterlihatan dapat menjadi beban. Zimmermann dkk. membedakan API menurut
+keterlihatannya, yaitu \textit{public API}, \textit{community API}, dan \textit{solution-internal API}
+\cite{zimmermann2022patterns}. Pembagian ini sejajar dengan audiens publik, mitra, dan privat pada Bab 4. Portofolio
+Medikara terutama berisi API mitra dan API privat, karena data pasien tidak cocok dibuka kepada pihak yang tidak dikenal.
+
+Tabel \ref{tab:ch08-strategi} menurunkan empat sasaran strategi 2026 sampai 2030 menjadi hasil, kemampuan, dan batas.
+Angka yang diawali ``Misalkan'' adalah asumsi latihan.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Dari sasaran strategi Medikara ke kemampuan yang dibuka dan batasnya}
+  \label{tab:ch08-strategi}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{F{2.5cm}EF{2.6cm}F{2.9cm}}
+    \hline
+    \textbf{Sasaran strategi} & \textbf{Hasil yang diukur} & \textbf{Kemampuan dibuka} & \textbf{Batas} \\ \hline
+    Layanan terintegrasi lintas fasilitas & Misalkan janji temu lewat Medikara+ naik dari 28.000 menjadi 35.000 per bulan, target antara sebelum 50 persen kunjungan pada IT40513 & Jadwal dan pemesanan & Data minimum, tanpa isi rekam medis \\ \hline
+    Ekosistem mitra & 40 klinik mitra tetap aktif, atau Rp1,44 miliar langganan per tahun & Pemesanan dan hasil pemeriksaan & Hasil hanya bagi pasien klinik itu \\ \hline
+    Kepatuhan & Akses vendor turun dari 140 tabel menjadi 2 tabel, 4 persen kiriman yang gagal dapat ditelusuri & Identitas, akses, dan status kiriman & Tanpa ekspor massal \\ \hline
+    Modernisasi & Tujuan baru berbiaya Rp45 juta, bukan Rp225 juta per tahun & Lapisan sistem di depan SIMRS & Kontrak tidak membocorkan nama tabel \\ \hline
+  \end{tabularx}
+\end{table}
+
+Keputusan menurunkan API dari tujuan punya dua konsekuensi. Pertama, permintaan yang tidak terhubung ke tujuan ditolak
+atau ditunda secara tertulis, termasuk bila datang dari unit yang berpengaruh. Kedua, setiap API memerlukan ukuran hasil
+sebelum dibangun. Misalkan pengukuran awal satu ukuran menyita 40 jam. Tiga ukuran menjadi 120 jam, atau Rp7,2 juta,
+yang dibayar sebelum ada \textit{endpoint} yang berjalan.
+
+Dua hal pada bahasan ini sering tertukar, yaitu strategi platform dan strategi API. Pembagiannya begini. Strategi platform
+menjawab siapa bertemu siapa, nilai apa yang dipertukarkan, dan siapa membayar. Strategi API menjawab kemampuan mana
+dibuka, untuk siapa, dengan batas apa, dan dalam urutan apa. Organisasi dapat punya strategi API tanpa menjadi platform,
+misalnya API privat yang hanya menyederhanakan 20 sambungan internal.
+
+Apa yang dibawa dari tonggak C2? Tabel \ref{tab:ch08-masukan} merangkum masukan yang dipakai bab ini. ID integrasi tidak
+berubah, sehingga setiap kandidat dapat ditelusuri kembali ke bukti asalnya.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Masukan dari Bab 4 sampai Bab 7 dan IT40513 bagi portofolio API}
+  \label{tab:ch08-masukan}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{F{1.5cm}F{2.9cm}EF{3.0cm}}
+    \hline
+    \textbf{Asal} & \textbf{Artefak} & \textbf{Temuan yang dipakai} & \textbf{Kegunaan di sini} \\ \hline
+    Bab 4 & Inventaris INT-01 sampai INT-10 & 100 sambungan, 4 baris calon produk, INT-10 tanpa pemilik & Daftar awal, biaya, pemilik \\ \hline
+    Bab 5 & Peta integrasi & Tiga titik masalah: INT-03 keterikatan, INT-02 kegagalan senyap, INT-06 kerja ulang & Bukti masalah \\ \hline
+    Bab 6 & Penilaian keamanan & 138 tabel di luar kebutuhan, satu layanan identitas Rp45 juta per tahun & Prasyarat dan risiko \\ \hline
+    Bab 7 & Kesiapan interoperabilitas & Skor 5 dari 14, KI-02 didahulukan, Medikara bukan penyedia jasa pembayaran & Kewajiban \\ \hline
+    IT40513 & \textit{Capability map} dan \textit{value stream} & Kode kapabilitas CAP, enam tahap rawat jalan, 2.150 keluhan & Sumber kandidat \\ \hline
+  \end{tabularx}
+\end{table}
 
 \section{Menurunkan Kandidat API dari Kapabilitas Bisnis}
 
-% TODO
-% Cakupan: memakai capability map dan value stream dari IT40513 sebagai masukan; kapabilitas yang
-% perlu dibuka ke mitra; perbedaan daftar API berbasis kapabilitas dan berbasis sistem.
-% Kasus Medikara: kapabilitas penjadwalan, rekam medis, hasil laboratorium, dan penagihan.
+Cara paling cepat menyusun daftar API adalah membuka daftar sistem, lalu membuat API untuk tiap sistem. Hasilnya mengikuti
+bentuk SIMRS hari ini. Apa alternatifnya?
+
+\textit{Capability map} menjelaskan kemampuan bisnis, sedangkan \textit{value stream} menjelaskan rangkaian nilai dari
+sudut pengguna. Kapabilitas menyatakan kemampuan yang dimiliki organisasi untuk mencapai tujuan tertentu, terlepas dari
+unit atau aplikasi yang menjalankannya \cite{c08-togaf-g211}. \textit{Value stream} adalah rangkaian tahap ujung ke ujung
+yang menghasilkan nilai bagi penerima tertentu \cite{c08-togaf-g178}. Keduanya terhubung, karena kapabilitas memungkinkan
+tahap dalam \textit{value stream} berjalan \cite{c08-bizbok15}. Kandidat API muncul pada titik ketika kemampuan perlu
+dipakai lintas batas. Daftar sistem hanya menunjukkan lokasi implementasi sekarang. Kandidat berbasis kemampuan lebih tahan
+terhadap perubahan vendor, tetapi tetap memerlukan penilaian kelayakan sistem lama.
+
+Analoginya papan nama loket. Nama loket mengikuti layanan yang diberikan, bukan merek komputer yang dipakai petugas. Pasien
+mencari loket pendaftaran. Ketika komputernya diganti, papan namanya tetap.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Kapabilitas Penjadwalan Layanan (CAP-L03) dapat dilayani melalui satu API janji temu meskipun lima SIMRS mempunyai
+        struktur berbeda. Bila API diturunkan dari daftar sistem, ada 5 API jadwal, dan 40 klinik mitra masing-masing
+        menyambung ke kelimanya, atau 200 sambungan di sisi klinik. Bila diturunkan dari kapabilitas, ada 40 sambungan.
+        Penyedia justru membayar lebih. Lima API berbiaya Rp225 juta per tahun, sedangkan 1 API ditambah 5 adaptor berbiaya
+        Rp270 juta per tahun. Selisih Rp45 juta itu adalah harga untuk melindungi klinik dari perubahan. Bab 4 memisalkan
+        satu perubahan menyita 4 jam per klinik, atau 160 jam untuk 40 klinik. Misalkan lima SIMRS menghasilkan 5 perubahan
+        per tahun. Bebannya 800 jam, atau Rp48 juta di sisi klinik, sehingga selisih tadi tertutup.
+  \item Tahap menerima hasil pemeriksaan memerlukan akses status dan hasil sesuai kewenangan. Bukan semua tabel laboratorium
+        perlu menjadi API. INT-03 memperlihatkan akibat sebaliknya: vendor Medikara+ dapat membaca 140 tabel, padahal
+        kebutuhannya 2 tabel. Penurunan dari kebutuhan menghasilkan dua kemampuan, yaitu membaca jadwal dan mencatat janji
+        temu, serta menghapus akses atas 138 tabel, atau sekitar 99 persen.
+\end{enumerate}
+
+Gambar \ref{fig:ch08-penurunan} memperlihatkan penurunan itu pada \textit{value stream} rawat jalan dari IT40513. Setiap
+kolom dibaca dari atas ke bawah: tahap, kapabilitas, lalu kandidat. API-06 tidak punya kolom sendiri karena dipakai pada
+semua tahap. API-04 dan API-05 berada di luar \textit{value stream} ini, karena penerima nilainya bukan pasien.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch08-penurunan-kandidat.tex}
+  \caption{Penurunan kandidat API dari tujuan strategis, tahap \textit{value stream}, dan kapabilitas}
+  \label{fig:ch08-penurunan}
+\end{figure}
+
+Tahap 2 dan tahap 3 menyumbang 1.360 dari 2.150 keluhan, atau sekitar 63 persen, sedangkan tahap 1 hanya 180 keluhan.
+Apakah API janji temu berarti salah sasaran? Belum tentu. Bab 5 mencatat pasien yang tidak menemukan jadwal datang ke loket,
+sehingga sebagian keluhan tahap 2 dapat berakar di tahap 1. Keluhan menunjukkan tempat pasien merasa terganggu, tetapi belum
+menunjukkan penyebabnya. Tim memeriksa hubungan itu sebelum memakai keluhan sebagai dasar nilai.
+
+Kapan sebuah kemampuan layak menjadi kandidat? Bab ini memakai tiga uji.
+\begin{enumerate}
+  \item Lintas batas: kemampuan dipakai di luar tim atau sistem pemiliknya.
+  \item Pengguna nyata: ada pihak yang dapat disebut namanya dan dapat ditanya.
+  \item Bukti masalah: ada angka atau temuan, walaupun masih berupa pemisalan yang ditandai.
+\end{enumerate}
+
+Tabel \ref{tab:ch08-kandidat} memuat delapan kandidat hasil uji itu. Kode API-01 sampai API-08 adalah kode kandidat bab ini,
+berbeda dari kode kesenjangan KI-01 sampai KI-08 pada Bab 7. Nama pemilik mengikuti pengandaian Bab 4, kecuali API-06 yang
+mengikuti pemilik kapabilitas CAP-P02.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Delapan kandidat API Medikara beserta kapabilitas, bukti, pengguna, dan pemiliknya}
+  \label{tab:ch08-kandidat}
+  \scriptsize
+  \begin{tabularx}{\textwidth}{F{1.0cm}F{1.8cm}F{1.4cm}EF{2.0cm}F{2.0cm}}
+    \hline
+    \textbf{ID} & \textbf{Kandidat} & \textbf{Kapabilitas} & \textbf{Baris dan bukti} & \textbf{Pengguna} & \textbf{Pemilik} \\ \hline
+    API-01 & Jadwal dan Janji Temu & CAP-L03 & INT-03: 28.000 janji temu per bulan, 140 tabel & Medikara+, 40 klinik mitra & Manajer Layanan Rawat Jalan \\ \hline
+    API-02 & Hasil Pemeriksaan & CAP-L06 & INT-06 dan baris usulan Bab 5: 110 jam per bulan, 72 telepon per hari & 3 laboratorium, 40 klinik mitra & Manajer Laboratorium \\ \hline
+    API-03 & Klaim Asuransi & CAP-P01 & INT-05: 7.800 klaim, 468 ditolak karena format per bulan & 9 asuransi & Manajer Klaim \\ \hline
+    API-04 & Rekap Perusahaan & Belum ada di peta & INT-07: 36 rekap, 32 jam per bulan, data karyawan di surel & 36 perusahaan klien & Manajer Layanan Perusahaan \\ \hline
+    API-05 & Rekap Klinik & CAP-P03 & INT-09: 936 berkas per tahun, 48 jam per bulan & 18 klinik, kantor pusat & Manajer Pelaporan \\ \hline
+    API-06 & Identitas dan Akses & CAP-P02 & Bab 6: diperlukan INT-03, INT-06, dan INT-07 & Seluruh API & Kepala Keamanan Informasi \\ \hline
+    API-07 & Mutasi Bank & CAP-P04 & INT-08: 50 jam per bulan & Tim keuangan & Manajer Keuangan \\ \hline
+    API-08 & Resep Apotek & CAP-L06 & INT-10: volume belum diketahui & 12 apotek & Belum ada \\ \hline
+  \end{tabularx}
+\end{table}
+
+Dua hal pada bahasan ini sering tertukar, yaitu identitas pemanggil dan identitas pasien. Pembagiannya begini. Identitas
+pemanggil menjawab aplikasi atau mitra mana yang memanggil dan apa haknya, seperti pada Bab 6. Identitas pasien menjawab
+apakah dua rekam merujuk orang yang sama, seperti pada \textit{Master Patient Index} (MPI) di Bab 7. API-06 hanya mengurus
+yang pertama. Bab 7 memisalkan 1.800 kiriman per bulan gagal karena identitas pasien belum cocok, tetapi rincian itu masih
+hipotesis KI-03. Karena itu identitas pasien belum menjadi kandidat. Tim mengujinya lewat sampel kiriman gagal, lalu
+meninjau daftar ini kembali.
+
+\begin{kasus}[title={Kasus Medikara Health: Delapan Permintaan Diterjemahkan Menjadi Kandidat}]
+Misalkan tim mengumpulkan permintaan yang masuk selama satu triwulan. Vendor Medikara+ meminta akses tambahan ke tabel SIMRS.
+Dua asuransi meminta berkas klaim dalam format masing-masing. Rumah sakit Depok meminta rekap klinik lebih cepat. Bagian
+keuangan meminta unduhan mutasi otomatis. Seluruh rincian ini adalah data latihan.
+
+Tim tidak menjawab permintaan satu per satu. Setiap permintaan diterjemahkan menjadi kemampuan, lalu diperiksa dengan tiga
+uji. Tiga temuan menonjol.
+\begin{enumerate}
+  \item Permintaan vendor bukan kebutuhan atas tabel, melainkan kemampuan penjadwalan. Menjawabnya apa adanya akan menambah
+        akses di atas 138 tabel yang sudah berlebih.
+  \item Permintaan dua asuransi digabung menjadi satu kandidat, API-03. Sembilan format pada INT-05 adalah gejala, sedangkan
+        kemampuannya satu, yaitu klaim dan penjaminan.
+  \item API-08 lolos uji lintas batas, tetapi gagal uji bukti. Baris itu tetap ditulis supaya tidak hilang dari daftar.
+\end{enumerate}
+
+Mengapa verifikasi penjaminan pada skema Bab 2 belum masuk delapan kandidat, padahal bernilai Rp960 juta per tahun? Angka itu
+bergantung pada 96.000 pemesanan dan kesediaan asuransi membayar. Kontrak dengan 9 asuransi belum ada, dan pemesanannya
+bergantung pada API-01. Tim mencatatnya sebagai kandidat lanjutan beserta pemicu tinjauan.
+
+Keputusan ini punya dua konsekuensi. Pertama, pihak yang meminta menerima jawaban berupa kemampuan, bukan persis yang diminta,
+sehingga pemilik perlu menjelaskan alasannya. Kedua, daftar kandidat menjadi artefak C3 yang punya versi, bukan kumpulan surat
+permintaan.
+\end{kasus}
 
 \section{Batas Domain dan Lapisan API}
 
-% TODO
-% Cakupan: batas API mengikuti batas domain bisnis; lapisan API sistem, proses, dan pengalaman
-% beserta trade-off; Domain-Driven Design hanya disinggung karena dibahas rinci di IT40713.
-% Pendalaman teknis: memetakan kandidat API ke batas domain dan menandai API yang melintasi lebih
-% dari satu domain.
+Delapan kandidat sudah punya nama. Pertanyaan berikutnya: di mana batas satu API berakhir, dan siapa yang memegang aturannya?
+
+Batas domain mengelompokkan makna dan aturan bisnis yang konsisten. Evans memaknai \textit{bounded context} sebagai batas,
+biasanya satu subsistem atau pekerjaan satu tim, tempat sebuah model didefinisikan dan berlaku \cite{c08-evans2015}. Lapisan
+sistem, proses, dan pengalaman merupakan cara membedakan jenis tanggung jawab API, bukan kewajiban membangun tiga lapisan
+fisik. Pembagian ini populer lewat istilah \textit{API-led connectivity}. API sistem mengakses sistem inti, API proses
+membentuk data di dalam atau lintas sistem, dan API pengalaman melayani pemakai akhir pada kanal tertentu
+\cite{c08-choudhary2023}. Istilah ini berasal dari sisi vendor, sehingga dipakai sebagai alat berpikir. Bahadur, pada blog
+vendor yang sama, menyebut anggapan bahwa ketiga lapisan wajib ada sebagai mitos \cite{c08-bahadur2020}. API yang menembus
+banyak domain tanpa pemilik dapat menghasilkan ketergantungan serta otorisasi yang sulit dipahami. Analisis domain rinci
+dibahas di IT40713.
+
+Analoginya formulir lintas bagian. Satu formulir yang dipakai banyak bagian memerlukan penanggung jawab. Tanpa itu setiap
+bagian mengubahnya menurut kepentingan sendiri, dan formulir terus membengkak.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item API pengalaman pada aplikasi pasien dapat menggabungkan informasi jadwal dan lokasi, tetapi keputusan mengunci slot
+        tetap dimiliki domain penjadwalan. Bab 5 mencatat 28.000 janji temu per bulan dengan tiga panggilan per pemesanan,
+        atau 84.000 panggilan. Bila aturan kunci slot disalin ke Medikara+ dan ke sistem 40 klinik mitra, ada 41 salinan
+        aturan. Perubahan aturan pembatalan menjadi 41 pekerjaan. Bila dipegang domain penjadwalan, pekerjaannya satu.
+  \item API sistem membungkus kemampuan SIMRS lama. Kontrak luarnya tidak perlu membocorkan nama tabel atau kode vendor. Bab
+        4 menghitung bahwa menambah satu tujuan secara langsung berarti 5 sambungan baru, atau Rp225 juta per tahun. Lewat
+        lapisan, tambahannya 1 sambungan, atau Rp45 juta. Lapisan bersama berbiaya Rp300 juta per tahun, sehingga baru lebih
+        murah mulai tiga tujuan. Pada empat tujuan, biayanya Rp705 juta dibanding Rp900 juta, atau selisih Rp195 juta.
+\end{enumerate}
+
+Gambar \ref{fig:ch08-lapisan} menerapkan pembagian itu pada tiga kandidat, dan Tabel \ref{tab:ch08-lapisan} merangkum alasan
+perubahan tiap lapisan. Kolom klaim memakai data SIMRS dan sistem \textit{Enterprise Resource Planning} (ERP) keuangan. Penanda
+yang berguna adalah alasan berubah. Bila dua hal berubah karena alasan yang berbeda, keduanya sebaiknya tidak dicampur.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch08-lapisan-api.tex}
+  \caption{Lapisan pengalaman, proses, dan sistem pada tiga kandidat API Medikara}
+  \label{fig:ch08-lapisan}
+\end{figure}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Tiga lapisan API, alasan berubah, dan pemegang keputusannya}
+  \label{tab:ch08-lapisan}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{F{1.7cm}EF{2.0cm}F{2.4cm}F{2.0cm}}
+    \hline
+    \textbf{Lapisan} & \textbf{Tanggung jawab} & \textbf{Berubah karena} & \textbf{Contoh Medikara} & \textbf{Pemegang keputusan} \\ \hline
+    Pengalaman & Menyajikan data untuk satu kanal & Kebutuhan kanal & Tampilan pasien pada Medikara+ & Pemilik produk kanal \\ \hline
+    Proses & Menjalankan aturan bisnis lintas langkah & Aturan bisnis & Pemesanan lintas langkah & Pemilik domain \\ \hline
+    Sistem & Menyembunyikan sistem sumber & Pergantian vendor atau versi & Adaptasi SIMRS & Tim integrasi \\ \hline
+  \end{tabularx}
+\end{table}
+
+Dua hal pada lapisan sering tertukar, yaitu lapisan logis dan lapisan fisik. Pembagiannya begini. Lapisan logis menunjukkan
+jenis tanggung jawab. Lapisan fisik berarti layanan terpisah yang di-\textit{deploy} dan dirawat sendiri. Misalkan setiap
+lapisan fisik menambah 30 milidetik dan satu antarmuka Rp45 juta per tahun. API-03 yang dipakai 9 asuransi lewat satu kanal
+tidak memerlukan lapisan pengalaman, sehingga menghemat Rp45 juta per tahun dan 30 milidetik per panggilan. API-01 punya dua
+kanal dengan kebutuhan berbeda, sehingga lapisan pengalamannya punya alasan.
+
+Keputusan memakai lapisan punya dua konsekuensi. Pertama, vendor SIMRS dapat berganti tanpa mengubah kontrak mitra, asalkan
+adaptornya diganti. Kedua, ada biaya tetap sebelum manfaat terasa, seperti pada hitungan titik impas Bab 4. Karena itu
+keputusan lapisan bersama dicatat terpisah dari portofolio, dan rancangannya dibahas di Bab 10.
 
 \section{Lanskap API}
 
-% TODO
-% Cakupan: lanskap API sebagai kumpulan API milik organisasi; delapan aspek lanskap menurut Medjaoui
-% dkk. (variety, vocabulary, volume, velocity, vulnerability, visibility, versioning, volatility);
-% katalog API sebagai alat melihat lanskap.
-% Kasus Medikara: lanskap API yang tumbuh liar dari lima rumah sakit hasil akuisisi.
+Portofolio menambah API baru, tetapi API baru itu masuk ke lingkungan yang sudah berjalan. Apa yang perlu dilihat sebelum
+menambah?
+
+Lanskap API dapat ditelaah melalui delapan aspek: \textit{variety}, \textit{vocabulary}, \textit{volume}, \textit{velocity},
+\textit{vulnerability}, \textit{visibility}, \textit{versioning}, dan \textit{volatility} \cite{medjaoui2021continuous}.
+Aspek tersebut membantu menemukan jenis keragaman serta ketidakpastian. Penilaian tidak berhenti pada daftar
+\textit{endpoint}. Makna istilah, tingkat perubahan, dan keterlihatan pemakaian sama pentingnya dengan besar trafik.
+Amundsen, salah satu penulis buku itu, meringkasnya sebagai delapan tantangan yang muncul ketika lanskap membesar
+\cite{c08-amundsen2020}.
+
+Analoginya pengelola kota. Pengelola kota memerlukan peta kepadatan, aturan jalan, dan rencana perubahan selain daftar nama
+jalan. Menambah satu jalan baru tanpa melihat peta itu dapat memindahkan kemacetan ke tempat lain.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Misalkan tiga API memakai istilah kunjungan dengan makna berbeda. SIMRS menghitung per pendaftaran, Medikara+ per janji
+        temu, dan SATUSEHAT per Encounter. Inventaris mencatat 100.000 kunjungan per bulan pada INT-02, 55.000 kunjungan pada
+        INT-01, dan 28.000 janji temu pada INT-03. Tanpa kosakata bersama, ketiga angka tampak seperti ukuran satu hal.
+        \textit{Vocabulary} menjadi masalah sebelum pengembang menyepakati struktur pesan.
+  \item INT-10 mencatat 12 sambungan ke apotek, tanpa pemilik dan tanpa data volume. Bila suatu hari format ekspornya diganti,
+        tidak ada yang tahu apotek mana yang terdampak. \textit{Visibility} dan \textit{versioning} harus diperbaiki sebelum
+        ada keputusan membangun atau mempensiunkan. Misalkan penelusuran menyita 2 jam per apotek. Bebannya 24 jam, atau
+        Rp1,44 juta, jauh lebih kecil daripada Rp45 juta per tahun untuk satu antarmuka yang belum tentu diperlukan.
+\end{enumerate}
+
+Tabel \ref{tab:ch08-lanskap} membaca kedelapan aspek pada keadaan Medikara. Isi kolom keadaan diambil dari Bab 4 sampai Bab 7.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Delapan aspek lanskap API pada keadaan Medikara dan akibatnya bagi portofolio}
+  \label{tab:ch08-lanskap}
+  \scriptsize
+  \begin{tabularx}{\textwidth}{F{1.6cm}F{3.1cm}EF{3.5cm}}
+    \hline
+    \textbf{Aspek} & \textbf{Pertanyaan} & \textbf{Keadaan Medikara} & \textbf{Akibat pada portofolio} \\ \hline
+    \textit{Variety} & Berapa banyak cara bertukar data? & Enam cara pada sepuluh baris: API, basis data, ekspor berkas, portal, surel, unduh berkas & Gaya baru dibatasi, sesuai pilihan Bab 5 \\ \hline
+    \textit{Vocabulary} & Apakah istilah bermakna sama? & Kunjungan, janji temu, dan Encounter tertukar & Kosakata disepakati sebelum kontrak Bab 9 \\ \hline
+    \textit{Volume} & Berapa banyak API dan sambungan? & 100 sambungan, 10 lewat API, 0 API mitra & Peninjauan terpusat masih memadai \\ \hline
+    \textit{Velocity} & Seberapa cepat lanskap berubah? & 4 pembaruan pihak wajib dan 18 perubahan aturan asuransi per tahun & API-03 punya beban perubahan tertinggi \\ \hline
+    \textit{Vulnerability} & Apa yang terjadi bila satu API jatuh? & Jadwal kosong 7 sampai 14 hari per tahun saat SIMRS diperbarui & API-01 wajib punya rencana cadangan \\ \hline
+    \textit{Visibility} & Apakah pemakaian dan kinerja terlihat? & INT-10 tanpa pemilik, INT-02 gagal tanpa pemberitahuan & Telemetri menjadi syarat tiap API baru \\ \hline
+    \textit{Versioning} & Bagaimana perubahan diterapkan? & Tiap pembaruan pihak wajib diterapkan lima kali & Kebijakan versi dibahas di Bab 10 \\ \hline
+    \textit{Volatility} & Seberapa besar jejak keamanan? & 138 tabel berlebih, insiden 1.240 rekam & API-06 menjadi prasyarat \\ \hline
+  \end{tabularx}
+\end{table}
+
+Dua baris pada tabel perlu dibaca hati-hati. Pemaknaannya mengikuti ringkasan Amundsen, yang mengaitkan \textit{vulnerability}
+dengan API yang dapat jatuh atau terhenti, dan \textit{volatility} dengan jejak keamanan yang ikut membesar
+\cite{c08-amundsen2020}. Arti harfiah kedua kata itu dapat mengarah sebaliknya. Karena itu tim memeriksa gangguan dan keamanan
+bersama-sama, dan tidak perlu berdebat tentang labelnya.
+
+Dua hal pada bahasan ini sering tertukar, yaitu lanskap dan portofolio. Pembagiannya begini. Lanskap adalah seluruh API dan
+integrasi yang ada, termasuk milik pihak lain. Portofolio adalah pilihan investasi atas kandidat yang dapat diputuskan
+organisasi. INT-01 dan INT-02 berada di lanskap, tetapi spesifikasinya bukan milik Medikara. Yang dapat diputuskan hanya cara
+menyambung.
+
+Membaca lanskap punya dua konsekuensi. Pertama, sebagian masalah tidak memerlukan API baru. INT-10 memerlukan penelusuran
+24 jam, bukan \textit{endpoint}. Kedua, portofolio mewarisi kewajiban. Sebanyak 34 persen responden Postman tidak dapat menemukan
+API yang sudah ada, dan 55 persen bergumul dengan dokumentasi yang tidak konsisten \cite{postman2025}. Pada Medikara, gejala itu
+sudah terlihat sebelum API mitra pertama lahir.
 
 \section{Kanvas Produk API}
 
-% TODO
-% Cakupan: elemen kanvas (pengguna, masalah yang diselesaikan, nilai, data, kapabilitas, ukuran
-% keberhasilan, risiko, pemilik); cara mengisi kanvas bersama tim campuran.
-% Kasus Medikara: kanvas API janji temu sebagai contoh lengkap.
+Tim sudah punya kandidat. Bagaimana menguji sebuah kandidat tanpa membangunnya lebih dahulu?
+
+Kanvas produk API memadatkan pengguna, masalah, tawaran nilai, operasi, dependensi, risiko, ukuran, dan pemilik. Kanvas bersifat
+hipotesis yang diuji melalui percakapan serta percobaan. Produk API yang bernilai membutuhkan kemampuan pengguna menyelesaikan
+pekerjaan, bukan hanya spesifikasi teknis yang lengkap. Delapan unsur ini disusun bab ini untuk keperluan kuliah, bukan istilah
+resmi dari satu standar. Bentuk satu halaman berasal dari \textit{Business Model Canvas} Osterwalder dan Pigneur
+\cite{c08-osterwalder2010}. APIOps Cycles menurunkannya menjadi \textit{API Business Model Canvas} dengan sembilan unsur, antara
+lain segmen konsumen API, hubungan pengembang, mitra utama, manfaat, dan biaya \cite{c08-apiops-bmc}. Kanvas bab ini menambahkan
+risiko, dependensi, dan pemilik, karena ketiganya menjadi sumber keputusan pada kasus Medikara.
+
+Analoginya proposal layanan satu halaman. Proposal satu halaman membantu semua pihak memeriksa apakah masalah dan tawarannya
+sesuai. Bila masalahnya tidak dapat ditulis dalam dua kalimat, rapat panjang pun belum tentu menolong.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Kanvas janji temu menargetkan petugas klinik, mengurangi telepon konfirmasi, dan mengukur janji yang terkonfirmasi tanpa
+        kerja ulang. Pada 40 klinik dengan 60 kunjungan per hari, ada 2.400 pemesanan per hari. Misalkan 10 persen diikuti
+        telepon konfirmasi 3 menit. Bebannya 12 jam per hari, atau 300 jam per bulan pada 25 hari kerja, atau Rp216 juta per
+        tahun pada tarif Rp60.000 per jam. Bila angka telepon tidak turun setelah API berjalan, hipotesis kanvas salah, walaupun
+        API-nya bekerja sempurna.
+  \item Kandidat hasil laboratorium menyebut risiko salah pasien serta pembatasan akses. Risiko itu memengaruhi urutan dan desain,
+        bukan sekadar lampiran. INT-06 mengetik ulang 1.100 hasil per bulan, atau 13.200 per tahun. Misalkan 0,5 persen salah
+        ketik, sehingga ada 66 hasil keliru per tahun. API menghapus salah ketik itu, tetapi memindahkan risiko ke pencocokan
+        pasien. Pada 240 hasil per hari untuk klinik mitra, atau 72.000 per tahun, kesalahan 1 dari 10.000 berarti sekitar 7
+        hasil salah sasaran. Karena itu \textit{payload} notifikasi pada Bab 5 tidak memuat isi hasil.
+\end{enumerate}
+
+Gambar \ref{fig:ch08-kanvas} memperlihatkan kanvas API-01 yang sudah terisi, dan Tabel \ref{tab:ch08-kanvas} merangkum cara memeriksa
+tiap unsur. Baris atas gambar menjawab apakah kandidat bernilai. Baris bawah menjawab apakah kandidat layak dijalankan.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch08-kanvas-produk.tex}
+  \caption{Kanvas produk API-01, tersedia di \berkas{sources/chapter08/contoh-kanvas-janji-temu.md}}
+  \label{fig:ch08-kanvas}
+\end{figure}
+
+\begin{table}[!htb]
+  \centering
+  \caption{Delapan unsur kanvas produk API dan cara mengujinya}
+  \label{tab:ch08-kanvas}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{F{1.8cm}EEE}
+    \hline
+    \textbf{Unsur} & \textbf{Contoh isian} & \textbf{Tanda isian lemah} & \textbf{Cara menguji} \\ \hline
+    Pengguna & Petugas klinik mitra & Hanya menyebut sistem & Wawancara 5 klinik \\ \hline
+    Masalah & Telepon konfirmasi & Tanpa frekuensi terukur & Catatan telepon 2 minggu \\ \hline
+    Tawaran nilai & Janji terkonfirmasi & Menyebut fitur, bukan hasil pengguna & Uji dengan jawaban simulasi \\ \hline
+    Operasi & Cari, pilih, kunci, batalkan & Meniru nama tabel & Tinjauan kontrak Bab 9 \\ \hline
+    Dependensi & API-06, adaptor SIMRS & Kosong atau tanpa tanggal & Surat kesediaan vendor \\ \hline
+    Risiko & Slot ganda, salah pasien & Hanya berisi kata keamanan & Skenario gagal per risiko \\ \hline
+    Ukuran & Telepon turun dari 10 ke 2 persen & Jumlah \textit{endpoint} atau panggilan & Dipantau per triwulan \\ \hline
+    Pemilik & Layanan rawat jalan & Nama vendor atau proyek & Tanda tangan keputusan \\ \hline
+  \end{tabularx}
+\end{table}
+
+Kapan kanvas diisi, sebelum atau sesudah skor? Keduanya. Versi singkat memuat pengguna, masalah, ukuran, dan pemilik, lalu diisi
+untuk semua kandidat sebelum skor, supaya nilai tidak ditebak. Versi lengkap memuat delapan unsur, lalu diisi untuk dua atau tiga
+kandidat teratas sesudah skor, karena menguji delapan unsur pada semua kandidat terlalu mahal. Bukti dari versi lengkap dapat
+mengubah skor. Dengan begitu kanvas memberi bukti nilai bagi penilaian, seperti pada Gambar \ref{fig:ch08-ilustrasi-bab}.
+
+\subsection{Pemilik Produk API}
+
+Pertanyaan kemudian muncul: siapa yang mengisi kolom pemilik? Pemilik produk memutuskan prioritas, menanggung anggaran, dan menerima
+akibat keputusannya. Tim teknis menjaga kontrak dan operasi. Medjaoui dkk. memandang API sebagai produk, sehingga pemilik diukur dari
+hasil bagi pengguna, bukan dari selesainya proyek \cite{medjaoui2021continuous}. Pada Medikara, kapabilitas dan produk berada pada
+tingkat yang berbeda. Direktur Pelayanan memegang kapabilitas CAP-L03 menurut peta IT40513, sedangkan Manajer Layanan Rawat Jalan
+memegang produk API-01, karena ia yang merasakan akibat antrean.
+
+Analoginya perbaikan pos ronda. Tukang memperbaiki bangunannya, sedangkan warga lewat ketua RT memutuskan kapan pos dipakai dan
+perbaikan mana yang lebih dahulu. Tukang yang baik tetap tidak berhak menentukan jadwal ronda.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item Misalkan lima rumah sakit mengajukan 12 perubahan API-01 per triwulan, sedangkan kapasitasnya 6. Tanpa pemilik, perubahan
+        dikerjakan menurut siapa yang paling dulu menelepon. Dengan pemilik, 6 perubahan dipilih menurut dampaknya pada janji
+        terkonfirmasi, dan 6 lainnya diberi alasan tertulis. Konflik yang tidak selesai dibawa ke Direktur Pelayanan.
+  \item Bab 4 memisalkan 18 perubahan aturan asuransi per tahun, dan setiap perubahan menjadi permintaan ke vendor seharga Rp8 juta,
+        atau Rp144 juta per tahun. Vendor yang dibayar per perubahan tidak punya alasan untuk mengurangi jumlahnya. Karena itu vendor
+        bukan otomatis pemilik produk, walaupun vendor paling paham kodenya.
+\end{enumerate}
+
+Tabel \ref{tab:ch08-peran} memisahkan keputusan menurut pemegangnya.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Pembagian keputusan pada API-01 antara pemilik produk, tim teknis, vendor, dan keamanan}
+  \label{tab:ch08-peran}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{F{3.0cm}EEF{2.3cm}F{2.3cm}}
+    \hline
+    \textbf{Keputusan} & \textbf{Pemilik produk} & \textbf{Tim integrasi} & \textbf{Vendor} & \textbf{Keamanan} \\ \hline
+    Prioritas perubahan & Memutuskan & Memberi perkiraan & Memberi masukan & Dimintai pendapat \\ \hline
+    Anggaran dan ukuran hasil & Memutuskan & Melaporkan data & Tidak terlibat & Tidak terlibat \\ \hline
+    Kontrak dan operasi harian & Menyetujui perubahan besar & Memutuskan & Mengikuti kontrak & Meninjau \\ \hline
+    Hak akses dan \textit{scope} & Menyetujui kebutuhan & Menerapkan & Mengikuti & Memutuskan \\ \hline
+  \end{tabularx}
+\end{table}
+
+\begin{kasus}[title={Kasus Medikara Health: Menguji Kanvas API-01 pada Lima Klinik}]
+Tim mengisi kanvas pada Gambar \ref{fig:ch08-kanvas}, lalu mengujinya sebelum menulis kontrak. Seluruh rincian ini adalah data latihan.
+\begin{enumerate}
+  \item Misalkan wawancara 5 klinik memperlihatkan petugas menelepon rumah sakit karena tidak yakin slot sudah terkunci, bukan karena
+        jadwalnya salah. Tawaran nilainya tetap, tetapi operasi ``baca status'' menjadi wajib.
+  \item Misalkan catatan telepon 2 minggu dari 5 klinik memperlihatkan rata-rata 7 telepon per klinik per hari dari 60 pemesanan, atau
+        sekitar 12 persen. Angka asumsi 10 persen tidak jauh berbeda, sehingga nilai kandidat tidak diubah.
+  \item Misalkan vendor Medikara+ menyatakan butuh 4 bulan untuk mengubah aplikasi. Tenggat INT-03 yang ditandatangani pada Bab 6 ikut
+        bergeser, dan selama 4 bulan itu akses ke 138 tabel masih terbuka.
+\end{enumerate}
+
+Sebuah usulan belum menjadi keputusan sebelum pemilik menerima konsekuensinya. Manajer Layanan Rawat Jalan menandatangani kanvas dengan
+dua catatan. Pertama, akses basis data dibatasi lebih dahulu lewat akun baca terbatas, walaupun API belum selesai. Kedua, bila
+telepon konfirmasi tidak turun di bawah 5 persen dalam dua triwulan, tawaran nilai ditulis ulang.
+\end{kasus}
 
 \section{Prioritisasi Portofolio}
 
-% TODO
-% Cakupan: kriteria nilai, usaha, dan risiko; matriks nilai dan usaha; keputusan membangun sendiri,
-% membeli, atau memakai API pihak lain; peran pemilik produk API; business case menyeluruh dibahas
-% rinci di IT40513.
-% Kasus Medikara: memilih tiga API dari lima kandidat dengan anggaran terbatas.
+Delapan kandidat sudah tertulis, dan anggaran hanya untuk tiga API. Bagaimana memilihnya tanpa rapat yang berakhir dengan suara
+paling keras?
+
+Prioritisasi menggabungkan nilai, usaha, risiko, dependensi, dan kapasitas. Bobot serta skala disepakati sebelum skor diisi. Skor
+membantu percakapan tetapi tidak menggantikan kewajiban hukum atau prasyarat teknis. Cooper dkk. mempelajari manajemen portofolio
+produk baru pada 205 perusahaan di Amerika Serikat. Kelompok berkinerja terbaik memakai prosedur formal yang konsisten, memakai lebih
+dari satu metode, dan menekankan metode strategis. Metode keuangan yang paling populer justru memberi hasil portofolio yang lebih buruk
+\cite{c08-cooper1999}. Studi itu tentang produk baru, bukan API, sehingga dipakai sebagai alasan memakai beberapa lensa, bukan sebagai
+bukti tentang API.
+
+Analoginya menyusun jadwal renovasi rumah. Jadwal memperhatikan manfaat tiap kamar dan prasyarat instalasi, bukan hanya skor keinginan
+penghuni. Dapur yang paling diinginkan tetap menunggu pipa air, walaupun pipa air tidak pernah menjadi keinginan siapa pun.
+
+Bab ini memakai lima langkah pada Gambar \ref{fig:ch08-keputusan}. Tiga gerbang pertama mengurangi kandidat sebelum skor. Urutan
+pembahasan membantu penelusuran alasan, dan penerapannya tetap dapat berulang bila bukti berubah.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch08-peta-keputusan.tex}
+  \caption{Peta keputusan portofolio: tiga gerbang, skor, lalu prasyarat dan kapasitas}
+  \label{fig:ch08-keputusan}
+\end{figure}
+
+Hasil tiga gerbang pada Medikara begini.
+\begin{enumerate}
+  \item Gerbang kewajiban. INT-01 dan INT-02 tidak diberi skor, karena Bab 7 sudah membedakan aturan hukum dan syarat layanan sebagai
+        kewajiban. Dasarnya Peraturan Menteri Kesehatan (Permenkes) 24/2022 \cite{permenkes24-2022} dan aturan klaim Badan
+        Penyelenggara Jaminan Sosial (BPJS) Kesehatan. Yang dipilih hanya cara dan urutannya. Bab 7 menaruh KI-02 lebih dahulu, karena
+        tanpa status kiriman baris lain tidak dapat diukur. KI-01 ikut dikerjakan, karena status itu menjadi dasar melengkapi kiriman
+        yang tertinggal.
+  \item Gerbang pemilik dan bukti. API-08 tertahan, karena belum punya pemilik dan volumenya belum diketahui. Penelusuran 24 jam
+        dikerjakan lebih dahulu.
+  \item Gerbang alternatif. API-05 menghemat 48 jam per bulan, atau Rp34,56 juta per tahun, lebih kecil dari Rp45 juta per tahun untuk
+        satu antarmuka. API-07 menghemat Rp36 juta per tahun, dan Bab 7 sudah menyimpulkan API belum menang. Keputusan Bab 4 tetap
+        berlaku: keduanya dirapikan. API-04 juga di bawah Rp45 juta, yaitu Rp23,04 juta, tetapi perapian tidak menghapus data karyawan
+        yang beredar di surel. Alternatifnya belum memadai, sehingga API-04 lanjut ke tahap skor.
+\end{enumerate}
+
+Tersisa lima kandidat. Tabel \ref{tab:ch08-skala} memuat skala yang disepakati sebelum skor diisi. Rupiah dan jam dipakai sebagai
+batas skala, supaya dua penilai tidak menafsirkan angka 4 secara berbeda.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Skala penilaian nilai, usaha, dan risiko. Skala disusun bab ini untuk latihan}
+  \label{tab:ch08-skala}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{F{0.9cm}F{4.3cm}F{2.6cm}E}
+    \hline
+    \textbf{Skor} & \textbf{Nilai per tahun} & \textbf{Usaha} & \textbf{Risiko} \\ \hline
+    5 & Minimal Rp500 juta & Lebih dari 3.000 jam & Hasil klinis per pasien ke luar organisasi \\ \hline
+    4 & Rp150 juta sampai kurang dari Rp500 juta & 2.001 sampai 3.000 jam & Data klinis atau tagihan ke mitra terkontrak \\ \hline
+    3 & Rp50 juta sampai kurang dari Rp150 juta & 1.001 sampai 2.000 jam & Data pribadi terbatas atau kredensial \\ \hline
+    2 & Di bawah Rp50 juta & 501 sampai 1.000 jam & Data operasional tanpa data pribadi \\ \hline
+    1 & Tanpa manfaat langsung yang terukur & Sampai 500 jam & Data publik \\ \hline
+  \end{tabularx}
+\end{table}
+
+Tabel \ref{tab:ch08-skor} memuat hasilnya. Skor memakai bobot nilai 50 persen, usaha 30 persen, dan risiko 20 persen. Usaha dan risiko
+dibalik dengan rumus 6 dikurangi skor, karena angka besar pada keduanya berarti kurang menarik. API-01 misalnya menjadi
+$0{,}5 \times 5 + 0{,}3 \times 2 + 0{,}2 \times 3 = 3{,}7$.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Skor lima kandidat Medikara dengan bobot nilai 50, usaha 30, dan risiko 20 persen}
+  \label{tab:ch08-skor}
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\textwidth}{F{1.05cm}F{2.0cm}F{0.9cm}F{0.9cm}F{0.9cm}F{0.75cm}EF{0.95cm}}
+    \hline
+    \textbf{ID} & \textbf{Kandidat} & \textbf{Nilai} & \textbf{Usaha} & \textbf{Risiko} & \textbf{Skor} & \textbf{Dasar nilai per tahun} & \textbf{Jam} \\ \hline
+    API-01 & Jadwal dan Janji Temu & 5 & 4 & 3 & 3,7 & Rp1,44 miliar langganan pada skema Bab 2 & 2.400 \\ \hline
+    API-02 & Hasil Pemeriksaan & 4 & 4 & 5 & 2,8 & Rp79,2 juta kerja ulang ditambah Rp129,6 juta telepon & 2.400 \\ \hline
+    API-04 & Rekap Perusahaan & 2 & 2 & 3 & 2,8 & Rp23,04 juta dari 32 jam per bulan & 800 \\ \hline
+    API-03 & Klaim Asuransi & 3 & 5 & 4 & 2,2 & Rp56,16 juta menurut Bab 4 & 4.167 \\ \hline
+    API-06 & Identitas dan Akses & 1 & 3 & 3 & 2,0 & Tanpa manfaat langsung & 1.200 \\ \hline
+  \end{tabularx}
+\end{table}
+
+Angka 4.167 jam pada API-03 berasal dari biaya pembangunan Rp250 juta pada Bab 4, dibagi tarif Rp60.000 per jam. Jam kandidat lain adalah
+pemisalan bab ini. Manfaat API-02 mengandaikan satu antarmuka melayani laboratorium dan klinik, serta seluruh telepon Bab 5 hilang,
+sehingga angka itu adalah batas atas yang perlu diuji. Gambar \ref{fig:ch08-matriks} menaruh hasilnya pada matriks nilai dan usaha.
+
+\begin{figure}[!htb]
+  \centering
+  \input{../figures/ch08-matriks-nilai-usaha.tex}
+  \caption{Matriks nilai dan usaha lima kandidat. Kotak hijau terpilih, kotak jingga prasyarat, kotak biru antrean}
+  \label{fig:ch08-matriks}
+\end{figure}
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item API-06 didahulukan sebagai prasyarat walaupun skornya paling rendah, yaitu 2,0. Bab 6 menetapkan INT-03 dan INT-06 memerlukan
+        satu layanan identitas. Tanpa itu, API-01 dan API-02 berjalan di atas kredensial sementara, padahal Bab 6 menghitung satu insiden
+        kecil sudah berbiaya Rp23,7 juta. API-06 berbiaya Rp72 juta untuk pembangunan dan Rp45 juta per tahun untuk perawatan, tanpa
+        manfaat langsung yang terukur.
+  \item Anggaran tiga API tidak selalu berarti tiga skor tertinggi. Tiga skor tertinggi adalah API-01, API-02, dan API-04. Satu API besar
+        dapat melampaui kapasitas tim atau menunggu kontrak mitra. API-03 butuh 4.167 jam, sedangkan sisa kapasitas sesudah tiga API
+        terpilih tinggal 1.080 jam. Bahkan bila kapasitas tersedia, manfaat Rp56,16 juta dikurangi perawatan teknis Rp45 juta hanya menyisakan
+        Rp11,16 juta per tahun, atau lebih dari 22 tahun untuk menutup Rp250 juta. Rp45 juta adalah perawatan satu antarmuka yang dipakai untuk membandingkan
+        semua kandidat. Bab 4 menghitung API klaim sebagai produk penuh, dengan pemilik, dukungan, dan 18 perubahan per tahun, yaitu Rp180 juta. Pada angka itu
+        API-03 malah kurang Rp123,84 juta per tahun, sehingga kesimpulannya sama.
+\end{enumerate}
+
+Misalkan tim integrasi berisi 4 orang dengan 160 jam per bulan selama 12 bulan. Kapasitasnya 7.680 jam, atau setara Rp460,8 juta pada tarif
+Rp60.000 per jam. Tabel \ref{tab:ch08-kapasitas} mengurangi kapasitas itu menurut urutan pengerjaan. Kewajiban memakai jam lebih dahulu.
+Misalkan perbaikan KI-01 dan KI-02 menyita 600 jam, terdiri atas 300 jam rekonsiliasi harian menurut Bab 7 dan 300 jam pembuatan status kiriman.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Kapasitas tim integrasi menurut urutan pengerjaan}
+  \label{tab:ch08-kapasitas}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{F{0.9cm}EF{1.5cm}F{2.3cm}F{1.5cm}}
+    \hline
+    \textbf{Urutan} & \textbf{Pekerjaan} & \textbf{Jam} & \textbf{Biaya} & \textbf{Sisa jam} \\ \hline
+    1 & Kewajiban INT-02: KI-01 dan KI-02 & 600 & Rp36 juta & 7.080 \\ \hline
+    2 & API-06 Identitas dan Akses & 1.200 & Rp72 juta & 5.880 \\ \hline
+    3 & API-01 Jadwal dan Janji Temu & 2.400 & Rp144 juta & 3.480 \\ \hline
+    4 & API-02 Hasil Pemeriksaan & 2.400 & Rp144 juta & 1.080 \\ \hline
+    & \textbf{Jumlah}, atau sekitar 86 persen kapasitas & \textbf{6.600} & \textbf{Rp396 juta} & \textbf{1.080} \\ \hline
+  \end{tabularx}
+\end{table}
+
+Sisa 1.080 jam, atau sekitar 14 persen, disimpan sebagai cadangan. API-04 masih muat dengan 800 jam, tetapi cadangan turun menjadi 280 jam,
+atau sekitar 4 persen, dan jumlah API menjadi empat. API-03 kurang 3.087 jam. Portofolio ini juga seimbang menurut jenisnya: satu kewajiban,
+satu prasyarat, satu sumber pendapatan, dan satu penghematan. Cadangan ini belum final, karena belum memuat beban operasi dan tata kelola. Bab 10
+memakai 960 jam, Bab 11 memakai 60 jam, dan Bab 13 memerlukan paling banyak 227 jam. Bab 14 menjumlahkan seluruhnya, lalu menggeser 2.000 jam pembangunan
+API-02 ke 2028.
+
+Keputusan memakai skor dan gerbang punya dua konsekuensi. Pertama, keputusan menjadi peka terhadap bobot. Latihan 2 memperlihatkan API-02 turun
+dari posisi kedua bersama API-04 ke posisi ketiga bila bobot risiko dinaikkan, sehingga bobot disepakati sebelum skor dibuka. Kedua, skor risiko hanya
+menilai risiko sesudah API berjalan. Keadaan sekarang juga berisiko, misalnya 66 hasil salah ketik per tahun pada INT-06. Tim perlu menulis
+perbandingan itu, supaya kandidat berisiko tinggi tidak selalu kalah oleh keadaan yang tidak pernah diberi skor.
+
+\begin{pendalaman}[title={Pendalaman Teknis (opsional): Menghitung Skor dan Sisa Kapasitas}]
+Listing \ref{lst:ch08-skor} memuat dua fungsi dari skrip penilaian. Fungsi pertama menghitung skor tertimbang. Fungsi kedua mengurangi kapasitas
+menurut urutan pengerjaan. Perubahan bobot cukup dilakukan pada konstanta, sehingga uji kepekaan pada Latihan 2 tidak memerlukan rumus baru.
+
+\begin{lstlisting}[style=ch08python, caption={Menghitung skor dan sisa kapasitas, tersedia di \berkas{sources/chapter08/hitung-prioritas-portofolio.py}}, label={lst:ch08-skor}]
+def hitung_skor(kandidat, bobot):
+  """Menghitung skor tertimbang; skor tidak menggantikan prasyarat."""
+  skor_nilai = bobot["nilai"] * int(kandidat["nilai"])
+  skor_usaha = bobot["usaha"] * (PENGGESER_SKALA - int(kandidat["usaha"]))
+  skor_risiko = bobot["risiko"] * (PENGGESER_SKALA - int(kandidat["risiko"]))
+  return round(skor_nilai + skor_usaha + skor_risiko, 1)
+
+
+def hitung_sisa_kapasitas(daftar_kandidat, urutan_terpilih):
+  """Mengurangi kapasitas per pekerjaan; kewajiban memakai jam dahulu."""
+  kapasitas = ANGGOTA_TIM * JAM_PER_BULAN * BULAN_PER_TAHUN
+  jam_per_id = {
+    baris["id"]: int(baris["jam_usaha"]) for baris in daftar_kandidat
+  }
+  sisa = kapasitas - JAM_KEWAJIBAN
+  catatan = [("Kapasitas", kapasitas), ("Sesudah kewajiban", sisa)]
+  for id_kandidat in urutan_terpilih:
+    sisa -= jam_per_id[id_kandidat]
+    catatan.append((f"Sesudah {id_kandidat}", sisa))
+  return catatan
+\end{lstlisting}
+
+Skrip hanya membaca berkas \textit{Comma-Separated Values} (CSV) lokal dan tidak memanggil server.
+\end{pendalaman}
+
+\subsection{Membangun Sendiri, Membeli, atau Memakai API Pihak Lain}
+
+Setiap kandidat terpilih masih menyisakan satu pertanyaan: apakah harus dibangun sendiri? Alternatif membangun, membeli, dan memakai API pihak lain
+dibandingkan pada horizon biaya dan kendali yang sama. Membangun sendiri memberi kendali, tetapi organisasi menanggung seluruh perawatan. Membeli
+memindahkan sebagian pekerjaan ke pemasok, tetapi menambah keterikatan. Memakai API pihak lain berarti aturan dan perubahan ikut pihak itu. Logika
+biaya transaksi Williamson membantu di sini: makin khusus sebuah aset bagi satu hubungan, makin kuat alasan untuk mengelolanya sendiri
+\cite{c08-williamson1981}.
+
+Analoginya makan siang kantor. Kantor dapat punya dapur sendiri, berlangganan katering, atau memesan dari restoran terdekat. Dapur sendiri masuk akal
+bila menunya khusus dan pegawainya banyak. Untuk makan siang biasa, katering sering sudah cukup, dan restoran menentukan sendiri menu serta jam
+bukanya.
+
+Dua contoh berangka pada Medikara:
+\begin{enumerate}
+  \item INT-08 memakai API bank. Bank memiliki datanya, sehingga membangun sendiri tidak masuk akal. Bab 7 menghitung kerja manual Rp36 juta per tahun,
+        sedangkan satu antarmuka Rp45 juta per tahun, atau Rp90 juta bila dua bank memakai spesifikasi berbeda. Dari jam kerja saja, memakai API bank
+        masih lebih mahal Rp9 juta per tahun. Keputusan dapat berubah bila portal unduhan dihentikan.
+  \item API-06 dibandingkan pada horizon tiga tahun. Membangun: Rp72 juta ditambah 3 kali Rp45 juta, atau Rp207 juta. Misalkan membeli: langganan Rp60 juta
+        per tahun dan 400 jam penyambungan, atau Rp204 juta. Selisih Rp3 juta terlalu kecil untuk memutuskan. Penentunya adalah hal lain: layanan identitas
+        bukan pembeda Medikara, dan 800 jam terbebas. Sisa kapasitas naik menjadi 1.880 jam, tetapi API-03 tetap tidak muat.
+\end{enumerate}
+
+Tabel \ref{tab:ch08-bangun-beli} merangkum perbandingannya.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Membangun sendiri, membeli, atau memakai API pihak lain}
+  \label{tab:ch08-bangun-beli}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{F{2.1cm}EEF{1.5cm}F{2.3cm}}
+    \hline
+    \textbf{Pilihan} & \textbf{Cocok bila} & \textbf{Biaya yang dihitung} & \textbf{Kendali} & \textbf{Contoh Medikara} \\ \hline
+    Membangun sendiri & Kemampuan membedakan organisasi atau khusus bagi satu hubungan & Jam pembangunan dan perawatan & Tinggi & API-01, API-02 \\ \hline
+    Membeli & Kemampuan umum dan pasarnya tersedia & Langganan, penyambungan, biaya keluar & Sedang & API-06, bila syarat audit terpenuhi \\ \hline
+    Memakai API pihak lain & Pihak lain memiliki data atau aturannya & Adaptasi dan perubahan sepihak & Rendah & INT-01, INT-02, API bank \\ \hline
+  \end{tabularx}
+\end{table}
+
+\begin{kasus}[title={Kasus Medikara Health: Portofolio API Target}]
+Tim menyusun Tabel \ref{tab:ch08-portofolio} sebagai usulan bagi direksi. Data lengkapnya tersedia di \berkas{sources/chapter08/matriks-prioritas-api.csv}.
+Seluruh isinya adalah data latihan.
+
+\begin{table}[H]
+  \centering
+  \caption{Usulan portofolio API target Medikara untuk tahun depan}
+  \label{tab:ch08-portofolio}
+  \scriptsize
+  \begin{tabularx}{\linewidth}{F{1.35cm}F{2.75cm}EE}
+    \hline
+    \textbf{Status} & \textbf{Butir} & \textbf{Alasan} & \textbf{Pemicu tinjauan} \\ \hline
+    Kewajiban & INT-02: KI-01 dan KI-02 & Tanpa skor. Tumpukan kiriman Rp240 juta per tahun bila dibiarkan, menurut Bab 7 & Spesifikasi SATUSEHAT berubah \\ \hline
+    Tahun depan & API-06 Identitas dan Akses & Prasyarat API-01 dan API-02 & Penawaran pemasok memenuhi syarat audit \\ \hline
+    Tahun depan & API-01 Jadwal dan Janji Temu & Skor 3,7, interaksi inti, temuan audit 138 tabel & Klinik mitra aktif turun di bawah 30 \\ \hline
+    Tahun depan & API-02 Hasil Pemeriksaan & Skor 2,8, manfaat hingga Rp208,8 juta & Catatan telepon nyata jauh di bawah 72 per hari \\ \hline
+    Antrean & API-03 Klaim Asuransi & Usaha Rp250 juta, manfaat Rp56,16 juta & Kontrak verifikasi penjaminan senilai Rp960 juta \\ \hline
+    Antrean & API-04 Rekap Perusahaan & Manfaat Rp23,04 juta di bawah Rp45 juta & Keluhan atau insiden data karyawan di surel \\ \hline
+    Dirapikan & API-05, API-07 & Manfaat di bawah Rp45 juta per tahun & Portal bank dihentikan \\ \hline
+    Ditelusuri & API-08 Resep Apotek & Tanpa pemilik dan tanpa volume & Penelusuran 24 jam selesai \\ \hline
+    Ditolak & Unduh seluruh data pasien & Tanpa tujuan sah & Dasar hukum dan tujuan baru \\ \hline
+  \end{tabularx}
+\end{table}
+
+Status ``Tahun depan'' berarti mulai dikerjakan pada anggaran 2027. Status itu adalah usulan sebelum beban Bab 10, Bab 11, dan Bab 13 dijumlahkan. Bab 14 mempertahankan kontrak dan penilaian dampak API-02 pada 2027, tetapi menggeser 2.000 jam pembangunannya ke 2028, dengan rilis Oktober 2028.
+
+Biaya tahun pertama dapat dihitung. Pembangunan 6.600 jam berbiaya Rp396 juta, dan perawatan 3 antarmuka berbiaya Rp135 juta, sehingga jumlahnya Rp531 juta.
+Lapisan bersama Rp300 juta per tahun dicatat terpisah, karena rancangannya baru dibahas di Bab 10. Bila lapisan itu ikut dipasang, jumlahnya Rp831 juta. Pada
+asumsi Bab 4, lapisan itu menghemat bersih Rp195 juta dari sambungan dan Rp192 juta dari pembaruan, atau Rp387 juta per tahun.
+
+Keputusan ini punya dua konsekuensi. Pertama, Bab 9 menulis kontrak untuk API-01, karena API itu paling banyak bergantung pada kesepakatan dengan vendor dan klinik.
+Kedua, Medikara sadar menanggung masalah yang belum diselesaikan. Sebanyak 468 klaim per bulan tetap ditolak karena format, atau 117 jam per bulan dan Rp84,24 juta per
+tahun. Rancangan format klaim tetap dapat disiapkan lewat kontrak Bab 9 tanpa membangun API-03. Catatan tim menyebut bukti yang belum tersedia, misalnya catatan
+telepon nyata, serta kondisi yang dapat mengubah keputusan.
+\end{kasus}
 
 \section{Aktivitas: Portofolio API Target}
 
-% TODO
-% Tujuan aktivitas: menetapkan portofolio API target yang berprioritas dan memiliki pemilik.
-% Peran dalam tim: anggota berlatar bisnis menilai nilai bagi pengguna dan mitra; anggota berlatar
-% teknis menilai usaha, ketergantungan sistem, dan risiko.
-% Langkah: turunkan kandidat dari tujuan strategis dan kapabilitas; isi matriks nilai dan usaha;
-% pilih dua atau tiga API teratas; isi kanvas produk API untuk masing-masing; tentukan pemiliknya.
-% Luaran dan tonggak capstone: portofolio API target dan kanvas produk API, masuk ke C3.
-% Berkas sources yang direncanakan: sources/chapter08/kanvas-produk-api.md,
-% sources/chapter08/matriks-prioritas-api.csv, sources/chapter08/contoh-kanvas-janji-temu.md
+\textbf{Tujuan.} Tim menurunkan kandidat API dari tujuan strategis dan kapabilitas organisasi, memprioritaskannya, lalu menghasilkan artefak C3 yang dapat ditelusuri dari
+persoalan layanan sampai keputusan tim. Organisasi nyata digunakan dengan izin dan anonimisasi. Medikara menjadi alternatif bila akses tidak tersedia.
+
+\textbf{Pembagian peran.}
+\begin{itemize}
+  \item Anggota berlatar bisnis, kesehatan, hukum, atau akuntansi menilai nilai bagi pengguna dan mitra, serta memeriksa kewajiban dan batas organisasi.
+  \item Anggota berlatar teknis menilai usaha, ketergantungan sistem, dan risiko.
+  \item Koordinator mencatat keputusan dan memastikan kedua kelompok menyepakati istilah.
+  \item Penelaah menantang asumsi tanpa mengganti bukti dengan pendapat.
+\end{itemize}
+
+\textbf{Langkah kerja.}
+\begin{enumerate}
+  \item Ambil kapabilitas serta perjalanan pengguna dari C1 dan IT40513, lalu ambil baris inventaris dan temuan dari C2.
+  \item Daftarkan lima sampai delapan kandidat berikut pengguna dan pemiliknya pada salinan \berkas{sources/chapter08/matriks-prioritas-api.csv}. Isi kanvas versi singkat
+        untuk tiap kandidat.
+  \item Lewatkan kandidat melalui tiga gerbang pada Gambar \ref{fig:ch08-keputusan}. Tulis kandidat yang keluar beserta alasannya.
+  \item Sepakati skala dan bobot penilaian sebelum skor dibuka, lalu periksa dependensi dan batas anggaran.
+  \item Gambar matriks nilai dan usaha. Hitung sisa kapasitas menurut urutan pengerjaan.
+  \item Isi kanvas lengkap pada salinan \berkas{sources/chapter08/kanvas-produk-api.md} untuk dua atau tiga kandidat prioritas sebagai masukan C3.
+  \item Tulis portofolio target: status tiap butir, alasan, pemilik, dan pemicu tinjauan. Mintakan persetujuan pemilik proses, atau pemilik yang diperankan anggota tim.
+\end{enumerate}
+
+\textbf{Luaran.} Tim menyerahkan portofolio API target, matriks nilai dan usaha, dua atau tiga kanvas produk API, catatan alternatif yang ditolak, dan tautan bukti.
+
+\textbf{Kaitan dengan capstone.} Luaran ini membuka tonggak C3 Kondisi Target. Satu API prioritas dipakai sebagai bahan kontrak OpenAPI di Bab 9, rancangan manajemen API di
+Bab 10, serta alur \textit{onboarding} mitra di Bab 11. ID dan versi artefak dipertahankan saat dipakai bab berikutnya.
+
+\textbf{Kriteria penilaian.} Penilaian mencakup ketepatan konsep 25 persen, keterlacakan bukti 30 persen, alasan keputusan dan pengorbanan 30 persen, serta keterbacaan artefak 15 persen.
+
+\textbf{Berkas pendukung.} Daftar lengkap tersedia pada \berkas{sources/chapter08/README.md}. Templat tidak menggantikan percakapan dengan pemilik proses, dan ketidakpastian dicatat
+secara terbuka. Data pribadi pasien atau karyawan tidak boleh dipakai. Data organisasi nyata dipakai dengan izin dan dianonimkan.
+
+\begin{pendalaman}[title={Pendalaman Teknis (opsional): Menandai API yang Melintasi Domain}]
+Petakan kandidat ke batas domain hasil analisis \textit{Domain-Driven Design} (DDD) yang dibahas rinci di IT40713, lalu tandai API yang melintasi lebih dari satu domain. Tabel
+\ref{tab:ch08-domain} memuat contoh pada Medikara. Nama domain adalah pemisalan bab ini, bukan hasil dari IT40713. API yang melintasi domain tidak otomatis salah, tetapi harus menjawab
+siapa memegang tiap aturan.
+
+\begin{table}[H]
+  \centering
+  \caption{Contoh pemetaan kandidat ke domain}
+  \label{tab:ch08-domain}
+  \scriptsize
+  \begin{tabularx}{\linewidth}{F{2.3cm}EF{1.2cm}E}
+    \hline
+    \textbf{Kandidat} & \textbf{Domain} & \textbf{Jumlah} & \textbf{Tindakan} \\ \hline
+    API-01 & Penjadwalan & 1 & Pertahankan batas, lokasi dipakai sebagai data acuan \\ \hline
+    API-02 & Laboratorium dan rekam medis & 2 & Manajer Laboratorium memegang hasil, Manajer Rekam Medis memegang aturan buka data \\ \hline
+    API-03 & Klaim dan keuangan & 2 & Pecah status klaim dari rincian tagihan \\ \hline
+    API-06 & Keamanan dan akses & 1 & Dipakai semua domain, tetapi tidak memegang aturan bisnis mereka \\ \hline
+  \end{tabularx}
+\end{table}
+\end{pendalaman}
 
 \section{Ringkasan}
 
-% TODO
+Strategi API menerjemahkan tujuan platform menjadi kemampuan yang dapat dikonsumsi pihak tertentu. Jumlah API bukan strategi, dan keputusan tidak membuka sebuah kemampuan juga bagian dari strategi.
+Bukti empiris mendukung keselarasan API dengan tujuan bisnis, bukan pembukaan seluas mungkin. Strategi platform menjawab siapa bertemu siapa, sedangkan strategi API menjawab kemampuan mana yang dibuka,
+untuk siapa, dengan batas apa, dan dalam urutan apa.
+
+\textit{Capability map} menjelaskan kemampuan bisnis, sedangkan \textit{value stream} menjelaskan rangkaian nilai dari sudut pengguna. Kandidat muncul ketika kemampuan perlu dipakai lintas batas. Pada
+Medikara, satu API janji temu dengan 5 adaptor lebih mahal Rp45 juta per tahun daripada 5 API per SIMRS, tetapi mengurangi 200 sambungan di sisi klinik menjadi 40. Batas domain mengelompokkan makna dan aturan
+bisnis yang konsisten. Lapisan sistem, proses, dan pengalaman membedakan tanggung jawab, bukan kewajiban membangun tiga lapisan fisik.
+
+Lanskap API ditelaah melalui delapan aspek, yaitu \textit{variety}, \textit{vocabulary}, \textit{volume}, \textit{velocity}, \textit{vulnerability}, \textit{visibility}, \textit{versioning}, dan
+\textit{volatility}. Lanskap memuat semua yang ada, sedangkan portofolio memuat yang dapat diputuskan. Kanvas produk API memadatkan pengguna, masalah, tawaran nilai, operasi, dependensi, risiko, ukuran, dan pemilik
+sebagai hipotesis yang diuji. Pemilik produk memutus prioritas dan menanggung akibatnya, sehingga vendor bukan otomatis pemiliknya.
+
+Prioritisasi menggabungkan nilai, usaha, risiko, dependensi, dan kapasitas. Tiga gerbang mengeluarkan kewajiban, kandidat tanpa pemilik, dan kandidat yang punya alternatif lebih murah. Skor membantu percakapan, tetapi
+API-06 dengan skor terendah 2,0 tetap didahulukan karena menjadi prasyarat. Portofolio Medikara memuat satu kewajiban dan tiga API, menyita 6.600 dari 7.680 jam, dan menunda API-03 dengan akibat yang tertulis.
+
+Pesan utama bab ini adalah mempertahankan hubungan antara masalah layanan, pilihan yang dipertimbangkan, dan bukti keputusan. Artefak C3 perlu menyebut pemilik serta pemicu peninjauan. Keputusan yang baik menjelaskan
+manfaat yang diharapkan sekaligus akibat yang harus ditanggung organisasi, termasuk masalah yang sengaja belum diselesaikan.
 
 \section{Latihan}
 
+\subsection*{Latihan 1: Menurunkan Kandidat dari Kapabilitas}
+
+Jelaskan mengapa daftar API yang diturunkan dari daftar sistem berbeda dengan daftar API yang diturunkan dari kapabilitas bisnis. Latihan ini membuktikan bahwa perbedaan kedua daftar dapat dihitung, bukan hanya diperdebatkan.
 \begin{enumerate}
-  \item Jelaskan mengapa daftar API yang diturunkan dari daftar sistem berbeda dengan daftar API yang diturunkan dari kapabilitas bisnis.
-  \item Misalkan Medikara hanya punya anggaran untuk tiga API tahun depan. Susun kriteria prioritisasi, lalu terapkan pada lima kandidat API.
-  \item Tentukan siapa pemilik produk yang tepat untuk API janji temu Medikara, lalu jelaskan tanggung jawabnya.
+  \item Pilih satu kapabilitas yang dilayani lebih dari satu sistem.
+  \item Tulis daftar API bila diturunkan dari sistem, lalu tulis daftar bila diturunkan dari kapabilitas.
+  \item Hitung jumlah sambungan dan biaya pada kedua daftar, dengan satuan biaya yang sama.
+  \item Jelaskan informasi vendor yang sengaja disembunyikan oleh daftar kedua.
+\end{enumerate}
+
+Tabel \ref{tab:ch08-lat1-contoh} merupakan contoh alasan, bukan satu-satunya jawaban yang benar. Angkanya mengikuti pemisalan pada bab ini.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 1: kapabilitas Penjadwalan Layanan pada 5 SIMRS dan 40 klinik mitra}
+  \label{tab:ch08-lat1-contoh}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{F{3.0cm}EEF{2.9cm}}
+    \hline
+    \textbf{Aspek} & \textbf{Dari daftar sistem} & \textbf{Dari kapabilitas} & \textbf{Dasar penilaian} \\ \hline
+    Bentuk API & 5 API jadwal, satu per SIMRS & 1 API janji temu, 5 adaptor & CAP-L03 \\ \hline
+    Sambungan di sisi klinik & 40 $\times$ 5 = 200 & 40 & 40 klinik mitra \\ \hline
+    Biaya penyedia per tahun & Rp225 juta & Rp270 juta & Rp45 juta per antarmuka \\ \hline
+    Satu perubahan di SIMRS & 160 jam, atau Rp9,6 juta di sisi klinik & 0 jam di klinik bila kontrak tetap & 4 jam per klinik \\ \hline
+    Yang terikat & Struktur dan nama tiap vendor & Hasil bagi pengguna & Informasi vendor disembunyikan \\ \hline
+  \end{tabularx}
+\end{table}
+
+Isi hasil tim pada Tabel \ref{tab:ch08-lat1-hasil}, lalu tambahkan rujukan bukti dalam catatan kerja.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 1}
+  \label{tab:ch08-lat1-hasil}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{F{3.0cm}EEF{2.9cm}}
+    \hline
+    \textbf{Aspek} & \textbf{Dari daftar sistem} & \textbf{Dari kapabilitas} & \textbf{Dasar penilaian} \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textbf{Pertanyaan analisis.}
+\begin{enumerate}
+  \item Baca baris biaya dan baris perubahan. Mulai berapa perubahan per tahun selisih biaya penyedia tertutup oleh beban di sisi klinik?
+  \item Apa yang berubah ketika SIMRS Bandung diganti, pada masing-masing daftar? Sebutkan pihak dan jam kerjanya.
+  \item Batas domain mana yang masih belum jelas pada hasil tim, dan bukti apa yang menjawabnya?
+\end{enumerate}
+
+\subsection*{Latihan 2: Memilih Tiga API}
+
+Misalkan Medikara hanya punya anggaran untuk tiga API tahun depan. Susun kriteria prioritisasi, lalu terapkan pada lima kandidat API. Latihan ini membuktikan bahwa urutan portofolio bergantung pada bobot, prasyarat, dan kapasitas, bukan hanya pada skor.
+\begin{enumerate}
+  \item Tulis lima kandidat beserta bukti masalahnya.
+  \item Sepakati skala dan dua perangkat bobot sebelum menilai.
+  \item Nilai manfaat, usaha, dan risiko, lalu hitung skor pada kedua perangkat bobot.
+  \item Periksa prasyarat, lalu pilih tiga API dalam batas kapasitas.
+\end{enumerate}
+
+Tabel \ref{tab:ch08-lat2-contoh} merupakan contoh alasan, bukan satu-satunya jawaban yang benar. Bobot A memakai nilai 50, usaha 30, dan risiko 20 persen. Bobot B memakai nilai 40, usaha 20, dan risiko 40 persen. Skripnya tersedia di \berkas{sources/chapter08/hitung-prioritas-portofolio.py}.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 2: lima kandidat Medikara pada dua perangkat bobot}
+  \label{tab:ch08-lat2-contoh}
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\textwidth}{F{2.7cm}F{0.9cm}F{0.9cm}F{0.9cm}F{1.05cm}F{1.05cm}E}
+    \hline
+    \textbf{Kandidat} & \textbf{Nilai} & \textbf{Usaha} & \textbf{Risiko} & \textbf{Bobot A} & \textbf{Bobot B} & \textbf{Keputusan} \\ \hline
+    API-01 Jadwal dan Janji Temu & 5 & 4 & 3 & 3,7 & 3,6 & Dipilih pada kedua bobot \\ \hline
+    API-02 Hasil Pemeriksaan & 4 & 4 & 5 & 2,8 & 2,4 & Dipilih, peka terhadap bobot risiko \\ \hline
+    API-03 Klaim Asuransi & 3 & 5 & 4 & 2,2 & 2,2 & Antrean, 4.167 jam tidak muat \\ \hline
+    API-04 Rekap Perusahaan & 2 & 2 & 3 & 2,8 & 2,8 & Antrean, manfaat di bawah Rp45 juta \\ \hline
+    API-06 Identitas dan Akses & 1 & 3 & 3 & 2,0 & 2,2 & Dipilih sebagai prasyarat \\ \hline
+  \end{tabularx}
+\end{table}
+
+Isi hasil tim pada Tabel \ref{tab:ch08-lat2-hasil}, lalu tambahkan rujukan bukti dalam catatan kerja.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 2}
+  \label{tab:ch08-lat2-hasil}
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabularx}{\textwidth}{F{2.7cm}F{0.9cm}F{0.9cm}F{0.9cm}F{1.05cm}F{1.05cm}E}
+    \hline
+    \textbf{Kandidat} & \textbf{Nilai} & \textbf{Usaha} & \textbf{Risiko} & \textbf{Bobot A} & \textbf{Bobot B} & \textbf{Keputusan} \\ \hline
+    \dots & \dots & \dots & \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots & \dots & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textbf{Pertanyaan analisis.}
+\begin{enumerate}
+  \item Bagaimana keputusan berubah bila bobot risiko naik? Bandingkan kolom Bobot A dan Bobot B pada API-02 dan API-04, lalu hitung selisih manfaat per tahun bila API-02 diganti API-04.
+  \item Kandidat mana ditunda, dan bukti apa yang dapat mengubah urutannya?
+  \item Skor risiko API-02 hanya menilai keadaan sesudah API berjalan. Bagaimana penilaian berubah bila 66 hasil salah ketik per tahun pada keadaan sekarang ikut dibandingkan?
+\end{enumerate}
+
+\subsection*{Latihan 3: Menentukan Pemilik Produk}
+
+Tentukan siapa pemilik produk yang tepat untuk API janji temu Medikara, lalu jelaskan tanggung jawabnya. Latihan ini membuktikan bahwa kepemilikan produk dapat dipisahkan dari jabatan, vendor, dan pemeliharaan teknis.
+\begin{enumerate}
+  \item Telusuri proses janji temu dari pemesanan sampai pasien dilayani.
+  \item Daftarkan calon pemilik, lalu pilih pihak yang dapat memutus prioritas dan merasakan akibatnya.
+  \item Pisahkan peran bisnis dan pemeliharaan teknis.
+  \item Tulis jalur penyelesaian bila kebutuhan antarfasilitas berbenturan.
+\end{enumerate}
+
+Tabel \ref{tab:ch08-lat3-contoh} merupakan contoh alasan, bukan satu-satunya jawaban yang benar.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Contoh hasil Latihan 3: pembagian peran pada API-01}
+  \label{tab:ch08-lat3-contoh}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{F{2.5cm}F{3.0cm}EE}
+    \hline
+    \textbf{Peran} & \textbf{Pihak} & \textbf{Tanggung jawab} & \textbf{Dasar penilaian} \\ \hline
+    Pemilik produk & Manajer Layanan Rawat Jalan & Prioritas per triwulan, anggaran, janji terkonfirmasi & Merasakan akibat antrean \\ \hline
+    Tim teknis & Tim integrasi & Kontrak, adaptor, dan operasi & Menjaga mutu, bukan memilih prioritas \\ \hline
+    Pemasok & Vendor Medikara+ & Mengubah aplikasi sesuai tenggat INT-03 & Rp8 juta per perubahan, tidak netral \\ \hline
+    Eskalasi & Direktur Pelayanan & Memutus konflik lima rumah sakit & Pemegang kapabilitas CAP-L03 \\ \hline
+    Hak akses & Kepala Keamanan Informasi & Menetapkan \textit{scope} lewat API-06 & Pemegang kapabilitas CAP-P02 \\ \hline
+  \end{tabularx}
+\end{table}
+
+Isi hasil tim pada Tabel \ref{tab:ch08-lat3-hasil}, lalu tambahkan rujukan bukti dalam catatan kerja.
+
+\begin{table}[!htb]
+  \centering
+  \caption{Lembar hasil Latihan 3}
+  \label{tab:ch08-lat3-hasil}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{F{2.5cm}F{3.0cm}EE}
+    \hline
+    \textbf{Peran} & \textbf{Pihak} & \textbf{Tanggung jawab} & \textbf{Dasar penilaian} \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+  \end{tabularx}
+\end{table}
+
+\textbf{Pertanyaan analisis.}
+\begin{enumerate}
+  \item Mengapa vendor bukan otomatis pemilik produk? Gunakan angka 18 perubahan per tahun dan Rp8 juta per perubahan pada Bab 4.
+  \item Bagaimana konflik kebutuhan lima rumah sakit diselesaikan bila ada 12 perubahan per triwulan, sedangkan kapasitasnya 6?
 \end{enumerate}

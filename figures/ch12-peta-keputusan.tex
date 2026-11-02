@@ -1,0 +1,27 @@
+\begin{tikzpicture}[
+  kotak/.style={draw, rounded corners, text width=3.2cm,
+    minimum height=1.55cm, align=center, font=\scriptsize},
+  panah/.style={-{Stealth[length=2mm]}, thick}
+]
+  \node[kotak,fill=blue!8] (n0) at (0.0,0) {Siapa menerima nilai?\\
+    {\tiny\mdseries Pasien, klinik, asuransi, perusahaan, atau organisasi sendiri}};
+  \node[kotak,fill=blue!8] (n1) at (3.9,0) {Siapa membayar?\\
+    {\tiny\mdseries Sisi yang membayar dan sisi yang disubsidi}};
+  \draw[panah] (n0.east) -- (n1.west);
+  \node[kotak,fill=blue!8] (n2) at (7.8,0) {Unit apa yang ditagih?\\
+    {\tiny\mdseries Model harga dan aturan \textit{retry} serta galat}};
+  \draw[panah] (n1.east) -- (n2.west);
+  \node[kotak,fill=orange!12] (n3) at (0.0,-2.3) {Apakah menutup biaya?\\
+    {\tiny\mdseries Biaya tetap dan variabel, margin, titik impas}};
+  \draw[panah] (n2.south) -- ++(0,-0.38) -| (n3.north);
+  \node[kotak,fill=blue!8] (n4) at (3.9,-2.3) {Apa bukti nilainya?\\
+    {\tiny\mdseries Ukuran utama, pendorong, metrik operasional}};
+  \draw[panah] (n3.east) -- (n4.west);
+  \node[kotak,fill=green!10] (n5) at (7.8,-2.3) {Keputusan untuk C4\\
+    {\tiny\mdseries Model monetisasi dan pohon metrik, dengan pemilik}};
+  \draw[panah] (n4.east) -- (n5.west);
+  \draw[panah, dashed, gray!70!black] (n5.south) -- ++(0,-0.35)
+    -| ([xshift=-0.3cm]n0.west) -- (n0.west);
+  \node[font=\tiny, fill=white, inner sep=1pt] at (3.9,-3.42)
+    {Bukti berubah: pertanyaan yang terkena dibuka kembali};
+\end{tikzpicture}

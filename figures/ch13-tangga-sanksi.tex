@@ -1,0 +1,24 @@
+\begin{tikzpicture}[
+  anak/.style={draw, rounded corners, text width=2.1cm, minimum height=1.2cm,
+    align=flush center, font=\scriptsize},
+  panah/.style={-{Stealth[length=2mm]}, thick}
+]
+  \node[anak, fill=blue!8] (s1) at (0,0)
+    {\textbf{1 Peringatan}\\{\tiny\mdseries bukti dikirim, mitra menjawab}};
+  \node[anak, fill=blue!8] (s2) at (2.4,1.0)
+    {\textbf{2 Perbaikan}\\{\tiny\mdseries rencana 30 hari yang disepakati}};
+  \node[anak, fill=orange!12] (s3) at (4.8,2.0)
+    {\textbf{3 Pembatasan}\\{\tiny\mdseries tidak menerima layanan baru}};
+  \node[anak, fill=orange!12] (s4) at (7.2,3.0)
+    {\textbf{4 Penangguhan}\\{\tiny\mdseries akses baru berhenti, kasus berjalan selesai}};
+  \node[anak, fill=red!22] (s5) at (9.6,4.0)
+    {\textbf{5 Pemutusan}\\{\tiny\mdseries kasus dipindahkan, lalu akses dicabut}};
+  \draw[panah] (s1.north) |- (s2.west);
+  \draw[panah] (s2.north) |- (s3.west);
+  \draw[panah] (s3.north) |- (s4.west);
+  \draw[panah] (s4.north) |- (s5.west);
+  \node[draw, rounded corners, fill=praditagreen!15, text width=11.6cm, minimum height=0.75cm,
+    align=center, font=\scriptsize] (keberatan) at (4.8,-1.25)
+    {\textbf{Keberatan ke komite kemitraan terbuka pada setiap anak tangga}\\
+     {\tiny\mdseries bukti sama, aturan sama bagi klinik dan apotek milik Medikara, risalah tersimpan}};
+\end{tikzpicture}

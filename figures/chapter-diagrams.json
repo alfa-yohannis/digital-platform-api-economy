@@ -1,7 +1,7 @@
 {
   "code": "IT40613",
   "format_version": 1,
-  "description": "Diagram konsep orisinal, disusun dari naskah bab; kotak generik, tanpa TikZ.",
+  "description": "Diagram konsep orisinal, disusun dari naskah bab; kotak generik yang dibangkitkan menjadi TikZ oleh tools/render-diagrams.py.",
   "chapters": [
     {
       "caption": "Dari rantai layanan ke interaksi platform",
@@ -84,7 +84,7 @@
       "note": "Atas: pipeline layanan. Bawah: platform mengatur interaksi antarpihak; API menyediakan kontrak pertukaran.",
       "basis": "Definisi pipeline dan platform, afiliasi pihak luar, serta kontrak request/response pada pendahuluan dan materi API.",
       "number": 1,
-      "filename": "ch01-diagram-konsep.png",
+      "filename": "ch01-diagram-konsep.tex",
       "source": "module/chapter01.tex",
       "chapter_title": "Orientasi: Platform, API, dan Capstone",
       "sections": [
@@ -195,7 +195,7 @@
       "note": "Efek lintas sisi dapat menambah nilai. Penambahan peserta juga dapat menambah kompetisi atau waktu tunggu.",
       "basis": "Interaksi inti, efek jaringan sesisi/lintas sisi, efek negatif, dan strategi peluncuran mikropasar.",
       "number": 2,
-      "filename": "ch02-diagram-konsep.png",
+      "filename": "ch02-diagram-konsep.tex",
       "source": "module/chapter02.tex",
       "chapter_title": "Model Bisnis Platform dan Efek Jaringan",
       "sections": [
@@ -310,7 +310,7 @@
       "note": "API dan dokumentasi membuka akses; syarat serta tata kelola membatasi penggunaan kemampuan bersama.",
       "basis": "Peran orkestrator/komplementor/pengguna, aliran nilai, boundary resources, dan pilihan strategi ekosistem.",
       "number": 3,
-      "filename": "ch03-diagram-konsep.png",
+      "filename": "ch03-diagram-konsep.tex",
       "source": "module/chapter03.tex",
       "chapter_title": "Ekosistem dan Orkestrasi Mitra",
       "sections": [
@@ -425,7 +425,7 @@
       "note": "Kepemilikan, operasi, dan pengukuran nilai berlanjut setelah integrasi pertama selesai.",
       "basis": "API product versus integration project, konsumen, pemilik, inventaris, biaya, dan nilai.",
       "number": 4,
-      "filename": "ch04-diagram-konsep.png",
+      "filename": "ch04-diagram-konsep.tex",
       "source": "module/chapter04.tex",
       "chapter_title": "API sebagai Produk dan Ekonomi API",
       "sections": [
@@ -528,7 +528,7 @@
       "note": "Event adalah fakta bisnis; webhook adalah cara mengirim pemberitahuan. Penerimaan awal belum selalu berarti tugas selesai.",
       "basis": "REST, GraphQL, event, webhook, sinkron/asinkron, kegagalan pengiriman dan rekonsiliasi.",
       "number": 5,
-      "filename": "ch05-diagram-konsep.png",
+      "filename": "ch05-diagram-konsep.tex",
       "source": "module/chapter05.tex",
       "chapter_title": "Gaya API dan Pola Integrasi",
       "sections": [
@@ -638,7 +638,7 @@
       "note": "Gateway memeriksa akses umum. Layanan wajib memeriksa otorisasi objek dan tindakan pada setiap permintaan.",
       "basis": "OAuth/OIDC, scope, BOLA, pemeriksaan objek, rate limit, dan minimisasi audit.",
       "number": 6,
-      "filename": "ch06-diagram-konsep.png",
+      "filename": "ch06-diagram-konsep.tex",
       "source": "module/chapter06.tex",
       "chapter_title": "Keamanan API: OAuth 2.0 dan OWASP API Security Top 10",
       "sections": [
@@ -762,7 +762,7 @@
       "note": "Ketiga jalur dipisahkan menurut tujuan. SNAP bukan protokol BPJS; FHIR memerlukan profil dan terminologi.",
       "basis": "FHIR dan SATUSEHAT, proses BPJS, serta SNAP sebagai pembanding standar sektoral.",
       "number": 7,
-      "filename": "ch07-diagram-konsep.png",
+      "filename": "ch07-diagram-konsep.tex",
       "source": "module/chapter07.tex",
       "chapter_title": "Standar API Sektoral: SATUSEHAT, HL7 FHIR, dan SNAP",
       "sections": [
@@ -872,7 +872,7 @@
       "note": "API dipilih untuk mendukung hasil organisasi. Skor tinggi tetap harus memenuhi prasyarat dan batas kapasitas.",
       "basis": "Strategi, capability/value stream, candidate API, canvas, dan evaluasi portofolio.",
       "number": 8,
-      "filename": "ch08-diagram-konsep.png",
+      "filename": "ch08-diagram-konsep.tex",
       "source": "module/chapter08.tex",
       "chapter_title": "Strategi dan Portofolio API",
       "sections": [
@@ -983,7 +983,7 @@
       "note": "Validasi schema tidak menggantikan uji perilaku, keamanan, dan kompatibilitas. HTTP 202 belum menjamin konfirmasi bisnis.",
       "basis": "Contract-first, OpenAPI, mock, schema/status, pengujian kontrak dan perubahan versi.",
       "number": 9,
-      "filename": "ch09-diagram-konsep.png",
+      "filename": "ch09-diagram-konsep.tex",
       "source": "module/chapter09.tex",
       "chapter_title": "Desain Kontrak API dengan OpenAPI",
       "sections": [
@@ -1115,7 +1115,7 @@
       "note": "Portal mendukung pengguna; gateway menjalankan kebijakan lalu lintas; pemilik API mengelola perubahan dan migrasi versi.",
       "basis": "Komponen API management, gateway, portal/catalog, analytics, version/deprecation.",
       "number": 10,
-      "filename": "ch10-diagram-konsep.png",
+      "filename": "ch10-diagram-konsep.tex",
       "source": "module/chapter10.tex",
       "chapter_title": "Manajemen Siklus Hidup API dan API Gateway",
       "sections": [
@@ -1225,7 +1225,7 @@
       "note": "Panggilan pertama yang berhasil belum membuktikan integrasi siap produksi. Akses uji dan produksi dipisahkan.",
       "basis": "Developer journey, TTFC, sandbox, kriteria promosi produksi, dukungan dan offboarding.",
       "number": 11,
-      "filename": "ch11-diagram-konsep.png",
+      "filename": "ch11-diagram-konsep.tex",
       "source": "module/chapter11.tex",
       "chapter_title": "Developer Experience dan Portal Pengembang",
       "sections": [
@@ -1328,7 +1328,7 @@
       "note": "Jumlah panggilan bukan ukuran nilai utama. Jam kerja yang dibebaskan juga belum tentu menjadi penghematan kas.",
       "basis": "Monetisasi langsung/tidak langsung, unit economics, titik impas, metrik interaksi bernilai.",
       "number": 12,
-      "filename": "ch12-diagram-konsep.png",
+      "filename": "ch12-diagram-konsep.tex",
       "source": "module/chapter12.tex",
       "chapter_title": "Monetisasi API dan Metrik Platform",
       "sections": [
@@ -1474,7 +1474,7 @@
       "note": "Pemetaan kewajiban mempertimbangkan cakupan hukum. Pengecualian memiliki batas waktu dan pihak penerima risiko.",
       "basis": "Federasi, automated checks/manual review, pengecualian, privasi dan hukum persaingan.",
       "number": 13,
-      "filename": "ch13-diagram-konsep.png",
+      "filename": "ch13-diagram-konsep.tex",
       "source": "module/chapter13.tex",
       "chapter_title": "Tata Kelola API dan Regulasi Platform",
       "sections": [
@@ -1578,7 +1578,7 @@
       "note": "Demo hanya baca dan pratinjau. Produksi memerlukan autentikasi, izin objek, kuota, serta konfirmasi untuk aksi berisiko.",
       "basis": "Host/client/server MCP, tool, batas kepercayaan dan sumber demo cari_slot/tinjau_slot yang tidak membuat appointment.",
       "number": 14,
-      "filename": "ch14-diagram-konsep.png",
+      "filename": "ch14-diagram-konsep.tex",
       "source": "module/chapter14.tex",
       "chapter_title": "API untuk Agen AI dan Peta Jalan Platform",
       "sections": [

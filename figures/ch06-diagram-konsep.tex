@@ -1,0 +1,72 @@
+% Diagram konsep Bab 6: Token valid tetap memerlukan izin atas objek.
+% Dibangkitkan tools/render-diagrams.py dari figures/chapter-diagrams.json;
+% ubah data JSON lalu jalankan ulang skrip, jangan sunting berkas ini langsung.
+\begin{tikzpicture}[
+  x=0.92cm, y=0.95cm,
+  kotak konsep/.style={draw, line width=0.5pt, rounded corners=2pt,
+    align=center, minimum width=2.999cm,
+    minimum height=1.330cm, inner sep=0pt, font=\scriptsize,
+    text=konsepJudul},
+  peran actor/.style={kotak konsep, fill=konsepIsiActor, draw=konsepGarisActor},
+  peran service/.style={kotak konsep, fill=konsepIsiService, draw=konsepGarisService},
+  peran control/.style={kotak konsep, fill=konsepIsiControl, draw=konsepGarisControl},
+  peran data/.style={kotak konsep, fill=konsepIsiData, draw=konsepGarisData},
+  peran outcome/.style={kotak konsep, fill=konsepIsiOutcome, draw=konsepGarisOutcome},
+  peran risk/.style={kotak konsep, fill=konsepIsiRisk, draw=konsepGarisRisk},
+  panah konsep/.style={-{Stealth[length=1.3mm, width=1.2mm]}, line width=0.6pt,
+    draw=konsepPanah},
+  panah putus/.style={panah konsep, draw=konsepPanahPutus,
+    dash pattern=on 2.5pt off 1.5pt},
+  label panah/.style={font=\tiny, align=center, fill=white,
+    inner sep=1pt, text=konsepLabel},
+  catatan/.style={font=\scriptsize, align=left, anchor=north west,
+    inner sep=0pt, text width=12.383cm, text=konsepTeks,
+    execute at begin node={\hyphenpenalty=10000\hbadness=10000\relax}},
+]
+  \definecolor{konsepIsiActor}{HTML}{EEF1F6}
+  \definecolor{konsepGarisActor}{HTML}{50627D}
+  \definecolor{konsepIsiService}{HTML}{EAF2FB}
+  \definecolor{konsepGarisService}{HTML}{3F6893}
+  \definecolor{konsepIsiControl}{HTML}{E9F3EC}
+  \definecolor{konsepGarisControl}{HTML}{316B4B}
+  \definecolor{konsepIsiData}{HTML}{F1EDF8}
+  \definecolor{konsepGarisData}{HTML}{786394}
+  \definecolor{konsepIsiOutcome}{HTML}{E4F2EC}
+  \definecolor{konsepGarisOutcome}{HTML}{236C57}
+  \definecolor{konsepIsiRisk}{HTML}{FCEDE7}
+  \definecolor{konsepGarisRisk}{HTML}{B36947}
+  \definecolor{konsepJudul}{HTML}{20394F}
+  \definecolor{konsepTeks}{HTML}{455264}
+  \definecolor{konsepLabel}{HTML}{35485C}
+  \definecolor{konsepPanah}{HTML}{5C7084}
+  \definecolor{konsepPanahPutus}{HTML}{A15D40}
+  % Panah dan label lebih dahulu; kotak menutupi sisa latar label.
+  \draw[panah konsep] (0.93,0) -- (2.77,0);
+  \draw[panah konsep] (6.03,0) -- (7.87,0);
+  \draw[panah konsep] (-0.7,-0.7) -- (-0.7,-2);
+  \draw[panah konsep] (0.93,-2.7) -- (2.77,-2.7);
+  \draw[panah konsep] (6.03,-2.7) -- (7.87,-2.7);
+  \draw[panah konsep] (4.4,-3.4) -- (4.4,-4.7);
+  \node[label panah] at (1.85,0) {meminta\\akses};
+  \node[label panah] at (6.95,0.31) {izin terbatas};
+  \node[label panah] at (-0.7,-1.35) {request + token};
+  \node[label panah] at (1.85,-2.39) {token valid};
+  \node[label panah] at (6.95,-2.39) {hak sesuai};
+  \node[label panah] at (4.4,-4.05) {hak tidak sesuai};
+  \node[peran actor] (klien) at (-0.7,0)
+    {\textbf{Klien mitra}\\[0.5pt]{\tiny\color{konsepTeks}identitas aplikasi}};
+  \node[peran control] (auth) at (4.4,0)
+    {\textbf{Server otorisasi}\\[0.5pt]{\tiny\color{konsepTeks}memberikan token akses}};
+  \node[peran data] (token) at (9.5,0)
+    {\textbf{Token}\\[0.5pt]{\tiny\color{konsepTeks}audience dan scope}};
+  \node[peran control] (gateway) at (-0.7,-2.7)
+    {\textbf{API gateway}\\[0.5pt]{\tiny\color{konsepTeks}token dan kuota}};
+  \node[peran control] (izin) at (4.4,-2.7)
+    {\textbf{Layanan bisnis}\\[0.5pt]{\tiny\color{konsepTeks}hak pasien, fasilitas, aksi}};
+  \node[peran data] (objek) at (9.5,-2.7)
+    {\textbf{Data pasien}\\[0.5pt]{\tiny\color{konsepTeks}akses sesuai hubungan}};
+  \node[peran risk] (tolak) at (4.4,-5.4)
+    {\textbf{Akses ditolak}\\[0.5pt]{\tiny\color{konsepTeks}catat audit minimum}};
+  \node[catatan] at (-2.33,-6.47)
+    {Gateway memeriksa akses umum. Layanan wajib memeriksa otorisasi objek dan tindakan pada setiap permintaan.};
+\end{tikzpicture}

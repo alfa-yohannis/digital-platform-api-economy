@@ -131,10 +131,11 @@ Skenario pengandaian ditandai "Misalkan".
   dua per bab, disimpan sebagai `figures/chNN-nama.jpg`, ukuran berkas paling
   besar sekitar 500 KB. Ilustrasi yang belum ada dipasang bersyarat dengan
   `\IfFileExists` sehingga build tetap bersih.
-- Setiap bab juga memuat satu diagram konsep `figures/chNN-diagram-konsep.png`
-  (dengan sumber SVG), dibangkitkan `tools/render-diagrams.py` dari
-  `figures/chapter-diagrams.json`. Istilah dan urutan di dalamnya wajib sama
-  dengan naskah bab.
+- Setiap bab juga memuat satu diagram konsep TikZ
+  `figures/chNN-diagram-konsep.tex`, dibangkitkan `tools/render-diagrams.py`
+  dari `figures/chapter-diagrams.json`. Ubah JSON lalu jalankan ulang skrip;
+  berkas `.tex` hasilnya tidak disunting langsung. Istilah dan urutan di
+  dalamnya wajib sama dengan naskah bab.
 - Palet TikZ tetap: `blue!8` untuk tahap biasa, `orange!12` untuk tahap yang
   ditekankan, `green!10` untuk hasil akhir, `praditagreen!15` untuk node
   induk, `red!22` dan `gray!35` untuk penanda masalah.

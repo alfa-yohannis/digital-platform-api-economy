@@ -1,0 +1,70 @@
+% Diagram konsep Bab 4: API sebagai produk yang terus dipelihara.
+% Dibangkitkan tools/render-diagrams.py dari figures/chapter-diagrams.json;
+% ubah data JSON lalu jalankan ulang skrip, jangan sunting berkas ini langsung.
+\begin{tikzpicture}[
+  x=0.92cm, y=0.95cm,
+  kotak konsep/.style={draw, line width=0.5pt, rounded corners=2pt,
+    align=center, minimum width=2.999cm,
+    minimum height=1.330cm, inner sep=0pt, font=\scriptsize,
+    text=konsepJudul},
+  peran actor/.style={kotak konsep, fill=konsepIsiActor, draw=konsepGarisActor},
+  peran service/.style={kotak konsep, fill=konsepIsiService, draw=konsepGarisService},
+  peran control/.style={kotak konsep, fill=konsepIsiControl, draw=konsepGarisControl},
+  peran data/.style={kotak konsep, fill=konsepIsiData, draw=konsepGarisData},
+  peran outcome/.style={kotak konsep, fill=konsepIsiOutcome, draw=konsepGarisOutcome},
+  peran risk/.style={kotak konsep, fill=konsepIsiRisk, draw=konsepGarisRisk},
+  panah konsep/.style={-{Stealth[length=1.3mm, width=1.2mm]}, line width=0.6pt,
+    draw=konsepPanah},
+  panah putus/.style={panah konsep, draw=konsepPanahPutus,
+    dash pattern=on 2.5pt off 1.5pt},
+  label panah/.style={font=\tiny, align=center, fill=white,
+    inner sep=1pt, text=konsepLabel},
+  catatan/.style={font=\scriptsize, align=left, anchor=north west,
+    inner sep=0pt, text width=12.383cm, text=konsepTeks,
+    execute at begin node={\hyphenpenalty=10000\hbadness=10000\relax}},
+]
+  \definecolor{konsepIsiActor}{HTML}{EEF1F6}
+  \definecolor{konsepGarisActor}{HTML}{50627D}
+  \definecolor{konsepIsiService}{HTML}{EAF2FB}
+  \definecolor{konsepGarisService}{HTML}{3F6893}
+  \definecolor{konsepIsiControl}{HTML}{E9F3EC}
+  \definecolor{konsepGarisControl}{HTML}{316B4B}
+  \definecolor{konsepIsiData}{HTML}{F1EDF8}
+  \definecolor{konsepGarisData}{HTML}{786394}
+  \definecolor{konsepIsiOutcome}{HTML}{E4F2EC}
+  \definecolor{konsepGarisOutcome}{HTML}{236C57}
+  \definecolor{konsepIsiRisk}{HTML}{FCEDE7}
+  \definecolor{konsepGarisRisk}{HTML}{B36947}
+  \definecolor{konsepJudul}{HTML}{20394F}
+  \definecolor{konsepTeks}{HTML}{455264}
+  \definecolor{konsepLabel}{HTML}{35485C}
+  \definecolor{konsepPanah}{HTML}{5C7084}
+  \definecolor{konsepPanahPutus}{HTML}{A15D40}
+  % Panah dan label lebih dahulu; kotak menutupi sisa latar label.
+  \draw[panah konsep] (4.4,-0.7) -- (4.4,-2);
+  \draw[panah konsep] (-0.7,-4.7) -- (-0.7,-2.7) -- (2.77,-2.7);
+  \draw[panah konsep] (6.03,-2.7) -- (7.87,-2.7);
+  \draw[panah konsep] (4.4,-4.7) -- (4.4,-3.4);
+  \draw[panah konsep] (9.5,-3.4) -- (9.5,-4.7);
+  \draw[panah putus] (9.5,-6.1) -- (9.5,-6.3) -- (-0.7,-6.3) -- (-0.7,-6.1);
+  \node[label panah] at (4.4,-1.35) {menggunakan};
+  \node[label panah] at (1.04,-2.7) {arah produk};
+  \node[label panah] at (6.95,-2.39) {mengakses};
+  \node[label panah] at (4.4,-4.05) {memelihara};
+  \node[label panah] at (9.5,-4.05) {mendukung layanan};
+  \node[label panah] at (4.4,-6.61) {bukti manfaat};
+  \node[peran actor] (pengguna) at (4.4,0)
+    {\textbf{Pengguna API}\\[0.5pt]{\tiny\color{konsepTeks}masalah dan tugas}};
+  \node[peran service] (api) at (4.4,-2.7)
+    {\textbf{Produk API}\\[0.5pt]{\tiny\color{konsepTeks}kontrak kemampuan}};
+  \node[peran data] (sistem) at (9.5,-2.7)
+    {\textbf{Sistem penyedia}\\[0.5pt]{\tiny\color{konsepTeks}aturan dan data}};
+  \node[peran control] (pemilik) at (-0.7,-5.4)
+    {\textbf{Pemilik produk}\\[0.5pt]{\tiny\color{konsepTeks}prioritas dan anggaran}};
+  \node[peran control] (operasi) at (4.4,-5.4)
+    {\textbf{Operasi dan}\\\textbf{dukungan}\\[0.5pt]{\tiny\color{konsepTeks}mutu sepanjang siklus}};
+  \node[peran outcome] (nilai) at (9.5,-5.4)
+    {\textbf{Hasil bisnis}\\[0.5pt]{\tiny\color{konsepTeks}pendapatan,}\\[-2pt]{\tiny\color{konsepTeks}layanan, efisiensi}};
+  \node[catatan] at (-2.33,-7.2)
+    {Kepemilikan, operasi, dan pengukuran nilai berlanjut setelah integrasi pertama selesai.};
+\end{tikzpicture}

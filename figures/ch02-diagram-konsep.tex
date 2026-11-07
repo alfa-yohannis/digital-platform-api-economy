@@ -1,0 +1,72 @@
+% Diagram konsep Bab 2: Efek jaringan dan mutu interaksi.
+% Dibangkitkan tools/render-diagrams.py dari figures/chapter-diagrams.json;
+% ubah data JSON lalu jalankan ulang skrip, jangan sunting berkas ini langsung.
+\begin{tikzpicture}[
+  x=0.92cm, y=0.95cm,
+  kotak konsep/.style={draw, line width=0.5pt, rounded corners=2pt,
+    align=center, minimum width=2.999cm,
+    minimum height=1.330cm, inner sep=0pt, font=\scriptsize,
+    text=konsepJudul},
+  peran actor/.style={kotak konsep, fill=konsepIsiActor, draw=konsepGarisActor},
+  peran service/.style={kotak konsep, fill=konsepIsiService, draw=konsepGarisService},
+  peran control/.style={kotak konsep, fill=konsepIsiControl, draw=konsepGarisControl},
+  peran data/.style={kotak konsep, fill=konsepIsiData, draw=konsepGarisData},
+  peran outcome/.style={kotak konsep, fill=konsepIsiOutcome, draw=konsepGarisOutcome},
+  peran risk/.style={kotak konsep, fill=konsepIsiRisk, draw=konsepGarisRisk},
+  panah konsep/.style={-{Stealth[length=1.3mm, width=1.2mm]}, line width=0.6pt,
+    draw=konsepPanah},
+  panah putus/.style={panah konsep, draw=konsepPanahPutus,
+    dash pattern=on 2.5pt off 1.5pt},
+  label panah/.style={font=\tiny, align=center, fill=white,
+    inner sep=1pt, text=konsepLabel},
+  catatan/.style={font=\scriptsize, align=left, anchor=north west,
+    inner sep=0pt, text width=12.383cm, text=konsepTeks,
+    execute at begin node={\hyphenpenalty=10000\hbadness=10000\relax}},
+]
+  \definecolor{konsepIsiActor}{HTML}{EEF1F6}
+  \definecolor{konsepGarisActor}{HTML}{50627D}
+  \definecolor{konsepIsiService}{HTML}{EAF2FB}
+  \definecolor{konsepGarisService}{HTML}{3F6893}
+  \definecolor{konsepIsiControl}{HTML}{E9F3EC}
+  \definecolor{konsepGarisControl}{HTML}{316B4B}
+  \definecolor{konsepIsiData}{HTML}{F1EDF8}
+  \definecolor{konsepGarisData}{HTML}{786394}
+  \definecolor{konsepIsiOutcome}{HTML}{E4F2EC}
+  \definecolor{konsepGarisOutcome}{HTML}{236C57}
+  \definecolor{konsepIsiRisk}{HTML}{FCEDE7}
+  \definecolor{konsepGarisRisk}{HTML}{B36947}
+  \definecolor{konsepJudul}{HTML}{20394F}
+  \definecolor{konsepTeks}{HTML}{455264}
+  \definecolor{konsepLabel}{HTML}{35485C}
+  \definecolor{konsepPanah}{HTML}{5C7084}
+  \definecolor{konsepPanahPutus}{HTML}{A15D40}
+  % Panah dan label lebih dahulu; kotak menutupi sisa latar label.
+  \draw[panah konsep] (0.93,0) -- (2.77,0);
+  \draw[panah konsep] (7.87,0) -- (6.03,0);
+  \draw[panah konsep] (4.4,-0.7) -- (4.4,-2);
+  \draw[panah konsep] (-0.7,-2) -- (-0.7,-0.7);
+  \draw[panah putus] (-0.7,0.7) -- (-0.7,0.9) -- (9.5,0.9) -- (9.5,0.7);
+  \draw[panah konsep] (9.5,-0.7) -- (9.5,-2);
+  \draw[panah putus] (7.87,-2.7) -- (6.03,-2.7);
+  \node[label panah] at (1.85,0.31) {permintaan};
+  \node[label panah] at (6.95,0) {kapasitas};
+  \node[label panah] at (4.4,-1.35) {hasil interaksi};
+  \node[label panah] at (-0.7,-1.35) {menarik partisipasi};
+  \node[label panah] at (4.4,1.21) {peluang lintas sisi};
+  \node[label panah] at (9.5,-1.35) {kompetisi sesisi};
+  \node[label panah] at (6.95,-2.39) {perlu kurasi};
+  \node[peran actor] (pasien) at (-0.7,0)
+    {\textbf{Sisi pasien}\\[0.5pt]{\tiny\color{konsepTeks}lebih banyak permintaan}};
+  \node[peran service] (cocok) at (4.4,0)
+    {\textbf{Interaksi inti}\\[0.5pt]{\tiny\color{konsepTeks}pasien, dokter, slot}};
+  \node[peran actor] (dokter) at (9.5,0)
+    {\textbf{Sisi penyedia}\\[0.5pt]{\tiny\color{konsepTeks}lebih banyak pilihan}};
+  \node[peran control] (subsidi) at (-0.7,-2.7)
+    {\textbf{Subsidi awal}\\[0.5pt]{\tiny\color{konsepTeks}batas biaya dan waktu}};
+  \node[peran outcome] (mutu) at (4.4,-2.7)
+    {\textbf{Mutu pencocokan}\\[0.5pt]{\tiny\color{konsepTeks}slot relevan dan tersedia}};
+  \node[peran risk] (padat) at (9.5,-2.7)
+    {\textbf{Efek negatif}\\[0.5pt]{\tiny\color{konsepTeks}persaingan dan kepadatan}};
+  \node[catatan] at (-2.33,-3.77)
+    {Efek lintas sisi dapat menambah nilai. Penambahan peserta juga dapat menambah kompetisi atau waktu tunggu.};
+\end{tikzpicture}

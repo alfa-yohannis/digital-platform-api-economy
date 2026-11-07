@@ -40,17 +40,14 @@ Bahasan protokol mengikuti spesifikasi MCP revisi 2026-07-28 \cite{mcp2026}, spe
 untuk aplikasi \textit{Large Language Model} (LLM) \cite{c14-owasp-llm2025}, serta penelitian Greshake dkk. \cite{c14-greshake2023}. Bahasan
 persetujuan manusia mengikuti Parasuraman dkk. \cite{c14-parasuraman2000}. Bahasan peta jalan memakai Lombardo dkk. \cite{c14-lombardo2017}.
 
-\IfFileExists{../figures/ch14-diagram-konsep.png}{%
-
 Demo MCP pada diagram berikut hanya membaca slot sintetis dan menghasilkan pratinjau. Pengawasan manusia tidak mengubah demo ini menjadi
 layanan transaksi produksi. Gambar \ref{fig:ch14-agen-terkendali} merangkum hubungan komponen dan konsep utama bagian pertama bab ini.
 \begin{figure}[!htb]
   \centering
-  \includegraphics[width=\textwidth]{../figures/ch14-diagram-konsep.png}
+  \input{../figures/ch14-diagram-konsep.tex}
   \caption{Demo MCP: pencarian dan pratinjau slot tanpa transaksi}
   \label{fig:ch14-agen-terkendali}
 \end{figure}
-}{}
 
 \section{Agen AI sebagai Pengguna API}
 
